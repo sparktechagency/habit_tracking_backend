@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('group_members', function (Blueprint $table) {
             $table->id();
             $table->foreignId('challenge_group_id')->constrained('challenge_groups')->cascadeOnDelete();
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('focus_on_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('focus_on_id');
             $table->enum('status', ['Completed','Incompleted'])->default('Incompleted');
             $table->timestamp('completed_at');
             $table->timestamps();

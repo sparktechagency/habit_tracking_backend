@@ -15,11 +15,11 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->string('challenge_type');
-            $table->unsignedInteger('challenge_group_id');
+            $table->unsignedBigInteger('challenge_group_id');
             $table->longText('description')->nullable();
-            $table->unsignedInteger('give_point')->default(0);
+            $table->unsignedBigInteger('give_point')->default(0);
             $table->timestamp('expiration_date');
-            $table->unsignedInteger('purchase_point')->default(0);
+            $table->unsignedBigInteger('purchase_point')->default(0);
             $table->enum('status', ['Enable', 'disable'])->default('Enable');
             $table->timestamps();
         });

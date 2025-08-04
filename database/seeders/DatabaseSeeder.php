@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Profile;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -29,8 +30,8 @@ class DatabaseSeeder extends Seeder
             'status' => 'Active',
         ]);
 
-        // Profile::create([
-        //     'user_id' => $admin->id,
-        // ]);
+        Profile::create([
+            'user_id' => $admin->id,
+        ]);
     }
 }

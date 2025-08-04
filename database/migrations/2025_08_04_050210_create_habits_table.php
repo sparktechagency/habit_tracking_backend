@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('habits', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->unsignedInteger('category_id');
+            $table->unsignedBigInteger('category_id');
             $table->string('habit_name');
             $table->enum('status', ['Favorite', 'Archived'])->nullable();
             $table->timestamp('done_at');

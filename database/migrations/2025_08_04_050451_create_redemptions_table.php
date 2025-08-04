@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('redemptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('reward_id')->constrained('rewards')->cascadeOnDelete();
-            $table->unsignedInteger('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->timestamp('date');
             $table->enum('role', ['Redeemed', 'In progress', 'Completed'])->default('Redeemed');
             $table->timestamps();

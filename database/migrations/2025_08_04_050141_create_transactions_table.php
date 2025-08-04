@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->unsignedInteger('subscription_id');
-            $table->timestamp('date');
-            $table->timestamp('renewal');
+            $table->unsignedBigInteger('subscription_id');
+            $table->timestamp('date')->nullable();
+            $table->timestamp('renewal')->nullable();
             $table->string('status')->default('Completed');
             $table->timestamps();
         });

@@ -13,12 +13,12 @@ return new class extends Migration {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->unsignedInteger('total_points')->default(0);
-            $table->unsignedInteger('level')->default(0);
-            $table->unsignedInteger('total_habits')->default(0);
-            $table->unsignedInteger('longest_streaking')->default(0);
-            $table->unsignedInteger('completed_challenges')->default(0);
-            $table->unsignedInteger('say_no')->default(0);
+            $table->unsignedBigInteger('total_points')->default(0);
+            $table->unsignedBigInteger('level')->default(0);
+            $table->unsignedBigInteger('total_habits')->default(0);
+            $table->unsignedBigInteger('longest_streaking')->default(0);
+            $table->unsignedBigInteger('completed_challenges')->default(0);
+            $table->unsignedBigInteger('say_no')->default(0);
             $table->timestamps();
         });
     }
