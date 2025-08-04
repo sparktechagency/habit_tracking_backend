@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Traits\Traits;
 
-abstract class Controller
+trait ApiResponseTrait
 {
-    protected function sendResponse($data = null, $message = 'Success', $status = true, $code = 200)
+    public function sendResponse($data = null, $message = 'Success', $status = true, $code = 200)
     {
         return response()->json([
             'status' => $status,
@@ -13,7 +13,7 @@ abstract class Controller
         ], $code);
     }
 
-    protected function sendError($message = 'Something went wrong', $code = 500)
+    public function sendError($message = 'Something went wrong', $code = 500)
     {
         return response()->json([
             'status' => false,
