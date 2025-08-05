@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Traits\Traits;
+namespace App\Traits;
 
 trait ApiResponseTrait
 {
-    public function sendResponse($data = null, $message = 'Success', $status = true, $code = 200)
+    public function sendResponse($data, $message = 'Success', $status = true, $code = 200)
     {
         return response()->json([
             'status' => $status,
@@ -13,11 +13,12 @@ trait ApiResponseTrait
         ], $code);
     }
 
-    public function sendError($message = 'Something went wrong', $code = 500)
+    public function sendError($error = 'Error', $errorMessages = [], $code = 500)
     {
         return response()->json([
             'status' => false,
-            'message' => $message
+            'message' => $error,
+            'errors' => $errorMessages
         ], $code);
     }
 }

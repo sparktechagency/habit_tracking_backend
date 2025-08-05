@@ -4,20 +4,5 @@ namespace App\Http\Controllers;
 
 abstract class Controller
 {
-    protected function sendResponse($data = null, $message = 'Success', $status = true, $code = 200)
-    {
-        return response()->json([
-            'status' => $status,
-            'message' => $message,
-            'data' => $data
-        ], $code);
-    }
-
-    protected function sendError($message = 'Something went wrong', $code = 500)
-    {
-        return response()->json([
-            'status' => false,
-            'message' => $message
-        ], $code);
-    }
+    //
 }
