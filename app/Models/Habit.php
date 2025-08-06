@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Habit extends Model
 {
-     use HasFactory;
+    use HasFactory;
 
     protected $guarded = ['id'];
 }

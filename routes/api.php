@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\User\HabitController;
+use App\Http\Controllers\Api\User\SayNoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,12 @@ Route::middleware('auth:api')->group(function () {
        Route::get('/view-habit/{id?}',[HabitController::class,'viewHabit']);
        Route::delete('/delete-habit/{id?}',[HabitController::class,'deleteHabit']);
        Route::patch('/archived-habit',[HabitController::class,'archivedHabit']);
-    });
 
+       // say no
+       Route::post('/add-entry',[SayNoController::class,'addEntry']);
+       Route::get('/get-entries',[SayNoController::class,'getEntries']);
+       Route::get('/view-entry/{id?}',[SayNoController::class,'viewEntry']);
+       Route::delete('/delete-entry/{id?}',[SayNoController::class,'deleteEntry']);
+
+    });
 });

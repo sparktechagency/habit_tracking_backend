@@ -14,21 +14,18 @@ class HabitService
             'habit_name' => $data['habit_name']
         ]);
     }
-
     public function getHabits()
     {
         return Habit::where('user_id', Auth::id())
             ->orderByDesc('created_at')
             ->get();
     }
-
     public function viewHabit(int $id): ?Habit
     {
         return Habit::where('id', $id)
             ->where('user_id', Auth::id())
             ->first();
     }
-
     public function deleteHabit(int $id): bool
     {
         $habit = Habit::where('id', $id)
@@ -40,7 +37,6 @@ class HabitService
 
         return $habit->delete();
     }
-
     public function archivedHabit(int $id): ?Habit
     {
         $habit = Habit::where('id', $id)
