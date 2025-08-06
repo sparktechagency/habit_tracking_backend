@@ -17,10 +17,10 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('status', ['Active', 'Inactive'])->default('Inactive');
             $table->timestamp('otp_verified_at')->nullable();
             $table->string('otp')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
-            $table->enum('status', ['Active', 'Inactive'])->default('Inactive');
             $table->longText('phone_number')->nullable();
             $table->string('address')->nullable();
             $table->string('location')->nullable();

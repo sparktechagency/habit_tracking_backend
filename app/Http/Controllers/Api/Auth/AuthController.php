@@ -25,7 +25,6 @@ use function Laravel\Prompts\error;
 
 class AuthController extends Controller
 {
-
     protected $authService;
     public function __construct(AuthService $authService)
     {
