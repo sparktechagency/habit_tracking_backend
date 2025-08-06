@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('category_id')->nullable();
             $table->string('habit_name');
             $table->enum('status', ['Favorite', 'Archived'])->nullable();
-            $table->timestamp('done_at');
+            $table->timestamp('done_at')->nullable();
             $table->timestamps();
         });
     }
