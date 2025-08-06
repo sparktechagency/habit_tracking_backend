@@ -25,7 +25,6 @@ class HabitController extends Controller
             return $this->sendError('Failed to create habit.', [], 500);
         }
     }
-
     public function getHabits()
     {
         try {
@@ -35,37 +34,43 @@ class HabitController extends Controller
             return $this->sendError('Failed to fetch habits.', [], 500);
         }
     }
-
     public function viewHabit($id)
     {
-        $habit = $this->habitService->viewHabit($id);
-
-        if (!$habit) {
-            return $this->sendError('Habit not found.', [], 404);
+        try {
+            $habit = $this->habitService->viewHabit($id);
+            if (!$habit) {
+                return $this->sendError('Habit not found.', [], 404);
+            }
+            return $this->sendResponse($habit, 'Habit fetched successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Something went wrong.', [], 500);
         }
-
-        return $this->sendResponse($habit, 'Habit fetched successfully.');
     }
-
     public function deleteHabit($id)
     {
-        $deleted = $this->habitService->deleteHabit($id);
-
-        if (!$deleted) {
-            return $this->sendError('Habit not found or unauthorized.', [], 404);
+        try {
+            $deleted = $this->habitService->deleteHabit($id);
+            if (!$deleted) {
+                return $this->sendError('Habit not found or unauthorized.', [], 404);
+            }
+            return $this->sendResponse([], 'Habit deleted successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Something went wrong.', [], 500);
         }
-
-        return $this->sendResponse([], 'Habit deleted successfully.');
     }
-
     public function archivedHabit(Request $request)
     {
-        $habit = $this->habitService->archivedHabit($request->habit_id);
-
-        if (!$habit) {
-            return $this->sendError('Habit not found.', [], 404);
+        try {
+            $habit = $this->habitService->archivedHabit($request->habit_id);
+            if (!$habit) {
+                return $this->sendError('Habit not found.', [], 404);
+            }
+            $message = $habit->status === 'Archived'
+                ? 'Habit archived successfully.'
+                : 'Habit unarchived successfully.';
+            return $this->sendResponse($habit, $message);
+        } catch (\Exception $e) {
+            return $this->sendError('Something went wrong.', [], 500);
         }
-
-        return $this->sendResponse($habit, 'Habit archived successfully.');
     }
 }

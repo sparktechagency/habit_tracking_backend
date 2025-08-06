@@ -46,12 +46,10 @@ class HabitService
         $habit = Habit::where('id', $id)
             ->where('user_id', Auth::id())
             ->first();
-
         if ($habit) {
-            $habit->status = 'Archived';
+            $habit->status = $habit->status === 'Archived' ? null : 'Archived';
             $habit->save();
         }
-
         return $habit;
     }
 }
