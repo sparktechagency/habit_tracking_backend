@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\Challenge_management\ChallengeTypeController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\User\HabitController;
 use App\Http\Controllers\Api\User\SayNoController;
@@ -22,7 +23,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
-        
+        // challenge type
+        Route::post('/add-type',[ChallengeTypeController::class,'addType']);
+        Route::get('/get-types',[ChallengeTypeController::class,'getTypes']);
+        Route::get('/view-type/{id?}',[ChallengeTypeController::class,'viewType']);
+        Route::patch('/edit-type/{id?}',[ChallengeTypeController::class,'editType']);
+        Route::delete('/delete-type/{id?}',[ChallengeTypeController::class,'deleteType']);
     });
 
     Route::middleware('partner')->prefix('patner')->group(function () {

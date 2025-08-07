@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class OtpVerifyRequest extends FormRequest
+class RegisterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,17 @@ class OtpVerifyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'otp' => 'required|digits:6',
+            'role' => 'required|in:user,partner',
+            'full_name' => 'required|string|max:255',
+            'email' => 'required|string|email|unique:users,email|max:255',
+            'password' => 'required|string|min:8|confirmed',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            //
         ];
     }
 }

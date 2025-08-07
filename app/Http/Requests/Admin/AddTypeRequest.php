@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AddNewHabitRequest extends FormRequest
+class AddTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,8 @@ class AddNewHabitRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'habit_name' => 'required|string|max:255',
+            'challenge_type' => 'required|string|max:255',
+            'note' => 'nullable|string|max:255'
         ];
     }
 }

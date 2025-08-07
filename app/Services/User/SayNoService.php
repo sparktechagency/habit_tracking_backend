@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
 use App\Models\Entry;
 use App\Models\Habit;
@@ -17,7 +17,6 @@ class SayNoService
             'say_no' => $data['say_no'],
         ]);
     }
-
     public function getEntries(?string $filter)
     {
         $query = Entry::where('user_id', Auth::id());
@@ -32,21 +31,17 @@ class SayNoService
         }
         return $query->latest()->get();
     }
-
     public function viewEntry(int $id): ?Entry
     {
         return Entry::where('id', $id)->where('user_id', Auth::id())->first();
     }
-
     public function deleteEntry(int $id): bool
     {
         $entry = Entry::where('id', $id)->where('user_id', Auth::id())->first();
-
         if ($entry) {
             $entry->delete();
             return true;
         }
-
         return false;
     }
 }

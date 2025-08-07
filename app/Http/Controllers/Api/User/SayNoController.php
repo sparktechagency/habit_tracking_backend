@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AddEntryRequest;
-use App\Services\SayNoService;
+use App\Http\Requests\User\AddEntryRequest;
+use App\Services\User\SayNoService;
 use Illuminate\Http\Request;
 
 class SayNoController extends Controller
@@ -43,7 +43,6 @@ class SayNoController extends Controller
             if (!$entry) {
                 return $this->sendError('Entry not found.', [], 404);
             }
-
             return $this->sendResponse($entry, 'Entry fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
@@ -57,7 +56,6 @@ class SayNoController extends Controller
             if (!$deleted) {
                 return $this->sendError('Entry not found or unauthorized.', [], 404);
             }
-
             return $this->sendResponse([], 'Entry deleted successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);

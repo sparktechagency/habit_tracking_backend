@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ChangePasswordRequest;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\OtpVerifyRequest;
-use App\Http\Requests\RegisterRequest;
-use App\Http\Requests\ResendOtpRequest;
-use App\Http\Requests\UpdatePasswordRequest;
+use App\Http\Requests\Auth\ChangePasswordRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\OtpVerifyRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResendOtpRequest;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Models\User;
-use App\Services\AuthService;
+use App\Services\Auth\AuthService;
 use App\Traits\ApiResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

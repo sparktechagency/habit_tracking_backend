@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AddEntryRequest extends FormRequest
+class AddNewHabitRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,7 @@ class AddEntryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'say_no' => 'required|string|min:2',
+            'habit_name' => 'required|string|max:255',
         ];
     }
 }

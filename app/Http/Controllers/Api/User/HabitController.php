@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AddNewHabitRequest;
-use App\Services\HabitService;
+use App\Http\Requests\User\AddNewHabitRequest;
+use App\Services\User\HabitService;
 use Illuminate\Http\Request;
 
 class HabitController extends Controller
