@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\Challenge_management\ChallengeTypeController;
+use App\Http\Controllers\Api\Admin\ChallengeTypeController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\User\HabitController;
 use App\Http\Controllers\Api\User\SayNoController;
+use App\Http\Controllers\Partner\RewardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +33,13 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::middleware('partner')->prefix('patner')->group(function () {
-       
+       // rewards
+       Route::post('/add-reward',[RewardController::class,'addReward']);
+       Route::patch('/enable-disable-reward/{id?}',[RewardController::class,'enableDisableReward']);
+       Route::get('/get-rewards',[RewardController::class,'getRewards']);
+
+       // redemptions
+
     });
 
     Route::middleware('user')->prefix('user')->group(function () {

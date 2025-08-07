@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('rewards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('partner_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->string('challenge_type');
             $table->unsignedBigInteger('challenge_group_id');
