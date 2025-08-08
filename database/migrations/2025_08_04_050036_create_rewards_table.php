@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('give_point')->default(0);
             $table->timestamp('expiration_date');
             $table->unsignedBigInteger('purchase_point')->default(0);
-            $table->enum('status', ['Enable', 'disable'])->default('Enable');
+            $table->enum('status', ['Enable', 'Disable'])->default('Enable');
             $table->timestamps();
         });
     }

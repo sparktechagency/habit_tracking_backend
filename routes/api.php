@@ -32,7 +32,7 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/delete-type/{id?}',[ChallengeTypeController::class,'deleteType']);
     });
 
-    Route::middleware('partner')->prefix('patner')->group(function () {
+    Route::middleware('partner')->prefix('partner')->group(function () {
        // rewards
        Route::post('/add-reward',[RewardController::class,'addReward']);
        Route::patch('/enable-disable-reward/{id?}',[RewardController::class,'enableDisableReward']);
@@ -55,6 +55,9 @@ Route::middleware('auth:api')->group(function () {
        Route::get('/get-entries',[SayNoController::class,'getEntries']);
        Route::get('/view-entry/{id?}',[SayNoController::class,'viewEntry']);
        Route::delete('/delete-entry/{id?}',[SayNoController::class,'deleteEntry']);
+
+       // rewards
+       
 
     });
 });

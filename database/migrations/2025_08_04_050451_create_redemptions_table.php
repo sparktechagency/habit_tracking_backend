@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('redemptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reward_id')->constrained('rewards')->cascadeOnDelete();
             $table->unsignedBigInteger('user_id');
+            $table->foreignId('reward_id')->constrained('rewards')->cascadeOnDelete();
             $table->timestamp('date');
-            $table->enum('role', ['Redeemed', 'In progress', 'Completed'])->default('Redeemed');
+            $table->string('code');
+            $table->enum('status', ['Redeemed', 'In progress', 'Completed'])->default('Redeemed');
             $table->timestamps();
         });
     }
