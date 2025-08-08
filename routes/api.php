@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\User\HabitController;
+use App\Http\Controllers\Api\User\RewardController as UserRewardController;
 use App\Http\Controllers\Api\User\SayNoController;
 use App\Http\Controllers\Partner\RewardController;
 use Illuminate\Http\Request;
@@ -57,7 +58,8 @@ Route::middleware('auth:api')->group(function () {
        Route::delete('/delete-entry/{id?}',[SayNoController::class,'deleteEntry']);
 
        // rewards
-       
+       Route::get('/get-available-rewards',[UserRewardController::class,'getAvailableRewards']);
+       Route::patch('/redeem-reward',[UserRewardController::class,'redeem']);
 
     });
 });
