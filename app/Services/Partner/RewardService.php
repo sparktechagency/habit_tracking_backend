@@ -3,11 +3,34 @@
 namespace App\Services\Partner;
 
 use App\Models\Reward;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class RewardService
 {
+    public function isProfileComplete(int $userId): bool
+    {
+        $user = User::with('profile')->where('id', $userId)->where('role', 'PARTNER')->first();
+        if (!$user || !$user->profile) {
+            return false;
+        }
+        $fieldsToCheck = [
+            $user->phone_number,
+            $user->address,
+            $user->profile->user_name,
+            $user->profile->business_name,
+            $user->profile->category,
+            $user->profile->description,
+            $user->profile->business_hours,
+        ];
+        foreach ($fieldsToCheck as $field) {
+            if (empty($field)) {
+                return false;
+            }
+        }
+        return true;
+    }
     public function addReward(array $data): Reward
     {
         $data['partner_id'] = Auth::id();

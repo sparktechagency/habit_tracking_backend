@@ -10,4 +10,14 @@ class Redemption extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    public function reward()
+    {
+        return $this->belongsTo(Reward::class, 'reward_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

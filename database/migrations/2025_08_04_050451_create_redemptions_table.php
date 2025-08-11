@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreignId('reward_id')->constrained('rewards')->cascadeOnDelete();
+            $table->unsignedBigInteger('partner_id');
             $table->timestamp('date');
             $table->string('code');
             $table->enum('status', ['Redeemed', 'In progress', 'Completed'])->default('Redeemed');

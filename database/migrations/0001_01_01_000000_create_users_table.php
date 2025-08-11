@@ -23,7 +23,6 @@ return new class extends Migration {
             $table->timestamp('otp_expires_at')->nullable();
             $table->longText('phone_number')->nullable();
             $table->string('address')->nullable();
-            $table->string('location')->nullable();
             $table->string('avatar')->nullable();
             $table->string('google_id')->nullable();
             $table->string('last_login_at')->nullable();

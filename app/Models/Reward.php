@@ -10,4 +10,11 @@ class Reward extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    public function partner()
+    {
+        return $this->belongsTo(User::class, 'partner_id');
+    }
+
+    
 }

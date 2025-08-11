@@ -2,10 +2,11 @@
 
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Partner\RedemptionController;
 use App\Http\Controllers\Api\User\HabitController;
 use App\Http\Controllers\Api\User\RewardController as UserRewardController;
 use App\Http\Controllers\Api\User\SayNoController;
-use App\Http\Controllers\Partner\RewardController;
+use App\Http\Controllers\Api\Partner\RewardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,11 +36,15 @@ Route::middleware('auth:api')->group(function () {
 
     Route::middleware('partner')->prefix('partner')->group(function () {
        // rewards
+       Route::get('/check-profile-completion',[RewardController::class,'checkProfileCompletion']);
        Route::post('/add-reward',[RewardController::class,'addReward']);
        Route::patch('/enable-disable-reward/{id?}',[RewardController::class,'enableDisableReward']);
        Route::get('/get-rewards',[RewardController::class,'getRewards']);
 
        // redemptions
+       Route::get('/get-redeem-history',[RedemptionController::class,'getRedeemHistory']);
+       Route::get('/get-redemption-details/{id?}',[RedemptionController::class,'getRedemptionDetails']);
+       Route::patch('/mark-as-redeemed/{id?}',[RedemptionController::class,'markAsRedeemed']);
 
     });
 
@@ -60,6 +65,8 @@ Route::middleware('auth:api')->group(function () {
        // rewards
        Route::get('/get-available-rewards',[UserRewardController::class,'getAvailableRewards']);
        Route::patch('/redeem-reward',[UserRewardController::class,'redeem']);
-
+       Route::get('/get-redeem-history',[UserRewardController::class,'getRedeemHistory']);
+       Route::get('/get-redemption-details/{id?}',[UserRewardController::class,'getRedemptionDetails']);
+       Route::patch('/mark-as-completed/{id?}',[UserRewardController::class,'markAsCompleted']);
     });
 });
