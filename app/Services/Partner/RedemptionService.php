@@ -69,23 +69,17 @@ class RedemptionService
 
         return $details;
     }
-
     public function markAsRedeemed(int $id)
-{
-    $redemption = Redemption::where('id', $id)
-        ->where('partner_id', Auth::id())
-        ->first();
+    {
+        $redemption = Redemption::where('id', $id)
+            ->where('partner_id', Auth::id())
+            ->first();
+        if (!$redemption) {
+            return false;
+        }
+        $redemption->status = 'In progress';
+        $redemption->save();
 
-    
-
-    if (!$redemption) {
-                return false;
-            }
-
-    $redemption->status = 'In progress';
-    $redemption->save();
-
-    return $redemption;
-}
-
+        return $redemption;
+    }
 }

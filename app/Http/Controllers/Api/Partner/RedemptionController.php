@@ -17,7 +17,6 @@ class RedemptionController extends Controller
     {
         $this->redemptionService = $redemptionService;
     }
-
     public function getRedeemHistory(Request $request)
     {
         try {
@@ -28,7 +27,6 @@ class RedemptionController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function getRedemptionDetails(Request $request, $id)
     {
         try {
@@ -44,7 +42,6 @@ class RedemptionController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function markAsRedeemed($id)
     {
         try {

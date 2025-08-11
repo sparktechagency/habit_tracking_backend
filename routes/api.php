@@ -45,7 +45,6 @@ Route::middleware('auth:api')->group(function () {
        Route::get('/get-redeem-history',[RedemptionController::class,'getRedeemHistory']);
        Route::get('/get-redemption-details/{id?}',[RedemptionController::class,'getRedemptionDetails']);
        Route::patch('/mark-as-redeemed/{id?}',[RedemptionController::class,'markAsRedeemed']);
-
     });
 
     Route::middleware('user')->prefix('user')->group(function () {

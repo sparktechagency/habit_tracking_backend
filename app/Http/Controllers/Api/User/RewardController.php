@@ -35,7 +35,6 @@ class RewardController extends Controller
             ], 500);
         }
     }
-
     public function redeem(RedeemRequest $request)
     {
         try {
@@ -61,7 +60,6 @@ class RewardController extends Controller
             ], 500);
         }
     }
-
     public function getRedeemHistory()
     {
         try {
@@ -72,7 +70,6 @@ class RewardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function getRedemptionDetails(Request $request, $id)
     {
         try {
@@ -88,7 +85,6 @@ class RewardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function markAsCompleted($id)
     {
         try {
