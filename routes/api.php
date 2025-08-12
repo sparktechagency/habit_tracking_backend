@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\User\HabitController;
 use App\Http\Controllers\Api\User\RewardController as UserRewardController;
 use App\Http\Controllers\Api\User\SayNoController;
 use App\Http\Controllers\Api\Partner\RewardController;
+use App\Http\Controllers\Api\User\GroupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,5 +68,8 @@ Route::middleware('auth:api')->group(function () {
        Route::get('/get-redeem-history',[UserRewardController::class,'getRedeemHistory']);
        Route::get('/get-redemption-details/{id?}',[UserRewardController::class,'getRedemptionDetails']);
        Route::patch('/mark-as-completed/{id?}',[UserRewardController::class,'markAsCompleted']);
+
+       // groups
+       Route::get('/get-challenge-type-lists',[GroupController::class,'getChallengeTypeLists']);
     });
 });
