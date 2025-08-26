@@ -23,6 +23,8 @@ class SayNoService
         $now = Carbon::now();
         if ($filter === 'day') {
             $query->whereDate('date', $now->toDateString());
+        } elseif ($filter === 'week') {
+            $query->whereBetween('date', [$now->startOfWeek(), $now->endOfWeek()]);
         } elseif ($filter === 'month') {
             $query->whereYear('date', $now->year)
                 ->whereMonth('date', $now->month);
