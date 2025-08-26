@@ -33,5 +33,57 @@ class DatabaseSeeder extends Seeder
         Profile::create([
             'user_id' => $admin->id,
         ]);
+
+        $userOne = User::create([
+            'full_name' => 'User one',
+            'email' => 'user.one@gmail.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('12345678'),
+            'role' => 'USER',
+            'status' => 'Active',
+        ]);
+
+        Profile::create([
+            'user_id' => $userOne->id,
+        ]);
+
+        $userTwo = User::create([
+            'full_name' => 'User two',
+            'email' => 'user.two@gmail.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('12345678'),
+            'role' => 'USER',
+            'status' => 'Active',
+        ]);
+
+        Profile::create([
+            'user_id' => $userTwo->id,
+        ]);
+
+        $partnerOne = User::create([
+            'full_name' => 'Partner one',
+            'email' => 'partner.one@gmail.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('12345678'),
+            'role' => 'PARTNER',
+            'status' => 'Active',
+        ]);
+
+        Profile::create([
+            'user_id' => $partnerOne->id,
+        ]);
+
+        $partnerTwo = User::create([
+            'full_name' => 'Partner two',
+            'email' => 'partner.two@gmail.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('12345678'),
+            'role' => 'PARTNER',
+            'status' => 'Active',
+        ]);
+
+        Profile::create([
+            'user_id' => $partnerTwo->id,
+        ]);
     }
 }

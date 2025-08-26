@@ -73,4 +73,16 @@ class HabitController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
+    public function doneHabit(Request $request)
+    {
+        try {
+            $habit = $this->habitService->doneHabit($request->habit_id);
+            if (!$habit) {
+                return $this->sendError('Habit not found.', [], 404);
+            }
+            return $this->sendResponse($habit, 'Habit done successfully');
+        } catch (\Exception $e) {
+            return $this->sendError('Something went wrong.', [], 500);
+        }
+    }
 }

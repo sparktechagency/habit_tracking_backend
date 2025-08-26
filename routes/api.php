@@ -55,6 +55,7 @@ Route::middleware('auth:api')->group(function () {
        Route::get('/view-habit/{id?}',[HabitController::class,'viewHabit']);
        Route::delete('/delete-habit/{id?}',[HabitController::class,'deleteHabit']);
        Route::patch('/archived-habit',[HabitController::class,'archivedHabit']);
+       Route::patch('/done-habit',[HabitController::class,'doneHabit']);
 
        // say no
        Route::post('/add-entry',[SayNoController::class,'addEntry']);

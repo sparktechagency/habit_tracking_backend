@@ -3,6 +3,7 @@
 namespace App\Services\User;
 
 use App\Models\Habit;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class HabitService
@@ -44,6 +45,17 @@ class HabitService
             ->first();
         if ($habit) {
             $habit->status = $habit->status === 'Archived' ? null : 'Archived';
+            $habit->save();
+        }
+        return $habit;
+    }
+    public function doneHabit(int $id): ?Habit
+    {
+        $habit = Habit::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
+        if ($habit) {
+            $habit->done_at = Carbon::now();
             $habit->save();
         }
         return $habit;
