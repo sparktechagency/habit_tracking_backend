@@ -15,7 +15,8 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('category_id')->nullable();
             $table->string('habit_name');
-            $table->enum('status', ['Favorite', 'Archived'])->nullable();
+            $table->boolean('isArchived')->default(false);
+            $table->enum('status',['Completed'])->nullable();
             $table->timestamp('done_at')->nullable();
             $table->timestamps();
         });

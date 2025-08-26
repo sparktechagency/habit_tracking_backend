@@ -15,11 +15,14 @@ class HabitService
             'habit_name' => $data['habit_name']
         ]);
     }
-    public function getHabits()
+    public function getHabits($isArchived = null)
     {
-        return Habit::where('user_id', Auth::id())
-            ->orderByDesc('created_at')
-            ->get();
+        $query = Habit::where('user_id', Auth::id())
+            ->orderByDesc('created_at');
+        if (!is_null($isArchived)) {
+            $query->where('isArchived', (bool) $isArchived);
+        }
+        return $query->get();
     }
     public function viewHabit(int $id): ?Habit
     {
@@ -44,7 +47,7 @@ class HabitService
             ->where('user_id', Auth::id())
             ->first();
         if ($habit) {
-            $habit->status = $habit->status === 'Archived' ? null : 'Archived';
+            $habit->isArchived = $habit->isArchived === 0 ? true : false;
             $habit->save();
         }
         return $habit;
@@ -55,6 +58,7 @@ class HabitService
             ->where('user_id', Auth::id())
             ->first();
         if ($habit) {
+            $habit->status = 'Completed';
             $habit->done_at = Carbon::now();
             $habit->save();
         }

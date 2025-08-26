@@ -25,10 +25,11 @@ class HabitController extends Controller
             return $this->sendError('Failed to create habit.', [], 500);
         }
     }
-    public function getHabits()
+    public function getHabits(Request $request)
     {
         try {
-            $habits = $this->habitService->getHabits();
+            $isArchived = $request->query('isArchived');
+            $habits = $this->habitService->getHabits($isArchived);
             return $this->sendResponse($habits, 'Habits fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to fetch habits.', [], 500);
@@ -65,7 +66,7 @@ class HabitController extends Controller
             if (!$habit) {
                 return $this->sendError('Habit not found.', [], 404);
             }
-            $message = $habit->status === 'Archived'
+            $message = $habit->isArchived === true
                 ? 'Habit archived successfully.'
                 : 'Habit unarchived successfully.';
             return $this->sendResponse($habit, $message);
