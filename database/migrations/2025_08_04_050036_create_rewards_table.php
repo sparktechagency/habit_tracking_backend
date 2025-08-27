@@ -15,10 +15,8 @@ return new class extends Migration {
             $table->foreignId('partner_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->string('challenge_type');
-            $table->unsignedBigInteger('challenge_group_id');
             $table->longText('description')->nullable();
-            $table->unsignedBigInteger('give_point')->default(0);
-            $table->timestamp('expiration_date');
+            $table->string('expiration_date');
             $table->unsignedBigInteger('purchase_point')->default(0);
             $table->enum('status', ['Enable', 'Disable'])->default('Enable');
             $table->timestamps();

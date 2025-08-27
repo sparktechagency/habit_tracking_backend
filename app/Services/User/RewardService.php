@@ -103,16 +103,15 @@ class RewardService
 
         return $details;
     }
-
     public function markAsCompleted(int $id)
     {
         $redemption = Redemption::where('id', $id)
             ->where('user_id', Auth::id())
             ->first();
 
-         if (!$redemption) {
-                return false;
-            }
+        if (!$redemption) {
+            return false;
+        }
 
         $redemption->status = 'Completed';
         $redemption->save();

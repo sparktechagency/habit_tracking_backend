@@ -52,6 +52,7 @@ class RedemptionService
     public function getRedemptionDetails(int $id): ?Redemption
     {
         $details = Redemption::where('partner_id', Auth::id())
+            ->where('id', $id)
             ->latest()
             ->with([
                 'user' => function ($q) {

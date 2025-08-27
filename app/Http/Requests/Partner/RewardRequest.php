@@ -24,13 +24,10 @@ class RewardRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'challenge_type' => 'required|string|max:255',
-            // 'challenge_group_id' => 'required|integer|exists:challenge_groups,id',
-            'challenge_group_id' => 'required|integer',
             'description' => 'nullable|string',
-            'give_point' => 'nullable|integer',
             'expiration_date' => 'required',
             'purchase_point' => 'required|integer',
-            'status' => 'in:Enable,disable',
+            'status' => 'in:Enable,Disable',
         ];
     }
 }
