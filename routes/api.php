@@ -74,5 +74,7 @@ Route::middleware('auth:api')->group(function () {
        // groups
        Route::get('/get-challenge-type-lists',[GroupController::class,'getChallengeTypeLists']);
        Route::post('/create-group',[GroupController::class,'createGroup']);
+       Route::get('/get-groups',[GroupController::class,'getGroups']);
+       Route::get('/view-group/{id?}',[GroupController::class,'viewGroup']);
     });
 });

@@ -37,5 +37,29 @@ class GroupController extends Controller
         } catch (Exception $e) {
             return $this->sendError('Failed to create challenge group.', [], 500);
         }
-    } 
+    }
+
+    public function getGroups(Request $request)
+    {
+        try {
+             $search = $request->query('search');
+            $groups = $this->groupService->getGroups($search);
+            return $this->sendResponse($groups, 'Groups fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function viewGroup(Request $request)
+    {
+        try {
+            $group = $this->groupService->viewGroup($request->id);
+            if (!$group) {
+                return $this->sendError('Group not found.', [], 404);
+            }
+            return $this->sendResponse($group, 'Group fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to fetch group.', [$e->getMessage()], 500);
+        }
+    }
 }

@@ -26,7 +26,7 @@ class AuthService
             'validity' => '10 minute'
         ];
         $user = User::create([
-            'role' => $data['role'] == 'USER' ? 'USER' : 'PARTNER',
+            'role' => $data['role'],
             'full_name' => $data['full_name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
