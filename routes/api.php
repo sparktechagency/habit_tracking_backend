@@ -17,6 +17,7 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+// social login (google)
 Route::post('/social-login', [AuthController::class, 'socialLogin']);
 
 
@@ -72,5 +73,6 @@ Route::middleware('auth:api')->group(function () {
 
        // groups
        Route::get('/get-challenge-type-lists',[GroupController::class,'getChallengeTypeLists']);
+       Route::post('/create-group',[GroupController::class,'createGroup']);
     });
 });
