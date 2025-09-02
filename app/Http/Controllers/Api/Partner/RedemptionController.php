@@ -22,7 +22,7 @@ class RedemptionController extends Controller
         try {
             $history = $this->redemptionService->getRedeemHistory($request->search);
             return $this->sendResponse($history, 'Redeem history fetched successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e->getMessage());
             return $this->sendError('Something went wrong.', [], 500);
         }
@@ -31,13 +31,11 @@ class RedemptionController extends Controller
     {
         try {
             $redemption = $this->redemptionService->getRedemptionDetails($id);
-
             if (!$redemption) {
                 return $this->sendError('Redemption not found.', [], 404);
             }
-
             return $this->sendResponse($redemption, 'Redemption details fetched successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e->getMessage());
             return $this->sendError('Something went wrong.', [], 500);
         }

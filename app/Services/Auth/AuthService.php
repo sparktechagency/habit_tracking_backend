@@ -25,7 +25,6 @@ class AuthService
             'otp' => $otp,
             'validity' => '10 minute'
         ];
-
         $user = User::create([
             'role' => $data['role'] == 'user' ? 'USER' : 'PARTNER',
             'full_name' => $data['full_name'],
@@ -34,17 +33,14 @@ class AuthService
             'otp' => $otp,
             'otp_expires_at' => $otp_expires_at,
         ]);
-
         Profile::create([
             'user_id' => $user->id,
         ]);
-
         try {
             Mail::to($user->email)->send(new VerifyOTPMail($email_otp));
         } catch (Exception $e) {
             Log::error($e->getMessage());
         }
-
         return $user;
     }
     public function login(array $data): array
@@ -172,7 +168,6 @@ class AuthService
             return ['success' => false, 'message' => 'User not found', 'code' => 404];
         }
         $user->avatar = $user->avatar ?? 'https://ui-avatars.com/api/?background=random&name=' . $user->full_name;
-
         return [
             'success' => true,
             'data' => $user,
@@ -186,7 +181,7 @@ class AuthService
                 'success' => true,
                 'message' => 'Successfully logged out.'
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Failed to logout. Please try again.',

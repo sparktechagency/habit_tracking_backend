@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\AddNewHabitRequest;
 use App\Services\User\HabitService;
+use Exception;
 use Illuminate\Http\Request;
 
 class HabitController extends Controller
@@ -21,7 +22,7 @@ class HabitController extends Controller
         try {
             $habit = $this->habitService->addNewHabit($request->validated());
             return $this->sendResponse($habit, 'Habit created successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Failed to create habit.', [], 500);
         }
     }
@@ -31,7 +32,7 @@ class HabitController extends Controller
             $isArchived = $request->query('isArchived');
             $habits = $this->habitService->getHabits($isArchived);
             return $this->sendResponse($habits, 'Habits fetched successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Failed to fetch habits.', [], 500);
         }
     }
@@ -43,7 +44,7 @@ class HabitController extends Controller
                 return $this->sendError('Habit not found.', [], 404);
             }
             return $this->sendResponse($habit, 'Habit fetched successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
@@ -55,7 +56,7 @@ class HabitController extends Controller
                 return $this->sendError('Habit not found or unauthorized.', [], 404);
             }
             return $this->sendResponse([], 'Habit deleted successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
@@ -70,7 +71,7 @@ class HabitController extends Controller
                 ? 'Habit archived successfully.'
                 : 'Habit unarchived successfully.';
             return $this->sendResponse($habit, $message);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
@@ -82,7 +83,7 @@ class HabitController extends Controller
                 return $this->sendError('Habit not found.', [], 404);
             }
             return $this->sendResponse($habit, 'Habit done successfully');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
     }

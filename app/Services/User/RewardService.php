@@ -15,8 +15,6 @@ class RewardService
     {
         $query = Reward::where('status', 'Enable')
             ->where('expiration_date', '>=', Carbon::now());
-
-        // Search filter
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
@@ -24,7 +22,6 @@ class RewardService
                 // ->orWhere('description', 'like', "%{$search}%");
             });
         }
-
         return $query->latest()->get();
     }
     public function redeem(int $rewardId): ?Redemption
@@ -33,7 +30,6 @@ class RewardService
             ->where('status', 'Enable')
             ->where('expiration_date', '>=', Carbon::now())
             ->first();
-
         if (!$reward) {
             return null;
         }
@@ -66,16 +62,12 @@ class RewardService
                 }
             ])
             ->get();
-
         foreach ($redeem_histories as $history) {
             $history->status = $history->status == 'Redeemed' ? 'Pending' : 'Redeemed';
-
             $history->reward->partner->avatar = $history->reward->partner->avatar
                 ? asset($history->reward->partner->avatar)
                 : 'https://ui-avatars.com/api/?background=random&name=' . urlencode($history->reward->partner->full_name);
-
         }
-
         return $redeem_histories;
     }
     public function getRedemptionDetails(int $id): ?Redemption
@@ -94,13 +86,10 @@ class RewardService
             ->where('id', $id)
             ->where('user_id', Auth::id())
             ->first();
-
         $details->status = $details->status == 'Redeemed' ? 'Pending' : 'Redeemed';
         $details->reward->partner->avatar = $details->reward->partner->avatar
             ? asset($details->reward->partner->avatar)
             : 'https://ui-avatars.com/api/?background=random&name=' . urlencode($details->reward->partner->full_name);
-
-
         return $details;
     }
     public function markAsCompleted(int $id)
@@ -108,14 +97,11 @@ class RewardService
         $redemption = Redemption::where('id', $id)
             ->where('user_id', Auth::id())
             ->first();
-
         if (!$redemption) {
             return false;
         }
-
         $redemption->status = 'Completed';
         $redemption->save();
-
         return $redemption;
     }
 }

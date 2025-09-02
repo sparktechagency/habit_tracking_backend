@@ -35,11 +35,15 @@ class SayNoService
     }
     public function viewEntry(int $id): ?Entry
     {
-        return Entry::where('id', $id)->where('user_id', Auth::id())->first();
+        return Entry::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
     }
     public function deleteEntry(int $id): bool
     {
-        $entry = Entry::where('id', $id)->where('user_id', Auth::id())->first();
+        $entry = Entry::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
         if ($entry) {
             $entry->delete();
             return true;

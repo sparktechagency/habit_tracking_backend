@@ -43,18 +43,18 @@ class RewardService
         $reward = Reward::where('id', $id)
             ->where('partner_id', Auth::id())
             ->first();
-
         if ($reward) {
             $reward->status = $reward->status == 'Enable' ? 'Disable' : 'Enable';
             $reward->save();
         }
-
         return $reward;
     }
     public function getRewards()
     {
-
         $currentDate = Carbon::now()->format('Y-m-d');   // 2025-10-01
-        return Reward::where('partner_id', Auth::id())->where('expiration_date', '>=', $currentDate)->latest()->get();
+        return Reward::where('partner_id', Auth::id())
+            ->where('expiration_date', '>=', $currentDate)
+            ->latest()
+            ->get();
     }
 }

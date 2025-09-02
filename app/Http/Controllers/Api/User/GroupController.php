@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Services\User\GroupService;
+use Exception;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
@@ -21,7 +22,7 @@ class GroupController extends Controller
         try {
             $types = $this->groupService->getChallengeTypeLists();
             return $this->sendResponse($types, 'Challenge types fetched successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Failed to fetch challenge types.', [], 500);
         }
     }

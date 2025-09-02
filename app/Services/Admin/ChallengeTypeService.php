@@ -10,7 +10,6 @@ class ChallengeTypeService
     {
         return Challenge::create($data);
     }
-
     public function getTypes(?string $search = null)
     {
         $query = Challenge::query();
@@ -19,12 +18,10 @@ class ChallengeTypeService
         }
         return $query->latest()->get();
     }
-
     public function viewType(int $id): ?Challenge
     {
         return Challenge::find($id);
     }
-
     public function editType(int $id, array $data): ?Challenge
     {
         $challenge = Challenge::find($id);
@@ -33,7 +30,6 @@ class ChallengeTypeService
         }
         return $challenge;
     }
-
     public function deleteType(int $id): bool
     {
         $challenge = Challenge::find($id);

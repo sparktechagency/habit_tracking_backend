@@ -27,7 +27,7 @@ class RewardController extends Controller
                 'message' => 'Available rewards fetched successfully.',
                 'data' => $rewards
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong.',
@@ -39,20 +39,18 @@ class RewardController extends Controller
     {
         try {
             $redemption = $this->rewardService->redeem($request->validated()['reward_id']);
-
             if (!$redemption) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Reward not available for redemption.'
                 ], 404);
             }
-
             return response()->json([
                 'status' => true,
                 'message' => 'Reward redeemed successfully.',
                 'data' => $redemption
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong.',
@@ -65,7 +63,7 @@ class RewardController extends Controller
         try {
             $history = $this->rewardService->getRedeemHistory();
             return $this->sendResponse($history, 'Redeem history fetched successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e->getMessage());
             return $this->sendError('Something went wrong.', [], 500);
         }
@@ -74,13 +72,11 @@ class RewardController extends Controller
     {
         try {
             $redemption = $this->rewardService->getRedemptionDetails($id);
-
             if (!$redemption) {
                 return $this->sendError('Redemption not found.', [], 404);
             }
-
             return $this->sendResponse($redemption, 'Redemption details fetched successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e->getMessage());
             return $this->sendError('Something went wrong.', [], 500);
         }

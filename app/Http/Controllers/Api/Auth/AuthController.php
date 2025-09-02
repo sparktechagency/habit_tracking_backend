@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Services\Auth\AuthService;
 use App\Traits\ApiResponseTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -40,7 +41,7 @@ class AuthController extends Controller
                 true,
                 201
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Registration Failed', ['error' => $e->getMessage()]);
         }
     }
@@ -58,7 +59,7 @@ class AuthController extends Controller
                 'expires_in' => $response['expires_in'],
                 'user' => $response['user'],
             ], 'Login successful');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 500);
         }
     }
@@ -80,7 +81,7 @@ class AuthController extends Controller
                 'expires_in' => $tokenExpiry->toDateTimeString(),
                 'user' => $user
             ], 'OTP verified successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
@@ -93,7 +94,7 @@ class AuthController extends Controller
                 return $this->sendError($result['message'], [], $result['code']);
             }
             return $this->sendResponse([], 'OTP resent to your email.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 500);
         }
     }
@@ -106,7 +107,7 @@ class AuthController extends Controller
                 return $this->sendError($result['message'], [], $result['code']);
             }
             return $this->sendResponse([], 'OTP sent to your email.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 500);
         }
     }
@@ -119,7 +120,7 @@ class AuthController extends Controller
                 return $this->sendError($result['message'], [], $result['code']);
             }
             return $this->sendResponse([], 'Password changed successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 500);
         }
     }
@@ -133,7 +134,7 @@ class AuthController extends Controller
                 return $this->sendError($result['message'], [], $result['code']);
             }
             return $this->sendResponse([], 'Password updated successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 500);
         }
     }
@@ -147,7 +148,7 @@ class AuthController extends Controller
             return $this->sendResponse([
                 'user' => $result['data'],
             ], 'Your profile');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 500);
         }
     }
@@ -159,7 +160,7 @@ class AuthController extends Controller
                 return $this->sendError($result['message'], [], $result['code'] ?? 500);
             }
             return $this->sendResponse([], $result['message']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 500);
         }
     }

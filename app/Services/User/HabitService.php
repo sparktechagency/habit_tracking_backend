@@ -35,10 +35,8 @@ class HabitService
         $habit = Habit::where('id', $id)
             ->where('user_id', Auth::id())
             ->first();
-
         if (!$habit)
             return false;
-
         return $habit->delete();
     }
     public function archivedHabit(int $id): ?Habit

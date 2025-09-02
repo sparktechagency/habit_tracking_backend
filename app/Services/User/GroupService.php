@@ -9,6 +9,8 @@ class GroupService
     public function getChallengeTypeLists()
     {
         $query = Challenge::query();
-        return $query->latest()->get()->pluck('challenge_type');
+        return $query->latest()
+            ->get()
+            ->pluck('challenge_type');
     }
 }
