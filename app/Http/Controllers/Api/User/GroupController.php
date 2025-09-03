@@ -42,7 +42,7 @@ class GroupController extends Controller
     public function getGroups(Request $request)
     {
         try {
-             $search = $request->query('search');
+            $search = $request->query('search');
             $groups = $this->groupService->getGroups($search);
             return $this->sendResponse($groups, 'Groups fetched successfully.');
         } catch (Exception $e) {
@@ -60,6 +60,26 @@ class GroupController extends Controller
             return $this->sendResponse($group, 'Group fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to fetch group.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function joinGroup(Request $request)
+    {
+        try {
+            $member = $this->groupService->joinGroup($request->challenge_group_id);
+            return $this->sendResponse($member, 'Joined group successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to join group.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function taskCompleted(Request $request)
+    {
+        try {
+            $result = $this->groupService->taskCompleted($request->challenge_group_id, $request->group_habit_id);
+            return $this->sendResponse($result, 'Task completed successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to join group.', [$e->getMessage()], 500);
         }
     }
 }

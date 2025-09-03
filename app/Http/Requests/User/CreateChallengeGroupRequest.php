@@ -25,6 +25,7 @@ class CreateChallengeGroupRequest extends FormRequest
             'group_name' => 'required|string|max:255',
             'challenge_type' => 'required|string|max:255',
             'duration' => 'required|string|max:100',
+            'focus_on' => 'required|array'
         ];
     }
 }

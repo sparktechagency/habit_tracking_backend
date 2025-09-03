@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('user_id');
             $table->enum('status', ['Active', 'Left'])->default('Active');
             $table->timestamp('joined_at')->useCurrent();
+            $table->timestamps();
         });
     }
 

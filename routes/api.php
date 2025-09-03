@@ -76,5 +76,7 @@ Route::middleware('auth:api')->group(function () {
        Route::post('/create-group',[GroupController::class,'createGroup']);
        Route::get('/get-groups',[GroupController::class,'getGroups']);
        Route::get('/view-group/{id?}',[GroupController::class,'viewGroup']);
+       Route::post('/join-group',[GroupController::class,'joinGroup']);
+       Route::post('/task-completed',[GroupController::class,'taskCompleted']);
     });
 });

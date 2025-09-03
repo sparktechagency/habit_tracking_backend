@@ -13,6 +13,16 @@ class ChallengeGroup extends Model
 
     protected $casts = [
         'start_date' => 'datetime',
-        'end_date'   => 'datetime',
+        'end_date' => 'datetime',
     ];
+
+    public function group_habits()
+    {
+        return $this->hasMany(GroupHabit::class);
+    }
+
+    public function members()
+    {
+        return $this->hasMany(GroupMember::class);
+    }
 }

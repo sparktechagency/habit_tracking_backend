@@ -10,4 +10,13 @@ class GroupMember extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+    public function challenge_group()
+    {
+        return $this->belongsTo(ChallengeGroup::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
