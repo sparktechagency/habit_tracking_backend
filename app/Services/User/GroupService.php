@@ -16,7 +16,6 @@ class GroupService
             ->get()
             ->pluck('challenge_type');
     }
-
     public function createGroup(array $data): ChallengeGroup
     {
         $startDate = Carbon::now();
@@ -32,7 +31,6 @@ class GroupService
             'status' => 'Active',
         ]);
     }
-
     public function getGroups(?string $search = null)
     {
         $query = ChallengeGroup::where('user_id', Auth::id())
@@ -46,7 +44,6 @@ class GroupService
         $groups = $query->get();
         return $groups;
     }
-
     public function viewGroup(int $id): ?ChallengeGroup
     {
         $group = ChallengeGroup::where('id', $id)
