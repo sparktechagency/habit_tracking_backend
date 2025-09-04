@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Challenge;
 use App\Models\Profile;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -60,6 +61,19 @@ class DatabaseSeeder extends Seeder
             'user_id' => $userTwo->id,
         ]);
 
+        $userThree = User::create([
+            'full_name' => 'User three',
+            'email' => 'user.three@gmail.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('12345678'),
+            'role' => 'USER',
+            'status' => 'Active',
+        ]);
+
+        Profile::create([
+            'user_id' => $userThree->id,
+        ]);
+
         $partnerOne = User::create([
             'full_name' => 'Partner one',
             'email' => 'partner.one@gmail.com',
@@ -85,5 +99,13 @@ class DatabaseSeeder extends Seeder
         Profile::create([
             'user_id' => $partnerTwo->id,
         ]);
+
+        $challenges = ['Health', 'Fitness', 'Productivity', 'Learning'];
+        foreach ($challenges as $challenge) {
+            Challenge::create([
+                'challenge_type' => $challenge,
+                'note' => 'This is ' . $challenge . ' type.'
+            ]);
+        }
     }
 }

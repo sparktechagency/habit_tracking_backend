@@ -28,7 +28,6 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch challenge types.', [], 500);
         }
     }
-
     public function createGroup(CreateChallengeGroupRequest $request): JsonResponse
     {
         try {
@@ -38,7 +37,6 @@ class GroupController extends Controller
             return $this->sendError('Failed to create challenge group.', [], 500);
         }
     }
-
     public function getGroups(Request $request)
     {
         try {
@@ -49,11 +47,10 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
         }
     }
-
-    public function viewGroup(Request $request)
+    public function viewGroup(Request $request,$id)
     {
         try {
-            $group = $this->groupService->viewGroup($request->id);
+            $group = $this->groupService->viewGroup($id);
             if (!$group) {
                 return $this->sendError('Group not found.', [], 404);
             }
@@ -62,7 +59,6 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch group.', [$e->getMessage()], 500);
         }
     }
-
     public function joinGroup(Request $request)
     {
         try {
@@ -72,14 +68,35 @@ class GroupController extends Controller
             return $this->sendError('Failed to join group.', [$e->getMessage()], 500);
         }
     }
-
+    public function logProgress(Request $request)
+    {
+        try {
+            $result = $this->groupService->logProgress($request->challenge_group_id);
+            if($result == null){
+                return $this->sendResponse([],'Your today logs already stored.');
+            }
+            return $this->sendResponse($result, 'Tasks added successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
+        }
+    }
+    public function getTodayLogs(Request $request)
+    {
+        try {
+            $group = $this->groupService->getTodayLogs($request->challenge_group_id);
+            return $this->sendResponse($group, 'Get today logs fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
+        }
+    }
     public function taskCompleted(Request $request)
     {
         try {
-            $result = $this->groupService->taskCompleted($request->challenge_group_id, $request->group_habit_id);
+            $result = $this->groupService->taskCompleted($request->challenge_log_id);
             return $this->sendResponse($result, 'Task completed successfully.');
         } catch (Exception $e) {
-            return $this->sendError('Failed to join group.', [$e->getMessage()], 500);
+            return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
+
 }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('group_habits_id');
             $table->unsignedInteger('day')->nullable();
+            $table->timestamp('date')->nullable();
             $table->string('status')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();

@@ -167,7 +167,6 @@ class AuthService
         if (!$user) {
             return ['success' => false, 'message' => 'User not found', 'code' => 404];
         }
-        $user->avatar = $user->avatar ?? 'https://ui-avatars.com/api/?background=random&name=' . $user->full_name;
         return [
             'success' => true,
             'data' => $user,

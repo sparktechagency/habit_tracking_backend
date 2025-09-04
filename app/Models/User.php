@@ -19,6 +19,7 @@ class User extends Authenticatable implements JWTSubject
      * @var list<string>
      */
     protected $guarded = ['id'];
+    protected $appends = ['avatar_url'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -27,6 +28,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $hidden = [
         'password',
+        'avatar',
         'remember_token',
     ];
 
@@ -59,7 +61,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function challenge_logs()
-{
-    return $this->hasMany(ChallengeLog::class, 'user_id');
-}
+    {
+        return $this->hasMany(ChallengeLog::class, 'user_id');
+    }
+
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar
+            ? asset($this->avatar)
+            : 'https://ui-avatars.com/api/?background=random&name=' . urlencode($this->full_name);
+    }
 }

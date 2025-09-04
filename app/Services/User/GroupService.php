@@ -53,7 +53,7 @@ class GroupService
     }
     public function getGroups(?string $search = null)
     {
-        $query = ChallengeGroup::withCount('members')->with('group_habits')->with('members')
+        $query = ChallengeGroup::withCount('members')->with('group_habits')->with('members.user.profile')
             ->orderBy('created_at', 'desc');
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
@@ -72,7 +72,9 @@ class GroupService
         $group = ChallengeGroup::withcount('members')->with('group_habits')->where('id', $id)->with('members')
             ->where('user_id', Auth::id())
             ->first();
-        $group->max_count = 100;
+        if ($group) {
+            $group->max_count = 100;
+        }
         return $group;
     }
     public function joinGroup(int $groupId): GroupMember|string
@@ -97,7 +99,6 @@ class GroupService
             'joined_at' => now(),
         ]);
     }
-
     public function getChallengeDaysWithDates($startDate, $endDate)
     {
         $dates = [];
@@ -111,7 +112,7 @@ class GroupService
 
         return $dates;
     }
-    public function taskCompleted(int $groupId, int $habitId)
+    public function logProgress(int $groupId)
     {
         $group = ChallengeGroup::where('id', $groupId)->first();
         if (!$group) {
@@ -120,28 +121,78 @@ class GroupService
 
         $start_date = $group->start_date;
         $end_date = $group->end_date;
-
         $days = $this->getChallengeDaysWithDates($start_date, $end_date);
         $today = Carbon::now()->toDateString();
-        $currentDayNumber = 0;
-
+        $currentDay = 0;
         for ($i = 0; $i < $group->duration; $i++) {
             if ($days[$i] == $today) {
-                $currentDayNumber = $i + 1;
+                $currentDay = $i + 1;
+                $currentDate = $days[$i];
             }
         }
 
-        return ChallengeLog::create([
-            'challenge_group_id' => $groupId,
-            'group_habits_id' => $habitId,
-            'user_id' => Auth::id(),
-            'day' => $currentDayNumber,
-            'status' => 'Completed',
-            'completed_at' => Carbon::now()
-        ]);
+        $in_group_check = GroupMember::where('user_id', Auth::id())->first();
+
+        if (!$in_group_check) {
+            throw new Exception('Your are not group member. please join this group.');
+        }
+
+        $day_check = ChallengeLog::where('challenge_group_id', $groupId)
+            ->where('day', $currentDay)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if ($day_check) {
+            return null;
+        }
+
+        $total_habit_count = GroupHabit::where('challenge_group_id', $groupId)->pluck('id');
+        for ($i = 0; $i < $total_habit_count->count(); $i++) {
+            $create_log = ChallengeLog::create([
+                'challenge_group_id' => $groupId,
+                'group_habits_id' => $total_habit_count[$i],
+                'user_id' => Auth::id(),
+                'day' => $currentDay,
+                'date' => $currentDate,
+                'status' => 'Incompleted'
+            ]);
+        }
+
+        return $create_log;
     }
+    public function getTodayLogs(int $groupId): array
+    {
+        $today = Carbon::now()->toDateString();
 
+        $my = ChallengeLog::where('challenge_group_id', $groupId)
+            ->whereDate('date', $today)
+            ->where('user_id', Auth::id())
+            ->get();
 
+        $others = ChallengeLog::where('challenge_group_id', $groupId)
+            ->whereDate('date', $today)
+            ->where('user_id', '!=', Auth::id())
+            ->get()
+            ->groupBy('user_id');
 
-
+        return [
+            'my_logs' => $my,
+            'others_logs' => $others,
+        ];
+    }
+    public function taskCompleted(int $logId)
+    {
+        $user_log = ChallengeLog::where('id', $logId)->where('user_id', Auth::id())->first();
+        if ($user_log->status == 'Completed') {
+            throw new Exception('This task is already completed.');
+        }
+        if ($user_log) {
+            $user_log->status = 'Completed';
+            $user_log->completed_at = Carbon::now();
+            $user_log->save();
+        } else {
+            throw new Exception('User unauthorized. log id ' . $logId . ' is not this user.');
+        }
+        return $user_log;
+    }
 }
