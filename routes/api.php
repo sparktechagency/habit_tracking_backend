@@ -80,5 +80,6 @@ Route::middleware('auth:api')->group(function () {
        Route::post('/log-progress',[GroupController::class,'logProgress']);
        Route::get('/get-today-logs',[GroupController::class,'getTodayLogs']);
        Route::patch('/task-completed',[GroupController::class,'taskCompleted']);
+       Route::get('/get-daily-summaries',[GroupController::class,'getDailySummaries']);
     });
 });

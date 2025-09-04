@@ -10,6 +10,7 @@ use App\Models\GroupMember;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class GroupService
 {
@@ -182,17 +183,161 @@ class GroupService
     }
     public function taskCompleted(int $logId)
     {
+        $log_id = ChallengeLog::find($logId);
+        if (!$log_id) {
+            throw new Exception('Challenge log id is not valid.');
+        }
         $user_log = ChallengeLog::where('id', $logId)->where('user_id', Auth::id())->first();
         if ($user_log->status == 'Completed') {
             throw new Exception('This task is already completed.');
         }
-        if ($user_log) {
-            $user_log->status = 'Completed';
-            $user_log->completed_at = Carbon::now();
-            $user_log->save();
-        } else {
+        if (!$user_log) {
             throw new Exception('User unauthorized. log id ' . $logId . ' is not this user.');
         }
+        $user_log->status = 'Completed';
+        $user_log->completed_at = Carbon::now();
+        $user_log->save();
         return $user_log;
     }
+
+    public function getDailySummarie(int $groupId)
+    {
+        $logs = ChallengeLog::with('user')
+            ->where('challenge_group_id', $groupId)
+            ->get()
+            ->groupBy('date');
+
+        $summaries = [];
+
+        foreach ($logs as $date => $dayLogs) {
+            $users = $dayLogs->groupBy('user_id');
+            $userProgress = [];
+            $totalPercent = 0;
+
+            foreach ($users as $userId => $userLogs) {
+                $totalTasks = $userLogs->count();
+                $completedTasks = $userLogs->where('status', 'Completed')->count();
+                $progressPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+
+                $userProgress[] = [
+                    'user_id' => $userId,
+                    'user_name' => $userLogs->first()->user->full_name ?? 'Unknown',
+                    'progress' => $progressPercent,
+                ];
+
+                $totalPercent += $progressPercent;
+            }
+
+            $groupCompletion = count($users) > 0 ? round($totalPercent / count($users)) : 0;
+
+
+
+            $summaries[] = [
+                'date' => $date,
+                'group_completion' => $groupCompletion,
+                'members' => $userProgress,
+            ];
+        }
+
+        $group = ChallengeGroup::where('id', $groupId)->first();
+        if (!$group) {
+            throw new Exception("Group with ID {$groupId} not found.");
+        }
+
+        $start_date = $group->start_date;
+        $end_date = $group->end_date;
+        $days = $this->getChallengeDaysWithDates($start_date, $end_date);
+        $today = Carbon::now()->addDay()->toDateString();
+        $currentDay = 0;
+        for ($i = 0; $i < $group->duration; $i++) {
+            if ($days[$i] == $today) {
+                $currentDay = $i + 1;
+                $currentDate = $days[$i];
+            }
+        }
+
+        foreach ($summaries as $summary) {
+            $summary->add = 'hello';
+        }
+
+
+
+        return $summaries;
+    }
+
+    public function getDailySummaries(int $groupId)
+    {
+        $group = ChallengeGroup::find($groupId);
+        if (!$group) {
+            throw new \Exception("Group with ID {$groupId} not found.");
+        }
+
+        $start_date = Carbon::parse($group->start_date)->toDateString();
+        $end_date = Carbon::parse($group->end_date)->toDateString();
+
+        // ✅ তারিখের Array তৈরি করুন এবং ফরম্যাট নিশ্চিত করুন
+        $daysArray = $this->getChallengeDaysWithDates($start_date, $end_date);
+
+        // ✅ Debugging: তারিখের Array চেক করুন
+        Log::info('Days Array:', $daysArray);
+
+        $logs = ChallengeLog::with('user')
+            ->where('challenge_group_id', $groupId)
+            // ✅ শুধুমাত্র challenge duration-এর মধ্যে তারিখগুলিই fetch করুন
+            ->whereBetween('date', [$start_date, $end_date])
+            ->get()
+            ->groupBy('date');
+
+        // ✅ Debugging: লগ থেকে প্রাপ্ত তারিখগুলি চেক করুন
+        Log::info('Log dates:', $logs->keys()->toArray());
+
+        $summaries = [];
+
+        foreach ($logs as $date => $dayLogs) {
+            // ✅ তারিখের ফরম্যাট নিশ্চিত করুন (Y-m-d)
+            $formattedDate = Carbon::parse($date)->toDateString();
+
+            // ✅ দিনের সংখ্যা খুঁজুন
+            $dayNumber = null;
+            foreach ($daysArray as $index => $dayDate) {
+                // ✅ তারিখের ফরম্যাট মিলিয়ে নিন
+                $formattedDayDate = Carbon::parse($dayDate)->toDateString();
+                if ($formattedDayDate === $formattedDate) {
+                    $dayNumber = $index + 1; // Day numbers start from 1
+                    break;
+                }
+            }
+
+            $users = $dayLogs->groupBy('user_id');
+            $userProgress = [];
+            $totalPercent = 0;
+
+            foreach ($users as $userId => $userLogs) {
+                $totalTasks = $userLogs->count();
+                $completedTasks = $userLogs->where('status', 'Completed')->count();
+                $progressPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+
+                $userProgress[] = [
+                    'user_id' => $userId,
+                    'user_name' => $userLogs->first()->user->full_name ?? 'Unknown',
+                    'progress' => $progressPercent,
+                ];
+
+                $totalPercent += $progressPercent;
+            }
+
+            $groupCompletion = count($users) > 0 ? round($totalPercent / count($users)) : 0;
+
+            $summaries[] = [
+                'date' => $formattedDate,
+                'day' => $dayNumber,
+                'group_completion' => $groupCompletion,
+                'members' => $userProgress,
+            ];
+        }
+
+        return $summaries;
+    }
+
+
 }
