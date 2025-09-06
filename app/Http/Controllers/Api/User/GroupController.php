@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CreateChallengeGroupRequest;
+use App\Models\ChallengeLog;
 use App\Services\User\GroupService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GroupController extends Controller
 {
@@ -47,7 +49,7 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
         }
     }
-    public function viewGroup(Request $request,$id)
+    public function viewGroup(Request $request, $id)
     {
         try {
             $group = $this->groupService->viewGroup($id);
@@ -72,8 +74,8 @@ class GroupController extends Controller
     {
         try {
             $result = $this->groupService->logProgress($request->challenge_group_id);
-            if($result == null){
-                return $this->sendResponse([],'Your today logs already stored.');
+            if ($result == null) {
+                return $this->sendResponse([], 'Your today logs already stored.');
             }
             return $this->sendResponse($result, 'Tasks added successfully.');
         } catch (Exception $e) {
