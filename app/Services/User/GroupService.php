@@ -268,7 +268,8 @@ class GroupService
                     'user_id' => $userId,
                     'user_name' => $userModel->full_name ?? 'Unknown',
                     'progress' => $progressPercent,
-                    'status' => $statusList
+                    'status' => $statusList,
+                    'is_all_completed' => !in_array('Incompleted', $statusList),
                 ];
 
                 $totalPercent += $progressPercent;
