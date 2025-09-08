@@ -110,5 +110,5 @@ class GroupController extends Controller
             return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
-
+ 
 }
