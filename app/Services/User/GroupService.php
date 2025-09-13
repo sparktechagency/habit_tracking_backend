@@ -84,7 +84,9 @@ class GroupService
                     ->orWhere('challenge_type', 'LIKE', "%{$search}%");
             });
         }
+
         $groups = $query->get();
+
         $groups->each(function ($group) use ($authId, $today) {
             $group->max_count = 100;
             $totalTasks = $group->group_habits->count();
@@ -375,6 +377,113 @@ class GroupService
             'my_achieved_point' => $achieved_point,
             'summaries' => $summaries
         ];
+    }
+    public function getOverallProgress(int $groupId)
+    {
+        $group = ChallengeGroup::find($groupId);
+        if (!$group) {
+            throw new Exception("Group with ID {$groupId} not found.");
+        }
+
+        $start_date = Carbon::parse($group->start_date)->toDateString();
+        $end_date = Carbon::parse($group->end_date)->toDateString();
+
+        $daysArray = $this->getChallengeDaysWithDates($start_date, $end_date);
+
+        $today = Carbon::now()->toDateString();
+
+        $total_day = count($daysArray);
+
+        $current_day = 0;
+        foreach ($daysArray as $i => $date) {
+            if ($date == $today) {
+                $current_day = $i + 1;
+                break;
+            }
+        }
+
+        $habit_count = GroupHabit::where('challenge_group_id', $groupId)->count();
+
+        $completed = ChallengeLog::where('user_id', Auth::id())
+            ->where('challenge_group_id', $groupId)
+            ->where('status', 'Completed')
+            ->count();
+
+        $overall_progress = $habit_count > 0 ? round(($completed / $habit_count) * 100) : 0;
+
+        $logs = ChallengeLog::where('challenge_group_id', $groupId)
+            ->whereBetween('date', [$start_date, $end_date])
+            ->get()
+            ->groupBy(function ($log) {
+                return Carbon::parse($log->date)->toDateString();
+            });
+
+        $summaries = [];
+        foreach ($daysArray as $index => $dayDate) {
+            $formattedDate = Carbon::parse($dayDate)->toDateString();
+            $dayNumber = $index + 1;
+
+            $dayLogs = $logs->get($formattedDate, collect());
+
+            $totalTasks = GroupHabit::where('challenge_group_id', $groupId)->count();
+            $completedTasks = $dayLogs->where('user_id', Auth::id())->where('status', 'Completed')->count();
+
+            $progressPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+
+            $summaries[] = [
+                'date' => $formattedDate,
+                'day' => $dayNumber,
+                'progress' => $progressPercent,
+            ];
+        }
+
+        return [
+            'overall_progress' => $overall_progress,
+            'current_day' => $current_day,
+            'total_day' => $total_day,
+            'summaries' => $summaries
+        ];
+    }
+    public function getMyCompletedGroups(?string $search = null)
+    {
+        $authId = Auth::id();
+        $today = now()->toDateString();
+        $query = ChallengeGroup::withCount('members')
+            ->with('group_habits')
+            ->where('status', 'Completed')
+            ->whereHas('members', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->orderBy('created_at', 'desc');
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('group_name', 'LIKE', "%{$search}%")
+                    ->orWhere('challenge_type', 'LIKE', "%{$search}%");
+            });
+        }
+        $groups = $query->get();
+
+        $groups->each(function ($group) use ($authId, $today) {
+            $group->max_count = 100;
+
+            $groupId = $group->id;
+            $habit_count = GroupHabit::where('challenge_group_id', $groupId)->count();
+            
+            $my_completed = ChallengeLog::where('user_id', Auth::id())
+                ->where('challenge_group_id', $groupId)
+                ->where('status', 'Completed')
+                ->count();
+            $group->my_progress = $habit_count > 0 ? round(($my_completed / $habit_count) * 100) : 0;
+
+            $group_completed = ChallengeLog::where('challenge_group_id', $groupId)
+                ->where('status', 'Completed')
+                ->count();
+            $group->group_progress = $habit_count > 0 ? round(($group_completed / $habit_count) * 100) : 0;
+
+            $group->makeHidden('members');
+            $group->makeHidden('group_habits');
+        });
+        return $groups;
     }
 
 }

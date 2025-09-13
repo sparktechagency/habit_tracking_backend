@@ -100,7 +100,6 @@ class GroupController extends Controller
             return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
-
     public function getDailySummaries(Request $request)
     {
         try {
@@ -110,5 +109,27 @@ class GroupController extends Controller
             return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
- 
+
+    // notification
+
+    public function getOverallProgress(Request $request)
+    {
+        try {
+            $groups = $this->groupService->getOverallProgress($request->challenge_group_id);
+            return $this->sendResponse($groups, 'My overall progress fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
+        }
+    }
+    public function getMyCompletedGroups(Request $request)
+    {
+        try {
+            $search = $request->query('search');
+            $groups = $this->groupService->getMyCompletedGroups($search);
+            return $this->sendResponse($groups, 'My completed groups fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
+        }
+    }
+
 }
