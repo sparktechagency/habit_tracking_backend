@@ -485,5 +485,4 @@ class GroupService
         });
         return $groups;
     }
-
 }

@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\User\RewardController as UserRewardController;
 use App\Http\Controllers\Api\User\SayNoController;
 use App\Http\Controllers\Api\Partner\RewardController;
 use App\Http\Controllers\Api\User\GroupController;
+use App\Http\Controllers\SettingsController;
+use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +27,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
     Route::get('/get-profile', [AuthController::class, 'getProfile']);
+    Route::post('/edit-profile', [SettingsController::class, 'editProfile']);
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {

@@ -146,9 +146,7 @@ class AuthController extends Controller
             if (!$result['success']) {
                 return $this->sendError($result['message'], [], $result['code']);
             }
-            return $this->sendResponse([
-                'user' => $result['data'],
-            ], 'Your profile');
+            return $this->sendResponse(['user' => $result['data'],], 'Your profile');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 500);
         }

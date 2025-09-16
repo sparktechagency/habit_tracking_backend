@@ -163,7 +163,7 @@ class AuthService
     }
     public function getProfile(?int $userId = null): array
     {
-        $user = User::find($userId ?? Auth::id());
+        $user = User::with('profile')->find($userId ?? Auth::id());
         if (!$user) {
             return ['success' => false, 'message' => 'User not found', 'code' => 404];
         }
@@ -172,6 +172,7 @@ class AuthService
             'data' => $user,
         ];
     }
+    
     public function logout(): array
     {
         try {

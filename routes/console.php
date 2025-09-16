@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(UpdateChallengeGroupStatus::class)->everyTenSeconds();
+// Schedule::command(UpdateChallengeGroupStatus::class)->daily();
