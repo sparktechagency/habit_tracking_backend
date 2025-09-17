@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->string('payment_intent_id');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->unsignedBigInteger('subscription_id');
+            // $table->unsignedBigInteger('subscription_id')->nullable();
+            $table->string('plan_name');
             $table->timestamp('date')->nullable();
             $table->timestamp('renewal')->nullable();
+            $table->decimal('amount',10,2);
             $table->string('status')->default('Completed');
             $table->timestamps();
         });

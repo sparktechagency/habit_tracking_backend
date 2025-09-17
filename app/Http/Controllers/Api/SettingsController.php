@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\SettingsRequest;
 use App\Services\SettingsService;
 use Exception;
@@ -14,7 +15,6 @@ class SettingsController extends Controller
     {
         $this->settingsService = $settingsService;
     }
-
     public function editProfile(SettingsRequest $request)
     {
         try {

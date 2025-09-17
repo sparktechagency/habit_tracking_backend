@@ -7,10 +7,10 @@ use App\Http\Controllers\Api\User\HabitController;
 use App\Http\Controllers\Api\User\RewardController as UserRewardController;
 use App\Http\Controllers\Api\User\SayNoController;
 use App\Http\Controllers\Api\Partner\RewardController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\User\GroupController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\StaticPageController;
-use App\Services\SettingsService;
+use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\StaticPageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,10 +22,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 // social login (google)
 Route::post('/social-login', [AuthController::class, 'socialLogin']);
-
+// static page show
 Route::get('pages/{slug}', [StaticPageController::class, 'show']);
-
-
 
 
 Route::middleware('auth:api')->group(function () {
@@ -34,6 +32,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/get-profile', [AuthController::class, 'getProfile']);
     Route::post('/edit-profile', [SettingsController::class, 'editProfile']);
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
+    // static page update
     Route::post('pages/{slug}', [StaticPageController::class, 'update']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
@@ -92,5 +91,9 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/get-daily-summaries', [GroupController::class, 'getDailySummaries']);
         Route::get('/get-overall-progress', [GroupController::class, 'getOverallProgress']);
         Route::get('/get-my-completed-groups', [GroupController::class, 'getMyCompletedGroups']);
+
+        // payment
+        Route::post('/payment-intent',[PaymentController::class,'paymentIntent']);
+        Route::post('/payment-success',[PaymentController::class,'paymentSuccess']);
     });
 });
