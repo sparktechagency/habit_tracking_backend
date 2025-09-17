@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Challenge;
 use App\Models\Profile;
+use App\Models\Subscription;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,6 +16,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
+        $this->call(SubscriptionSeeder::class);
+
         // User::factory(10)->create();
 
         // User::factory()->create([
@@ -107,5 +111,6 @@ class DatabaseSeeder extends Seeder
                 'note' => 'This is ' . $challenge . ' type.'
             ]);
         }
+
     }
 }

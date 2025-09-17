@@ -8,6 +8,7 @@ use App\Models\ChallengeLog;
 use App\Models\GroupHabit;
 use App\Models\GroupMember;
 use App\Models\Habit;
+use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
@@ -25,8 +26,7 @@ class AdvanceFeatureService
 
     public function getSubscriptions()
     {
-        return 'getSubscriptions';
-
+        return Subscription::latest('id')->get();
     }
 
     public function premiumUserCheck()
