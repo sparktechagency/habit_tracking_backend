@@ -34,7 +34,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/get-profile', [AuthController::class, 'getProfile']);
     Route::post('/edit-profile', [SettingsController::class, 'editProfile']);
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
-    Route::put('pages/{slug}', [StaticPageController::class, 'update']);
+    Route::post('pages/{slug}', [StaticPageController::class, 'update']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
         // challenge type

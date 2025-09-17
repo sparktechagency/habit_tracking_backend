@@ -15,7 +15,10 @@ class StaticPage extends Model
         'is_active',
     ];
 
-    // slug দিয়ে খোঁজার জন্য convenience scope
+    protected $hidden = [
+        'is_active',
+    ];
+
     public function scopeBySlug($query, $slug)
     {
         return $query->where('slug', $slug);

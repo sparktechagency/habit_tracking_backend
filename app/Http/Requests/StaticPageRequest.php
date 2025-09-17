@@ -24,7 +24,6 @@ class StaticPageRequest extends FormRequest
         return [
             'title' => 'nullable|string|max:255',
             'content' => 'nullable|string',
-            'is_active' => 'nullable|boolean',
         ];
     }
 }

@@ -20,42 +20,27 @@ class StaticPageController extends Controller
             ], 404);
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'slug' => $page->slug,
-                'title' => $page->title,
-                'content' => $page->content,
-            ],
-        ]);
+        return $this->sendResponse($page,'Get '.$page->slug);
     }
 
     public function update(StaticPageRequest $request, string $slug)
     {
         $page = StaticPage::bySlug($slug)->first();
-
         if ($page) {
-            // update হলে
-            $page->update($request->only(['title', 'content', 'is_active']));
-
-            $message = 'Page updated successfully';
+            $page->title = $request->validated()['title'];
+            $page->content = $request->validated()['content'];
+            $page->save();
+            $message = $page->slug.' Page updated successfully';
         } else {
-            // নতুন create হলে
             $page = StaticPage::create([
                 'slug' => $slug,
-                'title' => $request->title,
-                'content' => $request->content,
-                'is_active' => $request->is_active ?? true, // default active
+                'title' => $request->validated()['title'],
+                'content' => $request->validated()['content'],
             ]);
-
-            $message = 'Page created successfully';
+            $message = $page->slug.' Page created successfully';
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $page,
-            'message' => $message,
-        ]);
+        return $this->sendResponse($page, $message);
     }
 
 }
