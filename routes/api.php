@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\User\GroupController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StaticPageController;
+use App\Http\Controllers\Api\User\AdvanceFeatureController;
+use App\Services\User\AdvanceFeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -102,5 +104,12 @@ Route::middleware('auth:api')->group(function () {
         // payment
         Route::post('/payment-intent',[PaymentController::class,'paymentIntent']);
         Route::post('/payment-success',[PaymentController::class,'paymentSuccess']);
+
+        //advance feature
+        Route::get('/basic-info',[AdvanceFeatureController::class,'basicInfo']);
+        Route::get('/get-subscriptions',[AdvanceFeatureController::class,'getSubscriptions']);
+        Route::get('/habit-calendar',[AdvanceFeatureController::class,'habitCalendar']);
+        Route::get('/mode-track-line-graph',[AdvanceFeatureController::class,'modeTrackLineGraph']);
+        Route::get('/say-no-bar-chart',[AdvanceFeatureController::class,'sayOnBarChart']);
     });
 });
