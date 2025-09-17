@@ -108,6 +108,7 @@ Route::middleware('auth:api')->group(function () {
         //advance feature
         Route::get('/basic-info',[AdvanceFeatureController::class,'basicInfo']);
         Route::get('/get-subscriptions',[AdvanceFeatureController::class,'getSubscriptions']);
+        Route::get('/premium-user-check',[AdvanceFeatureController::class,'premiumUserCheck']);
         Route::get('/habit-calendar',[AdvanceFeatureController::class,'habitCalendar']);
         Route::get('/mode-track-line-graph',[AdvanceFeatureController::class,'modeTrackLineGraph']);
         Route::get('/say-no-bar-chart',[AdvanceFeatureController::class,'sayOnBarChart']);

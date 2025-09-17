@@ -34,6 +34,21 @@ class AdvanceFeatureController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
+    public function premiumUserCheck(Request $request)
+    {
+        try {
+            $result = $this->advanceFeatureService->premiumUserCheck();
+
+            if($request == '1'){
+                return $this->sendResponse($result, 'Premium user check.', true);
+            }else{
+                return $this->sendResponse($result,'Premium user check',false);
+            }
+
+        } catch (Exception $e) {
+            return $this->sendError('Something went wrong.', [], 500);
+        }
+    }
     public function habitCalendar(Request $request)
     {
         try {
@@ -63,5 +78,4 @@ class AdvanceFeatureController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
 }

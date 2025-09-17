@@ -8,6 +8,7 @@ use App\Models\ChallengeLog;
 use App\Models\GroupHabit;
 use App\Models\GroupMember;
 use App\Models\Habit;
+use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -25,6 +26,22 @@ class AdvanceFeatureService
     public function getSubscriptions()
     {
         return 'getSubscriptions';
+
+    }
+
+    public function premiumUserCheck()
+    {
+        $plan = Transaction::where('user_id',Auth::id())->latest()->first();
+
+        if($plan->renewal > Carbon::now()){
+            return [
+                'is_premium_check' => true,
+            ];
+        }else{
+            return [
+                'is_premium_check' => false,
+            ];
+        }
 
     }
 
