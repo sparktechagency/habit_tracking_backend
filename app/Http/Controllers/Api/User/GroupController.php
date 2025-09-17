@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CreateChallengeGroupRequest;
 use App\Models\ChallengeLog;
+use App\Models\User;
+use App\Notifications\CelebrationNotification;
 use App\Services\User\GroupService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -109,9 +111,25 @@ class GroupController extends Controller
             return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
+    public function sendCelebration(Request $request)
+    {
+        try {
+            $user = User::find($request->user_id);
 
-    // notification
+            if (!$user) {
+                throw new Exception('User not found.');
+            }
 
+            $from = Auth::user()->full_name;
+            $message = "Keep shining, you did amazing!";
+
+            $user->notify(new CelebrationNotification($from, $message));
+
+            return $this->sendResponse([], 'Notification send successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
+        }
+    }
     public function getOverallProgress(Request $request)
     {
         try {
@@ -131,5 +149,4 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
         }
     }
-
 }

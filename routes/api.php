@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Partner\RedemptionController;
 use App\Http\Controllers\Api\User\HabitController;
 use App\Http\Controllers\Api\User\RewardController as UserRewardController;
@@ -34,6 +35,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
     // static page update
     Route::post('pages/{slug}', [StaticPageController::class, 'update']);
+    // notification
+    Route::get('/get-notifications', [NotificationController::class, 'getNotifications']);
+    Route::patch('/read', [NotificationController::class, 'read']);
+    Route::patch('/read-all', [NotificationController::class, 'readAll']);
+    Route::get('/notification-status', [NotificationController::class, 'status']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
         // challenge type
@@ -91,6 +97,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/get-daily-summaries', [GroupController::class, 'getDailySummaries']);
         Route::get('/get-overall-progress', [GroupController::class, 'getOverallProgress']);
         Route::get('/get-my-completed-groups', [GroupController::class, 'getMyCompletedGroups']);
+        Route::post('/send-celebration', [GroupController::class, 'sendCelebration']);
 
         // payment
         Route::post('/payment-intent',[PaymentController::class,'paymentIntent']);
