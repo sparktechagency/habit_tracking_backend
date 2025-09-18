@@ -64,7 +64,7 @@ class AdvanceFeatureController extends Controller
     public function modeTrackLineGraph(Request $request)
     {
         try {
-            $result = $this->advanceFeatureService->modeTrackLineGraph();
+            $result = $this->advanceFeatureService->modeTrackLineGraph($request->filter);
             return $this->sendResponse($result, 'Your monthly habit track over the last month.', true, 200);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
@@ -74,7 +74,7 @@ class AdvanceFeatureController extends Controller
     {
         try {
             $result = $this->advanceFeatureService->sayOnBarChart();
-            return $this->sendResponse($result, 'Get say on bar chart fetch successfully.', true, 200);
+            return $this->sendResponse($result, 'Your most say no times this yearly.', true, 200);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }

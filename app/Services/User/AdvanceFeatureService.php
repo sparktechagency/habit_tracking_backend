@@ -5,6 +5,7 @@ namespace App\Services\User;
 use App\Models\Challenge;
 use App\Models\ChallengeGroup;
 use App\Models\ChallengeLog;
+use App\Models\Entry;
 use App\Models\GroupHabit;
 use App\Models\GroupMember;
 use App\Models\Habit;
@@ -89,13 +90,13 @@ class AdvanceFeatureService
             'result' => $result,
         ];
     }
-    public function modeTrackLineGraph()
+    public function modeTrackLineGraph(string $filter)
     {
         $userId = Auth::id();
-        $lastMonth = Carbon::now()->subMonth();
+        $month = $filter == 'current' ? Carbon::now() : Carbon::now()->subMonth();
 
-        $startOfMonth = $lastMonth->copy()->startOfMonth();
-        $endOfMonth = $lastMonth->copy()->endOfMonth();
+        $startOfMonth = $month->copy()->startOfMonth();
+        $endOfMonth = $month->copy()->endOfMonth();
 
         $completedLogs = HabitLog::where('user_id', $userId)
             // ->where('habit_id', $habitId)
@@ -109,7 +110,7 @@ class AdvanceFeatureService
         $daysInMonth = $startOfMonth->daysInMonth;
         $graphData = [];
         for ($day = 1; $day <= $daysInMonth; $day++) {
-            $date = Carbon::createFromDate($lastMonth->year, $lastMonth->month, $day)->toDateString();
+            $date = Carbon::createFromDate($month->year, $month->month, $day)->toDateString();
 
             $count = $completedLogs->firstWhere('day', $date)->completed_count ?? 0;
 
@@ -121,13 +122,35 @@ class AdvanceFeatureService
         }
 
         return [
-            'month' => $lastMonth->format('F Y'),
+            'month' => $month->format('F Y'),
             'data' => $graphData,
         ];
     }
     public function sayOnBarChart()
     {
-        return 'sayOnBarChart';
+        $userId = Auth::id();
+        $currentYear = Carbon::now()->year;
+
+        $entries = Entry::where('user_id', $userId)
+            ->whereYear('date', $currentYear)
+            ->selectRaw('MONTH(date) as month, COUNT(*) as total_say_no')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $found = $entries->firstWhere('month', $m);
+            $months[] = [
+                'month' => Carbon::create()->month($m)->format('M'),
+                'total_say_no' => $found->total_say_no ?? 0,
+            ];
+        }
+
+        return [
+            'year' => $currentYear,
+            'data' => $months
+        ];
 
     }
 }
