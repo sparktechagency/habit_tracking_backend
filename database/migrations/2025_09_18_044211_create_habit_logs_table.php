@@ -4,17 +4,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('habits', function (Blueprint $table) {
+        Schema::create('habit_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('habit_name');
-            $table->boolean('isArchived')->default(false);
+            $table->foreignId('habit_id')->constrained('habits')->cascadeOnDelete();
+            $table->enum('status', ['Completed','Incompleted'])->default('Incompleted');
+            $table->timestamp('done_at')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('habits');
+        Schema::dropIfExists('habit_logs');
     }
 };

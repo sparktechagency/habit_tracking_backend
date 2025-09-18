@@ -23,28 +23,25 @@ class AdvanceFeatureService
         return 'basic-info';
 
     }
-
     public function getSubscriptions()
     {
         return Subscription::latest('id')->get();
     }
-
     public function premiumUserCheck()
     {
-        $plan = Transaction::where('user_id',Auth::id())->latest()->first();
+        $plan = Transaction::where('user_id', Auth::id())->latest()->first();
 
-        if($plan->renewal > Carbon::now()){
+        if ($plan->renewal > Carbon::now()) {
             return [
                 'is_premium_check' => true,
             ];
-        }else{
+        } else {
             return [
                 'is_premium_check' => false,
             ];
         }
 
     }
-
     public function habitCalendar(int $year, int $month)
     {
         $userId = Auth::id();
@@ -53,54 +50,52 @@ class AdvanceFeatureService
         $endOfMonth = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
         $habits = Habit::where('user_id', $userId)
-            ->whereBetween('done_at', [$startOfMonth, $endOfMonth])
+            ->with([
+                'logs' => function ($query) use ($startOfMonth, $endOfMonth) {
+                    $query->whereBetween('done_at', [$startOfMonth, $endOfMonth]);
+                }
+            ])
             ->get();
 
-        $groupedHabits = $habits->groupBy('habit_name');
-
         $result = [];
-
-        foreach ($groupedHabits as $habitName => $habitEntries) {
-            $completedDays = $habitEntries
+        foreach ($habits as $habit) {
+            $completedDays = $habit->logs
                 ->where('status', 'Completed')
-                ->groupBy(fn($habit) => Carbon::parse($habit->done_at)->day);
+                ->groupBy(fn($log) => Carbon::parse($log->done_at)->day);
 
             $daysInMonth = $startOfMonth->daysInMonth;
             $calendar = [];
-
             for ($day = 1; $day <= $daysInMonth; $day++) {
                 $date = Carbon::createFromDate($year, $month, $day)->toDateString();
                 $calendar[] = [
                     'day' => $day,
                     'date' => $date,
-                    'completed' => isset($completedDays[$day]),
-                    'habit_name' => $habitName,
+                    'completed' => isset($completedDays[$day])
                 ];
             }
 
             $result[] = [
-                'habit_name' => $habitName,
-                'total_complete_count' => $habitEntries->where('status', 'Completed')->count(),
+                'habit_name' => $habit->habit_name,
+                'total_complete_count' => $habit->logs->where('status', 'Completed')->count(),
                 'calendar' => $calendar,
             ];
         }
 
         $total_workout = array_sum(array_column($result, 'total_complete_count'));
 
-        
-
         return [
             'total_workout' => $total_workout,
             'result' => $result,
         ];
     }
-
     public function modeTrackLineGraph()
     {
-        return 'modeTrackLineGraph';
+
+        $habit = Habit::where('user_id', Auth::id())->pluck('status');
+
+        return $habit;
 
     }
-
     public function sayOnBarChart()
     {
         return 'sayOnBarChart';

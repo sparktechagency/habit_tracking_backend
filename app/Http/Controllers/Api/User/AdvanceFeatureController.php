@@ -67,7 +67,7 @@ class AdvanceFeatureController extends Controller
             return $this->sendResponse($result, 'Get mode track line graph fetch successfully.', true, 200);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
-        }
+        } 
     }
     public function sayOnBarChart(Request $request)
     {

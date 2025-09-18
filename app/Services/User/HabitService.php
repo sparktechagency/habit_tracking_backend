@@ -3,6 +3,7 @@
 namespace App\Services\User;
 
 use App\Models\Habit;
+use App\Models\HabitLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,8 +20,11 @@ class HabitService
     {
         $query = Habit::where('user_id', Auth::id())
             ->orderByDesc('created_at');
-        if (!is_null($isArchived)) {
-            $query->where('isArchived', (bool) $isArchived);
+
+        if ($isArchived == 1) {
+            $query->where('isArchived', true);
+        } else {
+            $query->where('isArchived', false);
         }
         return $query->get();
     }
@@ -50,16 +54,23 @@ class HabitService
         }
         return $habit;
     }
-    public function doneHabit(int $id): ?Habit
+    public function doneHabit(int $habitId)
     {
-        $habit = Habit::where('id', $id)
-            ->where('user_id', Auth::id())
+        $today = Carbon::today();
+
+        $log = HabitLog::where('habit_id', $habitId)
+            ->whereDate('created_at', $today)
             ->first();
-        if ($habit) {
-            $habit->status = 'Completed';
-            $habit->done_at = Carbon::now();
-            $habit->save();
+
+        if ($log) {
+            return false;
         }
-        return $habit;
+
+        return HabitLog::create([
+            'habit_id' => $habitId,
+            'status' => 'Completed',
+            'done_at' => Carbon::now()
+        ]);
     }
+
 }

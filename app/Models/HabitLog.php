@@ -5,17 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Habit extends Model
+class HabitLog extends Model
 {
     use HasFactory;
 
     protected $guarded = ['id'];
-
-    // app/Models/Habit.php
-
-    public function logs()
-    {
-        return $this->hasMany(HabitLog::class);
-    }
-
 }

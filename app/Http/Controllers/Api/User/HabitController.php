@@ -79,12 +79,15 @@ class HabitController extends Controller
     {
         try {
             $habit = $this->habitService->doneHabit($request->habit_id);
+
             if (!$habit) {
-                return $this->sendError('Habit not found.', [], 404);
+                return $this->sendResponse([], 'Today\'s log is already done.', false);
             }
-            return $this->sendResponse($habit, 'Habit done successfully');
+
+            return $this->sendResponse($habit, 'Today habit is done successfully');
         } catch (Exception $e) {
-            return $this->sendError('Something went wrong.', [], 500);
+            return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
+
 }
