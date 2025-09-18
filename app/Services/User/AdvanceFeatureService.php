@@ -10,6 +10,7 @@ use App\Models\GroupHabit;
 use App\Models\GroupMember;
 use App\Models\Habit;
 use App\Models\HabitLog;
+use App\Models\Profile;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
@@ -22,7 +23,73 @@ class AdvanceFeatureService
 {
     public function basicInfo()
     {
-        return 'basic-info';
+
+
+
+
+        $userId = Auth::id();
+        $now = Carbon::now();
+
+        // // এই মাসের completed habit_logs আনা হচ্ছে
+        // $completedDays = HabitLog::where('user_id', $userId)
+        //     ->where('status', 'Completed')
+        //     ->where('habit_id', 1)
+        //     ->whereMonth('done_at', $now->month)
+        //     ->whereYear('done_at', $now->year)
+        //     ->orderBy('done_at')
+        //     ->pluck('done_at')
+        //     ->map(fn($date) => Carbon::parse($date)->toDateString())
+        //     ->unique()
+        //     ->values();
+
+        // $longestStreak = 0;
+        // $currentStreak = 0;
+
+        // for ($i = 0; $i < count($completedDays); $i++) {
+        //     if ($i > 0 && Carbon::parse($completedDays[$i])->diffInDays(Carbon::parse($completedDays[$i - 1])) == 1) {
+        //         $currentStreak++;
+        //     } else {
+        //         $currentStreak = 1;
+        //     }
+        //     $longestStreak = max($longestStreak, $currentStreak);
+        // }
+
+        // return response()->json([
+        //     'month' => $now->format('F Y'),
+        //     'longest_streak' => $longestStreak,
+        // ]);
+
+
+
+
+
+
+
+        $authId = Auth::id();
+
+        $user = User::where('id', $authId)
+            ->select('id', 'full_name', 'role')
+            ->first();
+
+        $completed_group_challenge = ChallengeGroup::where('status', 'Completed')
+            ->whereHas('members', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })->count();
+
+        $profile = Profile::where('user_id', $authId)->first();
+
+        return [
+            'user' => $user,
+            'level' => $profile->level,
+            'total_points' => $profile->total_points,
+            'used_points' => $profile->used_points,
+            'remaining_points' => $profile->total_points - $profile->used_points,
+            'completed_habit' => Habit::where('user_id', Auth::id())->count(),
+            'longest_streak' => $longestStreak??'working',
+            'longest_streak_month' => $now->format('F Y')?? 'working',
+            'completed_group_challenge' => $completed_group_challenge,
+            'say_no' => Entry::where('user_id', Auth::id())->count()
+        ];
 
     }
     public function getSubscriptions()
@@ -90,7 +157,7 @@ class AdvanceFeatureService
             'result' => $result,
         ];
     }
-    public function modeTrackLineGraph(string $filter)
+    public function modeTrackLineGraph(?string $filter)
     {
         $userId = Auth::id();
         $month = $filter == 'current' ? Carbon::now() : Carbon::now()->subMonth();

@@ -4,6 +4,7 @@ namespace App\Services\User;
 
 use App\Models\Habit;
 use App\Models\HabitLog;
+use App\Models\Profile;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,8 +24,6 @@ class HabitService
 
         if ($isArchived == 1) {
             $query->where('isArchived', true);
-        } else {
-            $query->where('isArchived', false);
         }
         return $query->get();
     }
@@ -65,6 +64,22 @@ class HabitService
         if ($log) {
             return false;
         }
+
+        $profile = Profile::where('user_id', Auth::id())->first();
+        $profile->increment('total_points');
+
+        $totalPoints = $profile->total_points;
+
+        $profile->level = match (true) {
+            $totalPoints >= 1 && $totalPoints <= 100 => 1,
+            $totalPoints >= 101 && $totalPoints <= 300 => 2,
+            $totalPoints >= 301 && $totalPoints <= 600 => 3,
+            $totalPoints >= 601 && $totalPoints <= 1000 => 4,
+            $totalPoints >= 1001 && $totalPoints <= 1500 => 5,
+            default => 0,
+        };
+
+        $profile->save();
 
         return HabitLog::create([
             'habit_id' => $habitId,

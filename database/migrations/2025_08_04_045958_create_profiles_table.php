@@ -16,10 +16,7 @@ return new class extends Migration {
             $table->string('user_name')->nullable();
             $table->unsignedBigInteger('total_points')->default(0);
             $table->unsignedBigInteger('level')->default(0);
-            $table->unsignedBigInteger('total_habits')->default(0);
-            $table->unsignedBigInteger('longest_streaking')->default(0);
-            $table->unsignedBigInteger('completed_challenges')->default(0);
-            $table->unsignedBigInteger('say_no')->default(0);
+            $table->unsignedBigInteger('used_points')->default(0);
             $table->string('business_name')->nullable();
             $table->string('category')->nullable();
             $table->string('description')->nullable();

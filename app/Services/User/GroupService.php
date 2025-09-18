@@ -7,6 +7,7 @@ use App\Models\ChallengeGroup;
 use App\Models\ChallengeLog;
 use App\Models\GroupHabit;
 use App\Models\GroupMember;
+use App\Models\Profile;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -193,6 +194,11 @@ class GroupService
         if (!$group) {
             throw new Exception("Group with ID {$groupId} not found.");
         }
+
+        if ($group->status == 'Completed') {
+            throw new Exception('Group is expired.');
+        }
+
         $days = $this->getChallengeDaysWithDates($group->start_date, $group->end_date);
         $today = Carbon::now()->toDateString();
         $currentDay = 0;
@@ -255,21 +261,41 @@ class GroupService
     }
     public function taskCompleted(int $logId)
     {
-        $log_id = ChallengeLog::find($logId);
-        if (!$log_id) {
-            throw new Exception('Challenge log id is not valid.');
+        $userLog = ChallengeLog::where('id', $logId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$userLog) {
+            throw new Exception("User unauthorized. Log ID {$logId} is not this user.");
         }
-        $user_log = ChallengeLog::where('id', $logId)->where('user_id', Auth::id())->first();
-        if ($user_log->status == 'Completed') {
+
+        if ($userLog->status === 'Completed') {
             throw new Exception('This task is already completed.');
         }
-        if (!$user_log) {
-            throw new Exception('User unauthorized. log id ' . $logId . ' is not this user.');
-        }
-        $user_log->status = 'Completed';
-        $user_log->completed_at = Carbon::now();
-        $user_log->save();
-        return $user_log;
+
+        $userLog->update([
+            'status' => 'Completed',
+            'completed_at' => Carbon::now(),
+        ]);
+
+       
+        $profile = Profile::where('user_id', Auth::id())->first();
+        $profile->increment('total_points');
+
+        $totalPoints = $profile->total_points;
+
+        $profile->level = match (true) {
+            $totalPoints >= 1 && $totalPoints <= 100 => 1,
+            $totalPoints >= 101 && $totalPoints <= 300 => 2,
+            $totalPoints >= 301 && $totalPoints <= 600 => 3,
+            $totalPoints >= 601 && $totalPoints <= 1000 => 4,
+            $totalPoints >= 1001 && $totalPoints <= 1500 => 5,
+            default => 0,
+        };
+
+        $profile->save();
+
+        return $userLog;
     }
     public function getDailySummaries(int $groupId)
     {
@@ -468,7 +494,7 @@ class GroupService
 
             $groupId = $group->id;
             $habit_count = GroupHabit::where('challenge_group_id', $groupId)->count();
-            
+
             $my_completed = ChallengeLog::where('user_id', Auth::id())
                 ->where('challenge_group_id', $groupId)
                 ->where('status', 'Completed')
