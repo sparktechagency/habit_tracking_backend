@@ -8,6 +8,7 @@ use App\Models\ChallengeLog;
 use App\Models\GroupHabit;
 use App\Models\GroupMember;
 use App\Models\Habit;
+use App\Models\HabitLog;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
@@ -90,11 +91,39 @@ class AdvanceFeatureService
     }
     public function modeTrackLineGraph()
     {
+        $userId = Auth::id();
+        $lastMonth = Carbon::now()->subMonth();
 
-        $habit = Habit::where('user_id', Auth::id())->pluck('status');
+        $startOfMonth = $lastMonth->copy()->startOfMonth();
+        $endOfMonth = $lastMonth->copy()->endOfMonth();
 
-        return $habit;
+        $completedLogs = HabitLog::where('user_id', $userId)
+            // ->where('habit_id', $habitId)
+            ->where('status', 'Completed')
+            ->whereBetween('done_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw('DATE(done_at) as day, COUNT(*) as completed_count')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get();
 
+        $daysInMonth = $startOfMonth->daysInMonth;
+        $graphData = [];
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $date = Carbon::createFromDate($lastMonth->year, $lastMonth->month, $day)->toDateString();
+
+            $count = $completedLogs->firstWhere('day', $date)->completed_count ?? 0;
+
+            $graphData[] = [
+                'day' => $day,
+                'date' => $date,
+                'completed_count' => $count,
+            ];
+        }
+
+        return [
+            'month' => $lastMonth->format('F Y'),
+            'data' => $graphData,
+        ];
     }
     public function sayOnBarChart()
     {

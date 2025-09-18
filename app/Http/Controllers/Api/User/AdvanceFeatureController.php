@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\User\AdvanceFeatureService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdvanceFeatureController extends Controller
 {
@@ -39,10 +40,10 @@ class AdvanceFeatureController extends Controller
         try {
             $result = $this->advanceFeatureService->premiumUserCheck();
 
-            if($request == '1'){
+            if ($request == '1') {
                 return $this->sendResponse($result, 'Premium user check.', true);
-            }else{
-                return $this->sendResponse($result,'Premium user check',false);
+            } else {
+                return $this->sendResponse($result, 'Premium user check', false);
             }
 
         } catch (Exception $e) {
@@ -64,10 +65,10 @@ class AdvanceFeatureController extends Controller
     {
         try {
             $result = $this->advanceFeatureService->modeTrackLineGraph();
-            return $this->sendResponse($result, 'Get mode track line graph fetch successfully.', true, 200);
+            return $this->sendResponse($result, 'Your monthly habit track over the last month.', true, 200);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
-        } 
+        }
     }
     public function sayOnBarChart(Request $request)
     {

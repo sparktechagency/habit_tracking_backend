@@ -68,6 +68,7 @@ class HabitService
 
         return HabitLog::create([
             'habit_id' => $habitId,
+            'user_id' => Auth::id(),
             'status' => 'Completed',
             'done_at' => Carbon::now()
         ]);
