@@ -11,10 +11,15 @@ class Reward extends Model
 
     protected $guarded = ['id'];
 
+    // expiration_date কে Carbon instance বানাতে
+    protected $casts = [
+        'expiration_date' => 'date',
+    ];
+
     public function partner()
     {
         return $this->belongsTo(User::class, 'partner_id');
     }
 
-    
+
 }

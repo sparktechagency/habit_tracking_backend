@@ -19,7 +19,7 @@ class SubscriptionControler extends Controller
     public function getSubscriptions(Request $request)
     {
         try {
-            $types = $this->subscriptionService->getSubscriptions();
+            $types = $this->subscriptionService->getSubscriptions($request->search);
             return $this->sendResponse($types, 'Get subscriptions fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);

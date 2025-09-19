@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('title');
             $table->string('challenge_type');
             $table->longText('description')->nullable();
-            $table->string('expiration_date');
+            $table->date('expiration_date');
             $table->unsignedBigInteger('purchase_point')->default(0);
             $table->enum('status', ['Enable', 'Disable'])->default('Enable');
             $table->timestamps();

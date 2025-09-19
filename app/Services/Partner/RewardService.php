@@ -51,10 +51,14 @@ class RewardService
     }
     public function getRewards()
     {
-        $currentDate = Carbon::now()->format('Y-m-d');   // 2025-10-01
-        return Reward::where('partner_id', Auth::id())
-            ->where('expiration_date', '>=', $currentDate)
+        $currentDate = Carbon::now()->toDateString();
+
+        $rewards = Reward::where('partner_id', Auth::id())
+            ->whereDate('expiration_date', '>=', $currentDate)
             ->latest()
             ->get();
+
+        return  $rewards;
+         
     }
 }

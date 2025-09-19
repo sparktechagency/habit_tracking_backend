@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
 use App\Http\Controllers\Api\Admin\SubscriptionControler;
+use App\Http\Controllers\Api\Admin\UserManagementController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Partner\RedemptionController;
@@ -52,6 +53,10 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/view-type/{id?}', [ChallengeTypeController::class, 'viewType']);
         Route::patch('/edit-type/{id?}', [ChallengeTypeController::class, 'editType']);
         Route::delete('/delete-type/{id?}', [ChallengeTypeController::class, 'deleteType']);
+
+        // user management
+        Route::get('/get-users',[UserManagementController::class,'getUsers']);
+        Route::get('/get-partners',[UserManagementController::class,'getPartners']);
 
         // subscriptions
         Route::get('/get-subscriptions',[SubscriptionControler::class,'getSubscriptions']);

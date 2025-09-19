@@ -8,11 +8,19 @@ use Ramsey\Uuid\Type\Decimal;
 
 class SubscriptionService
 {
-    public function getSubscriptions()
+    public function getSubscriptions(?string $search)
     {
-        return Subscription::latest('id')->get();
-    }
+        $query = Subscription::query();
 
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('plan_name', 'LIKE', "%{$search}%");
+            });
+        }
+
+        return $query->latest()->get();
+
+    }
     public function editPremiumPrice(?int $id, ?float $price)
     {
         $subscription = Subscription::where('id', $id)->first();
