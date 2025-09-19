@@ -21,51 +21,49 @@ use Illuminate\Support\Facades\Log;
 
 class AdvanceFeatureService
 {
-    public function basicInfo()
+    public function basicInfo2()
     {
-
-
-
-
-        $userId = Auth::id();
+        $authId = Auth::id();
         $now = Carbon::now();
 
-        // // এই মাসের completed habit_logs আনা হচ্ছে
-        // $completedDays = HabitLog::where('user_id', $userId)
-        //     ->where('status', 'Completed')
-        //     ->where('habit_id', 1)
-        //     ->whereMonth('done_at', $now->month)
-        //     ->whereYear('done_at', $now->year)
-        //     ->orderBy('done_at')
-        //     ->pluck('done_at')
-        //     ->map(fn($date) => Carbon::parse($date)->toDateString())
-        //     ->unique()
-        //     ->values();
+        $habit_lists = Habit::where('user_id', $authId)
+            ->select('id', 'habit_name')
+            ->get();
 
-        // $longestStreak = 0;
-        // $currentStreak = 0;
+        $arr = [];
+        foreach ($habit_lists as $habit) {
+            $completedDays = HabitLog::where('user_id', $authId)
+                ->where('status', 'Completed')
+                ->where('habit_id', $habit->id) // এখানে habit id ব্যবহার করতে হবে
+                ->whereMonth('done_at', $now->month)
+                ->whereYear('done_at', $now->year)
+                ->orderBy('done_at')
+                ->pluck('done_at')
+                ->map(fn($date) => Carbon::parse($date)->toDateString())
+                ->unique()
+                ->values();
 
-        // for ($i = 0; $i < count($completedDays); $i++) {
-        //     if ($i > 0 && Carbon::parse($completedDays[$i])->diffInDays(Carbon::parse($completedDays[$i - 1])) == 1) {
-        //         $currentStreak++;
-        //     } else {
-        //         $currentStreak = 1;
-        //     }
-        //     $longestStreak = max($longestStreak, $currentStreak);
-        // }
-
-        // return response()->json([
-        //     'month' => $now->format('F Y'),
-        //     'longest_streak' => $longestStreak,
-        // ]);
-
-
-
-
-
-
-
-        $authId = Auth::id();
+            $longest = 0;
+            $current = 0;
+            $previousDay = null;
+            foreach ($completedDays as $day) {
+                if ($previousDay && Carbon::parse($previousDay)->diffInDays(Carbon::parse($day)) == 1) {
+                    $current++;
+                } else {
+                    $current = 1;
+                }
+                $longest = max($longest, $current);
+                $previousDay = $day;
+            }
+            $arr[] = [
+                'habit_id' => $habit->id,
+                'habit_name' => $habit->habit_name,
+                'longest_streak' => $longest
+            ];
+        }
+        $longestValues = collect($arr)->pluck('longest_streak')->toArray();
+        $avg = count($longestValues) > 0 ? round(array_sum($longestValues) / count($longestValues), 2) : 0;
+        $max = max($longestValues);
 
         $user = User::where('id', $authId)
             ->select('id', 'full_name', 'role')
@@ -80,18 +78,181 @@ class AdvanceFeatureService
 
         return [
             'user' => $user,
-            'level' => $profile->level,
-            'total_points' => $profile->total_points,
-            'used_points' => $profile->used_points,
-            'remaining_points' => $profile->total_points - $profile->used_points,
-            'completed_habit' => Habit::where('user_id', Auth::id())->count(),
-            'longest_streak' => $longestStreak??'working',
-            'longest_streak_month' => $now->format('F Y')?? 'working',
+            'level' => $profile->level ?? 0,
+            'total_points' => $profile->total_points ?? 0,
+            'used_points' => $profile->used_points ?? 0,
+            'remaining_points' => ($profile->total_points ?? 0) - ($profile->used_points ?? 0),
+            'completed_habit' => $habit_lists->count(),
+            'longest_streaks_avg' => round($avg),
+            'longest_streaks_max' => $max,
+            'longest_streak_month' => $now->format('F Y'),
             'completed_group_challenge' => $completed_group_challenge,
-            'say_no' => Entry::where('user_id', Auth::id())->count()
+            'say_no' => Entry::where('user_id', $authId)->count()
         ];
-
     }
+
+
+
+    public function basicInfo1()
+    {
+        $authId = Auth::id();
+        $now = Carbon::now();
+
+        $habit_lists = Habit::where('user_id', $authId)
+            ->select('id', 'habit_name')
+            ->get();
+
+        $arr = [];
+        foreach ($habit_lists as $habit) {
+            $completedDays = HabitLog::where('user_id', $authId)
+                ->where('status', 'Completed')
+                ->where('habit_id', $habit->id)
+                ->whereMonth('done_at', $now->month)
+                ->whereYear('done_at', $now->year)
+                ->orderBy('done_at')
+                ->pluck('done_at')
+                ->map(fn($date) => Carbon::parse($date)->toDateString())
+                ->unique()
+                ->values();
+
+            $longest = 0;
+            $current = 0;
+            $previousDay = null;
+
+            if ($completedDays->count() > 0) {
+                foreach ($completedDays as $day) {
+                    if ($previousDay && Carbon::parse($previousDay)->diffInDays(Carbon::parse($day)) == 1) {
+                        $current++;
+                    } else {
+                        $current = 1;
+                    }
+
+                    $longest = max($longest, $current);
+                    $previousDay = $day;
+                }
+            }
+
+            $arr[] = [
+                'habit_id' => $habit->id,
+                'habit_name' => $habit->habit_name,
+                'longest_streak' => $longest
+            ];
+        }
+
+        // avg বের করা
+        $longestValues = collect($arr)->pluck('longest_streak')->toArray();
+        $avg = count($longestValues) > 0 ? round(array_sum($longestValues) / count($longestValues), 2) : 0;
+        $max = max($longestValues ?? []);
+
+        $user = User::where('id', $authId)
+            ->select('id', 'full_name', 'role')
+            ->first();
+
+        $completed_group_challenge = ChallengeGroup::where('status', 'Completed')
+            ->whereHas('members', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })->count();
+
+        $profile = Profile::where('user_id', $authId)->first();
+
+        return [
+            'user' => $user,
+            'level' => $profile->level ?? 0,
+            'total_points' => $profile->total_points ?? 0,
+            'used_points' => $profile->used_points ?? 0,
+            'remaining_points' => ($profile->total_points ?? 0) - ($profile->used_points ?? 0),
+            'completed_habit' => $habit_lists->count(),
+            'longest_streaks' => $avg, // avg streak
+            'habit_streaks' => $max,    // প্রতিটি habit এর streak details
+            'longest_streak_month' => $now->format('F Y'),
+            'completed_group_challenge' => $completed_group_challenge,
+            'say_no' => Entry::where('user_id', $authId)->count()
+        ];
+    }
+
+
+
+    public function basicInfo()
+{
+    $authId = Auth::id();
+    $now = Carbon::now();
+
+    $habit_lists = Habit::where('user_id', $authId)
+        ->select('id', 'habit_name')
+        ->get();
+
+    $arr = [];
+    foreach ($habit_lists as $habit) {
+        $completedDays = HabitLog::where('user_id', $authId)
+            ->where('status', 'Completed')
+            ->where('habit_id', $habit->id)
+            ->whereMonth('done_at', $now->month)
+            ->whereYear('done_at', $now->year)
+            ->orderBy('done_at')
+            ->pluck('done_at')
+            ->map(fn($date) => Carbon::parse($date)->toDateString())
+            ->unique()
+            ->values();
+
+        $longest = 0;
+        $current = 0;
+        $previousDay = null;
+
+        foreach ($completedDays as $day) {
+            if ($previousDay && Carbon::parse($previousDay)->diffInDays(Carbon::parse($day)) == 1) {
+                $current++;
+            } else {
+                $current = 1;
+            }
+            $longest = max($longest, $current);
+            $previousDay = $day;
+        }
+
+        $arr[] = [
+            'habit_id' => $habit->id,
+            'habit_name' => $habit->habit_name,
+            'longest_streak' => $longest
+        ];
+    }
+
+    $longestValues = collect($arr)->pluck('longest_streak')->toArray();
+
+    $avg = count($longestValues) > 0
+        ? round(array_sum($longestValues) / count($longestValues), 2)
+        : 0;
+
+    $max = count($longestValues) > 0
+        ? max($longestValues)
+        : 0; // ✅ safe default
+
+    $user = User::where('id', $authId)
+        ->select('id', 'full_name', 'role')
+        ->first();
+
+    $completed_group_challenge = ChallengeGroup::where('status', 'Completed')
+        ->whereHas('members', function ($q) use ($authId) {
+            $q->where('user_id', $authId);
+        })->count();
+
+    $profile = Profile::where('user_id', $authId)->first();
+
+    return [
+        'user' => $user,
+        'level' => $profile->level ?? 0,
+        'total_points' => $profile->total_points ?? 0,
+        'used_points' => $profile->used_points ?? 0,
+        'remaining_points' => ($profile->total_points ?? 0) - ($profile->used_points ?? 0),
+        'completed_habit' => $habit_lists->count(),
+        'longest_streaks_avg' => round($avg),
+        'longest_streaks_max' => $max,
+        'longest_streak_month' => $now->format('F Y'),
+        'completed_group_challenge' => $completed_group_challenge,
+        'say_no' => Entry::where('user_id', $authId)->count()
+    ];
+}
+
+
+
     public function getSubscriptions()
     {
         return Subscription::latest('id')->get();

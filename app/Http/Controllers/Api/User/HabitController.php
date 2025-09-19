@@ -30,7 +30,8 @@ class HabitController extends Controller
     {
         try {
             $isArchived = $request->query('isArchived');
-            $habits = $this->habitService->getHabits($isArchived);
+            $search = $request->query('search');
+            $habits = $this->habitService->getHabits($isArchived,$search);
             return $this->sendResponse($habits, 'Habits fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to fetch habits.', [], 500);

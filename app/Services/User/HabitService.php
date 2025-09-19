@@ -17,7 +17,7 @@ class HabitService
             'habit_name' => $data['habit_name']
         ]);
     }
-    public function getHabits($isArchived = null)
+    public function getHabits($isArchived = null,?string $search = null)
     {
         $today = Carbon::now();
 
@@ -28,6 +28,12 @@ class HabitService
 
         if ($isArchived == 1) {
             $query->where('isArchived', true);
+        }
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('habit_name', 'LIKE', "%{$search}%");
+            });
         }
 
         return $query->get();
