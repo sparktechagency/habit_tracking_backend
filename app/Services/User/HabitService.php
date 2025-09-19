@@ -19,12 +19,17 @@ class HabitService
     }
     public function getHabits($isArchived = null)
     {
-        $query = Habit::where('user_id', Auth::id())
+        $today = Carbon::now();
+
+        $query = Habit::with(['logs' => function ($q) use ($today) {
+            $q->whereDate('done_at', $today);
+        }])->where('user_id', Auth::id())
             ->orderByDesc('created_at');
 
         if ($isArchived == 1) {
             $query->where('isArchived', true);
         }
+
         return $query->get();
     }
     public function viewHabit(int $id): ?Habit
