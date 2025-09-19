@@ -105,12 +105,18 @@ class AdvanceFeatureService
     }
     public function premiumUserCheck()
     {
-        $plan = Transaction::where('user_id', Auth::id())->latest()->first();
+        $plan = Transaction::where('user_id', Auth::id())->exists();
 
-        if ($plan->renewal > Carbon::now()) {
-            return [
-                'is_premium_check' => true,
-            ];
+        if ($plan) {
+            if (Transaction::where('user_id', Auth::id())->latest()->first()->renewal > Carbon::now()) {
+                return [
+                    'is_premium_check' => true,
+                ];
+            } else {
+                return [
+                    'is_premium_check' => false,
+                ];
+            }
         } else {
             return [
                 'is_premium_check' => false,

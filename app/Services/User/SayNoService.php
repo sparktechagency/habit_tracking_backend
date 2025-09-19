@@ -17,21 +17,22 @@ class SayNoService
             'say_no' => $data['say_no'],
         ]);
     }
-    public function getEntries(?string $filter,int $per_page)
+    public function getEntries(?string $filter, ?int $per_page)
     {
         $query = Entry::where('user_id', Auth::id());
         $now = Carbon::now();
+
         if ($filter === 'day') {
             $query->whereDate('date', $now->toDateString());
         } elseif ($filter === 'week') {
-            $query->whereBetween('date', [$now->startOfWeek(), $now->endOfWeek()]);
+            $query->whereBetween('date', [$now->subDays(6), Carbon::now()]);
         } elseif ($filter === 'month') {
             $query->whereYear('date', $now->year)
                 ->whereMonth('date', $now->month);
         } elseif ($filter === 'year') {
             $query->whereYear('date', $now->year);
         }
-        return $query->latest()->paginate($per_page??10);
+        return $query->latest()->paginate($per_page ?? 10);
     }
     public function viewEntry(int $id): ?Entry
     {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
+use App\Http\Controllers\Api\Admin\SubscriptionControler;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Partner\RedemptionController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Api\User\GroupController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StaticPageController;
 use App\Http\Controllers\Api\User\AdvanceFeatureController;
+use App\Models\Subscription;
 use App\Services\User\AdvanceFeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +52,10 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/view-type/{id?}', [ChallengeTypeController::class, 'viewType']);
         Route::patch('/edit-type/{id?}', [ChallengeTypeController::class, 'editType']);
         Route::delete('/delete-type/{id?}', [ChallengeTypeController::class, 'deleteType']);
+
+        // subscriptions
+        Route::get('/get-subscriptions',[SubscriptionControler::class,'getSubscriptions']);
+        Route::post('/edit-premium-price/{id?}',[SubscriptionControler::class,'editPremiumPrice']);
     });
 
     Route::middleware('partner')->prefix('partner')->group(function () {
