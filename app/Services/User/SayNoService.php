@@ -17,7 +17,7 @@ class SayNoService
             'say_no' => $data['say_no'],
         ]);
     }
-    public function getEntries(?string $filter)
+    public function getEntries(?string $filter,int $per_page)
     {
         $query = Entry::where('user_id', Auth::id());
         $now = Carbon::now();
@@ -31,7 +31,7 @@ class SayNoService
         } elseif ($filter === 'year') {
             $query->whereYear('date', $now->year);
         }
-        return $query->latest()->get();
+        return $query->latest()->paginate($per_page??10);
     }
     public function viewEntry(int $id): ?Entry
     {

@@ -29,7 +29,7 @@ class SayNoController extends Controller
     public function getEntries(Request $request)
     {
         try {
-            $entries = $this->sayNoService->getEntries($request->filter);
+            $entries = $this->sayNoService->getEntries($request->filter,$request->per_page);
             return $this->sendResponse($entries, 'Entries fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
