@@ -16,7 +16,7 @@ class RewardService
     public function getAvailableRewards(?string $search, ?int $per_page)
     {
         $query = Reward::where('status', 'Enable')
-            ->where('admin_approved', true)
+            ->where('admin_approved','Accepted')
             ->where('expiration_date', '>', Carbon::now());
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {

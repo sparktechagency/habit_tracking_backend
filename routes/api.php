@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AvailableRewardController;
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
 use App\Http\Controllers\Api\Admin\PartnerBusinessController;
 use App\Http\Controllers\Api\Admin\SubscriptionControler;
@@ -64,6 +65,13 @@ Route::middleware('auth:api')->group(function () {
 
         // partner business
         Route::get('/get-partners',[PartnerBusinessController::class,'getPartners']);
+
+
+        // available reward
+        Route::get('/get-rewards',[AvailableRewardController::class,'getRewards']);
+        Route::get('/view-reward/{id?}',[AvailableRewardController::class,'viewReward']);
+        Route::patch('/approved-reward',[AvailableRewardController::class,'approvedReward']);
+        Route::patch('/canceled-reward',[AvailableRewardController::class,'canceledReward']);
 
         // subscriptions
         Route::get('/get-subscriptions',[SubscriptionControler::class,'getSubscriptions']);
