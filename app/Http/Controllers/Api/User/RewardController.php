@@ -35,12 +35,35 @@ class RewardController extends Controller
             ], 500);
         }
     }
+
+    public function viewReward(Request $request, ?int $id)
+    {
+        try {
+            $rewards = $this->rewardService->viewReward($id);
+            return response()->json([
+                'status' => true,
+                'message' => 'View reward fetched successfully.',
+                'data' => $rewards
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function redeem(RedeemRequest $request)
     {
         try {
             $redemption = $this->rewardService->redeem($request->validated()['reward_id']);
             if ($redemption == false) {
                 return $this->sendResponse([], "You don't have enough points.", false, 200);
+            }
+
+            if ($redemption['already_redeemed'] == true) {
+                return $this->sendResponse([], "You are already redeem this reward.", false, 200);
             }
             return $this->sendResponse($redemption, 'Reward redeemed successfully.');
         } catch (Exception $e) {

@@ -57,7 +57,8 @@ class PaymentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'payment_intent_id' => 'required',
-            'amount' => 'required|numeric'
+            'amount' => 'required|numeric',
+            'card_number' => 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -74,13 +75,14 @@ class PaymentController extends Controller
             if ($paymentIntent->status === 'requires_payment_method') {  // succeeded or requires_payment_method
                 $plan = Transaction::Create([
                     'payment_intent_id' => $request->payment_intent_id,
+                    'card_number' => $request->card_number,
                     'user_id' => Auth::id(),
                     // 'subscription_id' => $request->subscription_id,
                     'plan_name' => 'Premium',
                     'date' => Carbon::now(),
                     'renewal' => Carbon::now()->addMonth(),
                     'amount' => $request->amount,
-                    'status' => 'Conpleted'
+                    'status' => 'Completed'
                 ]);
 
                 return response()->json([

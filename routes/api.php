@@ -98,6 +98,7 @@ Route::middleware('auth:api')->group(function () {
 
         // rewards
         Route::get('/get-available-rewards', [UserRewardController::class, 'getAvailableRewards']);
+        Route::get('/view-reward/{id?}', [UserRewardController::class, 'viewReward']);
         Route::patch('/redeem-reward', [UserRewardController::class, 'redeem']);
         Route::get('/get-redeem-history', [UserRewardController::class, 'getRedeemHistory']);
         Route::get('/get-redemption-details/{id?}', [UserRewardController::class, 'getRedemptionDetails']);

@@ -7,6 +7,7 @@ use App\Models\Redemption;
 use App\Models\Reward;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Nette\Utils\Random;
 
@@ -31,8 +32,31 @@ class RewardService
         }
         return $rewords;
     }
+    public function viewReward(?int $id)
+    {
+        $reword = Reward::where('status', 'Enable')
+            ->where('admin_approved', true)
+            ->where('expiration_date', '>', Carbon::now())
+            ->where('id', $id)
+            ->first();
+
+        $reword->business_name = Profile::where('user_id', $reword->partner_id)->first()->business_name;
+
+        $reword->already_redeemed = Redemption::where('user_id', Auth::id())
+            ->where('reward_id', $id)
+            ->exists() ? true : false;
+
+        return $reword;
+    }
     public function redeem(int $rewardId)
     {
+        $already_redeemed = Redemption::where('user_id', Auth::id())
+            ->where('reward_id', $rewardId)
+            ->exists();
+
+        if ($already_redeemed) {
+            return ['already_redeemed' => true];
+        }
 
         $profile = Profile::where('user_id', Auth::id())->first();
         $available_points = $profile->total_points - $profile->used_points;
