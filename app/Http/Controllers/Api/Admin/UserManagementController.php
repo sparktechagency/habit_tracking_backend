@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class UserManagementController extends Controller
 {
 
-     protected $userManagementService;
+    protected $userManagementService;
 
     public function __construct(UserManagementService $userManagementService)
     {
@@ -24,7 +24,7 @@ class UserManagementController extends Controller
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
-    } 
+    }
 
     public function viewUser(Request $request)
     {
@@ -34,15 +34,15 @@ class UserManagementController extends Controller
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
-    } 
+    }
 
     public function blockUnblockUser(Request $request)
     {
         try {
-             $types = $this->userManagementService->blockUnblockUser($request->user_id);
+            $types = $this->userManagementService->blockUnblockUser($request->user_id);
             return $this->sendResponse($types, 'User fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
-    } 
+    }
 }

@@ -86,7 +86,7 @@ class RewardService
             'status' => 'Redeemed',
         ]);
     }
-    public function getRedeemHistory(?int $per_page)
+    public function getRedeemHistory2(?int $per_page,?string $search)
     {
         $redeem_histories = Redemption::where('user_id', Auth::id())
             ->latest()
@@ -102,6 +102,7 @@ class RewardService
                 }
             ])
             ->paginate($per_page ?? 10);
+
         foreach ($redeem_histories as $history) {
             $history->status = $history->status == 'Redeemed' ? 'Pending' : 'Redeemed';
             $history->reward->partner->avatar = $history->reward->partner->avatar
@@ -110,6 +111,59 @@ class RewardService
         }
         return $redeem_histories;
     }
+
+
+public function getRedeemHistory(?int $per_page, ?string $search)
+{
+    $query = Redemption::where('user_id', Auth::id())
+        ->latest()
+        ->with([
+            'reward' => function ($q) {
+                $q->select('id', 'partner_id', 'title');
+            },
+            'reward.partner' => function ($q) {
+                $q->select('id', 'full_name', 'role', 'address', 'phone_number', 'avatar');
+            },
+            'reward.partner.profile' => function ($q) {
+                $q->select('id', 'user_id', 'user_name', 'business_name', 'category', 'description', 'business_hours');
+            }
+        ]);
+
+    // 🔍 Search filter
+    if (!empty($search)) {
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('reward', function ($q2) use ($search) {
+                $q2->where('title', 'LIKE', "%{$search}%");
+            })
+            ->orWhereHas('reward.partner', function ($q2) use ($search) {
+                $q2->where('full_name', 'LIKE', "%{$search}%");
+            })
+            ->orWhereHas('reward.partner.profile', function ($q2) use ($search) {
+                $q2->where('business_name', 'LIKE', "%{$search}%")
+                   ->orWhere('category', 'LIKE', "%{$search}%");
+            });
+        });
+    }
+
+    $redeem_histories = $query->paginate($per_page ?? 10);
+
+    // 🛠️ Data transform
+    foreach ($redeem_histories as $history) {
+        // Status toggle
+        $history->status = $history->status == 'Redeemed' ? 'Pending' : 'Redeemed';
+
+        // Avatar setup
+        $history->reward->partner->avatar = $history->reward->partner->avatar
+            ? asset($history->reward->partner->avatar)
+            : 'https://ui-avatars.com/api/?background=random&name=' . urlencode($history->reward->partner->full_name);
+    }
+
+    return $redeem_histories;
+}
+
+
+
+
     public function getRedemptionDetails(int $id): ?Redemption
     {
         $details = Redemption::with([

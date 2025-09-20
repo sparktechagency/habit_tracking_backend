@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Models\Challenge;
+use App\Models\Reward;
 use App\Models\Subscription;
 use App\Models\User;
 use Ramsey\Uuid\Type\Decimal;
@@ -29,6 +30,12 @@ class UserManagementService
         $user = User::with('profile')
             ->where('id', $id)
             ->first();
+
+            if($user->role == 'PARTNER'){
+                $user->total_rewards = Reward::where('partner_id',$id)->count();
+                $user->types = 'Physical';
+            }
+
         return $user;
     }
 

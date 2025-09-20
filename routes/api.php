@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
 use App\Http\Controllers\Api\Admin\PartnerBusinessController;
 use App\Http\Controllers\Api\Admin\SubscriptionControler;
+use App\Http\Controllers\Api\Admin\TransationController;
 use App\Http\Controllers\Api\Admin\UserManagementController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\NotificationController;
@@ -59,6 +60,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/get-users',[UserManagementController::class,'getUsers']);
         Route::get('/view-user',[UserManagementController::class,'viewUser']);
         Route::patch('/block-unblock-user',[UserManagementController::class,'blockUnblockUser']);
+        Route::get('/basic-info',[AdvanceFeatureController::class,'basicInfo']);
 
         // partner business
         Route::get('/get-partners',[PartnerBusinessController::class,'getPartners']);
@@ -66,6 +68,9 @@ Route::middleware('auth:api')->group(function () {
         // subscriptions
         Route::get('/get-subscriptions',[SubscriptionControler::class,'getSubscriptions']);
         Route::post('/edit-premium-price/{id?}',[SubscriptionControler::class,'editPremiumPrice']);
+
+        // transation
+        Route::get('/get-transations',[TransationController::class,'getTransations']);
     });
 
     Route::middleware('partner')->prefix('partner')->group(function () {

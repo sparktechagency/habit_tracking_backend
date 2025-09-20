@@ -21,9 +21,9 @@ use Illuminate\Support\Facades\Log;
 
 class AdvanceFeatureService
 {
-    public function basicInfo()
+    public function basicInfo(?int $userId)
     {
-        $authId = Auth::id();
+        $authId = $userId ?? Auth::id();
         $now = Carbon::now();
 
         $habit_lists = Habit::where('user_id', $authId)

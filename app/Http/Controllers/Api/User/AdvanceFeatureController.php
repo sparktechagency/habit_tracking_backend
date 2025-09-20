@@ -20,7 +20,7 @@ class AdvanceFeatureController extends Controller
     public function basicInfo(Request $request)
     {
         try {
-            $result = $this->advanceFeatureService->basicInfo();
+            $result = $this->advanceFeatureService->basicInfo($request->user_id);
             return $this->sendResponse($result, 'Get basic info fetch successfully.', true, 200);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);

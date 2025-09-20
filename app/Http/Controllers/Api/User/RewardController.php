@@ -74,7 +74,7 @@ class RewardController extends Controller
     public function getRedeemHistory(Request $request)
     {
         try {
-            $history = $this->rewardService->getRedeemHistory($request->per_page);
+            $history = $this->rewardService->getRedeemHistory($request->per_page,$request->search);
             return $this->sendResponse($history, 'Redeem history fetched successfully.');
         } catch (Exception $e) {
             Log::error($e->getMessage());
