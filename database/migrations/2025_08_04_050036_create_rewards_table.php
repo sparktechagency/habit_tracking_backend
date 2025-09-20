@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->date('expiration_date');
             $table->unsignedBigInteger('purchase_point')->default(0);
             $table->enum('status', ['Enable', 'Disable'])->default('Enable');
+            $table->boolean('admin_approved')->default(false);
             $table->timestamps();
         });
     }

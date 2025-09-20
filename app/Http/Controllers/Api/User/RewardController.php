@@ -21,7 +21,7 @@ class RewardController extends Controller
     public function getAvailableRewards(Request $request)
     {
         try {
-            $rewards = $this->rewardService->getAvailableRewards($request->search);
+            $rewards = $this->rewardService->getAvailableRewards($request->search, $request->per_page);
             return response()->json([
                 'status' => true,
                 'message' => 'Available rewards fetched successfully.',
@@ -39,29 +39,19 @@ class RewardController extends Controller
     {
         try {
             $redemption = $this->rewardService->redeem($request->validated()['reward_id']);
-            if (!$redemption) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Reward not available for redemption.'
-                ], 404);
+            if ($redemption == false) {
+                return $this->sendResponse([], "You don't have enough points.", false, 200);
             }
-            return response()->json([
-                'status' => true,
-                'message' => 'Reward redeemed successfully.',
-                'data' => $redemption
-            ]);
+            return $this->sendResponse($redemption, 'Reward redeemed successfully.');
         } catch (Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong.',
-                'error' => $e->getMessage()
-            ], 500);
+            Log::error($e->getMessage());
+            return $this->sendError('Something went wrong.', [], 500);
         }
     }
-    public function getRedeemHistory()
+    public function getRedeemHistory(Request $request)
     {
         try {
-            $history = $this->rewardService->getRedeemHistory();
+            $history = $this->rewardService->getRedeemHistory($request->per_page);
             return $this->sendResponse($history, 'Redeem history fetched successfully.');
         } catch (Exception $e) {
             Log::error($e->getMessage());

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
+use App\Http\Controllers\Api\Admin\PartnerBusinessController;
 use App\Http\Controllers\Api\Admin\SubscriptionControler;
 use App\Http\Controllers\Api\Admin\UserManagementController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -56,7 +57,11 @@ Route::middleware('auth:api')->group(function () {
 
         // user management
         Route::get('/get-users',[UserManagementController::class,'getUsers']);
-        Route::get('/get-partners',[UserManagementController::class,'getPartners']);
+        Route::get('/view-user',[UserManagementController::class,'viewUser']);
+        Route::patch('/block-unblock-user',[UserManagementController::class,'blockUnblockUser']);
+
+        // partner business
+        Route::get('/get-partners',[PartnerBusinessController::class,'getPartners']);
 
         // subscriptions
         Route::get('/get-subscriptions',[SubscriptionControler::class,'getSubscriptions']);

@@ -2,6 +2,7 @@
 
 namespace App\Services\User;
 
+use App\Models\Profile;
 use App\Models\Redemption;
 use App\Models\Reward;
 use Carbon\Carbon;
@@ -11,10 +12,11 @@ use Nette\Utils\Random;
 
 class RewardService
 {
-    public function getAvailableRewards(?string $search)
+    public function getAvailableRewards(?string $search, ?int $per_page)
     {
         $query = Reward::where('status', 'Enable')
-            ->where('expiration_date', '>=', Carbon::now());
+            ->where('admin_approved', true)
+            ->where('expiration_date', '>', Carbon::now());
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
@@ -22,20 +24,34 @@ class RewardService
                 // ->orWhere('description', 'like', "%{$search}%");
             });
         }
-        return $query->latest()->get();
+
+        $rewords = $query->latest()->paginate($per_page ?? 10);
+        foreach ($rewords as $reword) {
+            $reword->business_name = Profile::where('user_id', $reword->partner_id)->first()->business_name;
+        }
+        return $rewords;
     }
-    public function redeem(int $rewardId): ?Redemption
+    public function redeem(int $rewardId)
     {
+
+        $profile = Profile::where('user_id', Auth::id())->first();
+        $available_points = $profile->total_points - $profile->used_points;
+
+
         $reward = Reward::where('id', $rewardId)
             ->where('status', 'Enable')
             ->where('expiration_date', '>=', Carbon::now())
             ->first();
+
         if (!$reward) {
-            return null;
+            throw new \Exception("Reward not available for redemption.");
         }
 
-        // এখানে তুমি চাইলে user-এর points কাটতে পারো
-        // Auth::user()->decrement('points', $reward->purchase_point);
+        if ($available_points < $reward->purchase_point) {
+            return false;
+        }
+
+        $profile->increment('used_points', $reward->purchase_point);
 
         return Redemption::create([
             'user_id' => Auth::id(),
@@ -46,7 +62,7 @@ class RewardService
             'status' => 'Redeemed',
         ]);
     }
-    public function getRedeemHistory()
+    public function getRedeemHistory(?int $per_page)
     {
         $redeem_histories = Redemption::where('user_id', Auth::id())
             ->latest()
@@ -55,13 +71,13 @@ class RewardService
                     $q->select('id', 'partner_id', 'title');
                 },
                 'reward.partner' => function ($q) {
-                    $q->select('id', 'full_name', 'role', 'avatar');
+                    $q->select('id', 'full_name', 'role', 'address', 'phone_number');
                 },
                 'reward.partner.profile' => function ($q) {
                     $q->select('id', 'user_id', 'user_name', 'business_name', 'category', 'description', 'business_hours');
                 }
             ])
-            ->get();
+            ->paginate($per_page ?? 10);
         foreach ($redeem_histories as $history) {
             $history->status = $history->status == 'Redeemed' ? 'Pending' : 'Redeemed';
             $history->reward->partner->avatar = $history->reward->partner->avatar
@@ -77,7 +93,7 @@ class RewardService
                 $q->select('id', 'partner_id', 'title');
             },
             'reward.partner' => function ($q) {
-                $q->select('id', 'full_name', 'role');
+                $q->select('id', 'full_name', 'role', 'address', 'phone_number');
             },
             'reward.partner.profile' => function ($q) {
                 $q->select('id', 'user_id', 'user_name', 'business_name', 'category', 'description', 'business_hours');

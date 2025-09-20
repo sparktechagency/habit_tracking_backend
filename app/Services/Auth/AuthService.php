@@ -49,9 +49,14 @@ class AuthService
         if (!$user) {
             return ['success' => false, 'message' => 'User not found', 'code' => 404];
         }
-        if ($user->status !== 'Active') {
-            return ['success' => false, 'message' => 'Your account is inactive. Please contact support.', 'code' => 403];
+        if ($user->status == 'Inactive') {
+            return ['success' => false, 'message' => 'Your account is inactive. Please verify your account.', 'code' => 403];
         }
+
+        if ($user->status == 'Blocked') {
+            return ['success' => false, 'message' => 'Your account is blocked. Please contact to admin.', 'code' => 403];
+        }
+
         if (!Hash::check($data['password'], $user->password)) {
             return ['success' => false, 'message' => 'Invalid password', 'code' => 401];
         }

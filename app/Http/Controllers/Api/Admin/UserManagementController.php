@@ -24,15 +24,25 @@ class UserManagementController extends Controller
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
-    }
+    } 
 
-     public function getPartners(Request $request)
+    public function viewUser(Request $request)
     {
         try {
-            $types = $this->userManagementService->getPartners($request->search);
-            return $this->sendResponse($types, 'Get partner fetched successfully.');
+            $types = $this->userManagementService->viewUser($request->user_id);
+            return $this->sendResponse($types, 'View user fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
-    }
+    } 
+
+    public function blockUnblockUser(Request $request)
+    {
+        try {
+             $types = $this->userManagementService->blockUnblockUser($request->user_id);
+            return $this->sendResponse($types, 'User fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Something went wrong.', [], 500);
+        }
+    } 
 }
