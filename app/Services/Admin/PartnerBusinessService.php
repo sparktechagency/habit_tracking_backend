@@ -3,8 +3,10 @@
 namespace App\Services\Admin;
 
 use App\Models\Challenge;
+use App\Models\Reward;
 use App\Models\Subscription;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Ramsey\Uuid\Type\Decimal;
 
 class PartnerBusinessService
@@ -19,7 +21,14 @@ class PartnerBusinessService
                 $q->where('full_name', 'LIKE', "%{$search}%");
             });
         }
+        $partners = $query->paginate(10); 
 
-        return $query->get(); 
+        foreach ($partners as $partner) {
+            
+            $partner->rewards_offered = Reward::where('partner_id',$partner->id)->count();
+        }
+
+            return $partners;
+
     }
 }
