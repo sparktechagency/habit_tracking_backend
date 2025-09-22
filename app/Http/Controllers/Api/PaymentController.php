@@ -72,7 +72,7 @@ class PaymentController extends Controller
 
         try {
             $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
-            if ($paymentIntent->status === 'requires_payment_method') {  // succeeded or requires_payment_method
+            if ($paymentIntent->status === 'succeeded') {  // succeeded or requires_payment_method
                 $plan = Transaction::Create([
                     'payment_intent_id' => $request->payment_intent_id,
                     'card_number' => $request->card_number,

@@ -10,7 +10,7 @@ use Ramsey\Uuid\Type\Decimal;
 
 class UserManagementService
 {
-    public function getUsers(?string $search)
+    public function getUsers(?string $search,?int $per_page)
     {
         $query = User::query();
 
@@ -22,7 +22,7 @@ class UserManagementService
             });
         }
 
-        return $query->get();
+        return $query->latest()->paginate($per_page??10);
     }
 
     public function viewUser(?int $id)

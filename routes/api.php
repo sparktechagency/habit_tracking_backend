@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\AvailableRewardController;
 use App\Http\Controllers\Api\Admin\ChallengeManagementController;
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
+use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\PartnerBusinessController;
 use App\Http\Controllers\Api\Admin\SubscriptionControler;
 use App\Http\Controllers\Api\Admin\TransationController;
@@ -51,6 +52,14 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/notification-status', [NotificationController::class, 'status']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
+        
+        // dashboard
+        Route::get('/dashboard-info',[DashboardController::class,'dashboardInfo']);
+        Route::get('/user-chart',[DashboardController::class,'userChart']);
+        Route::get('/group-chart',[DashboardController::class,'groupChart']);
+        Route::get('/top-challenge-chart',[DashboardController::class,'topChallengeChart']);
+        Route::get('/revenue-chart',[DashboardController::class,'revenueChart']);
+        
         // challenge type
         Route::post('/add-type', [ChallengeTypeController::class, 'addType']);
         Route::get('/get-types', [ChallengeTypeController::class, 'getTypes']);
@@ -63,8 +72,6 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/view-active-challenge/{id?}',[ChallengeManagementController::class,'viewActiveChallenge']);
         Route::get('/get-completed-challenges',[ChallengeManagementController::class,'getCompletedChallenges']);
         Route::get('/view-completed-challenge/{id?}',[ChallengeManagementController::class,'viewCompletedChallenge']);
-
-
 
         // user management
         Route::get('/get-users',[UserManagementController::class,'getUsers']);

@@ -19,7 +19,7 @@ class UserManagementController extends Controller
     public function getUsers(Request $request)
     {
         try {
-            $types = $this->userManagementService->getUsers($request->search);
+            $types = $this->userManagementService->getUsers($request->search,$request->per_page);
             return $this->sendResponse($types, 'Get users fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
