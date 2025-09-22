@@ -170,7 +170,7 @@ class AdvanceFeatureService
             'result' => $result,
         ];
     }
-    public function modeTrackLineGraph(?string $filter)
+    public function modeTrackLineGraph1(?string $filter)
     {
         $userId = Auth::id();
         $month = $filter == 'current' ? Carbon::now() : Carbon::now()->subMonth();
@@ -203,6 +203,67 @@ class AdvanceFeatureService
 
         return [
             'month' => $month->format('F Y'),
+            'data' => $graphData,
+        ];
+    }
+    public function modeTrackLineGraph(?string $filter)
+    {
+        $userId = Auth::id();
+        $months = 12;
+
+        // current or last 6 month / 12 month
+        // $months = $filter == 'current' ? 1 : 12;
+
+        // // Filter range
+        // switch ($filter) {
+        //     case 'last_3_months':
+        //         $months = 3;
+        //         break;
+        //     case 'last_6_months':
+        //         $months = 6;
+        //         break;
+        //     case 'last_year':
+        //         $months = 12;
+        //         break;
+        //     case 'current':
+        //     default:
+        //         $months = 1;
+        //         break;
+        // }
+
+        $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
+        $endDate = Carbon::now()->endOfMonth();
+
+        $completedLogs = HabitLog::where('user_id', $userId)
+            ->where('status', 'Completed')
+            ->whereBetween('done_at', [$startDate, $endDate])
+            ->selectRaw('YEAR(done_at) as year, MONTH(done_at) as month, COUNT(*) as completed_count')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        $graphData = [];
+        $period = Carbon::parse($startDate)->monthsUntil($endDate);
+
+        foreach ($period as $date) {
+            $year = $date->year;
+            $month = $date->month;
+
+            $record = $completedLogs->firstWhere(
+                fn($log) =>
+                $log->year == $year && $log->month == $month
+            );
+
+            $graphData[] = [
+                'month' => $date->format('F Y'),
+                'completed_count' => $record->completed_count ?? 0,
+            ];
+        }
+
+        return [
+            'start' => $startDate->format('F Y'),
+            'end' => $endDate->format('F Y'),
             'data' => $graphData,
         ];
     }
