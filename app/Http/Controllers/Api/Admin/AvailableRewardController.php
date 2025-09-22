@@ -19,7 +19,7 @@ class AvailableRewardController extends Controller
     public function getRewards(Request $request)
     {
         try {
-            $types = $this->availableRewardService->getRewards($request->search);
+            $types = $this->availableRewardService->getRewards($request->search,$request->per_page);
             return $this->sendResponse($types, 'Get Rewards fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);

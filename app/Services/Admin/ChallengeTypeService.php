@@ -10,13 +10,13 @@ class ChallengeTypeService
     {
         return Challenge::create($data);
     }
-    public function getTypes(?string $search = null)
+    public function getTypes(?string $search = null, ?int $per_page)
     {
         $query = Challenge::query();
         if ($search) {
             $query->where('challenge_type', 'like', "%{$search}%");
         }
-        return $query->latest()->get();
+        return $query->latest()->paginate($per_page ?? 10);
     }
     public function viewType(int $id): ?Challenge
     {

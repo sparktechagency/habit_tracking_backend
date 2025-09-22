@@ -11,24 +11,25 @@ use Ramsey\Uuid\Type\Decimal;
 
 class PartnerBusinessService
 {
-   public function getPartners(?string $search){
+    public function getPartners(?string $search, ?int $per_page)
+    {
         $query = User::query();
 
-        $query->with('profile')->where('role','PARTNER');
+        $query->with('profile')->where('role', 'PARTNER');
 
-         if (!empty($search)) {
+        if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'LIKE', "%{$search}%");
             });
         }
-        $partners = $query->paginate(10); 
+        $partners = $query->paginate($per_page ?? 10);
 
         foreach ($partners as $partner) {
-            
-            $partner->rewards_offered = Reward::where('partner_id',$partner->id)->count();
+
+            $partner->rewards_offered = Reward::where('partner_id', $partner->id)->count();
         }
 
-            return $partners;
+        return $partners;
 
     }
 }

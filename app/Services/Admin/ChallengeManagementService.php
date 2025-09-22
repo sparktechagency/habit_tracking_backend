@@ -9,7 +9,7 @@ use App\Models\Reward;
 
 class ChallengeManagementService
 {
-    public function getActiveChallenges(?string $search)
+    public function getActiveChallenges(?string $search, ?int $per_page)
     {
         $query = ChallengeGroup::withCount('members')
             ->with('group_habits')
@@ -23,7 +23,7 @@ class ChallengeManagementService
             });
         }
 
-        $groups = $query->get();
+        $groups = $query->paginate($per_page ?? 10);
 
         $groups->each(function ($group) {
             $group->max_count = 100;
@@ -70,7 +70,7 @@ class ChallengeManagementService
 
         return $group;
     }
-    public function getCompletedChallenges(?string $search)
+    public function getCompletedChallenges(?string $search, ?int $per_page)
     {
         $query = ChallengeGroup::withCount('members')
             ->with('group_habits')
@@ -84,7 +84,7 @@ class ChallengeManagementService
             });
         }
 
-        $groups = $query->get();
+        $groups = $query->paginate($per_page ?? 10);
 
         $groups->each(function ($group) {
             $group->max_count = 100;

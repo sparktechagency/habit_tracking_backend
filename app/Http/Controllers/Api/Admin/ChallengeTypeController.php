@@ -30,7 +30,7 @@ class ChallengeTypeController extends Controller
     public function getTypes(Request $request)
     {
         try {
-            $types = $this->challengeTypeService->getTypes($request->search);
+            $types = $this->challengeTypeService->getTypes($request->search,$request->per_page);
             return $this->sendResponse($types, 'Challenge types fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to fetch challenge types.', [], 500);

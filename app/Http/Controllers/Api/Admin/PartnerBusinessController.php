@@ -19,7 +19,7 @@ class PartnerBusinessController extends Controller
      public function getPartners(Request $request)
     {
         try {
-            $types = $this->partnerBusinessService->getPartners($request->search);
+            $types = $this->partnerBusinessService->getPartners($request->search,$request->per_page);
             return $this->sendResponse($types, 'Get partner fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);

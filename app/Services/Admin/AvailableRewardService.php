@@ -7,7 +7,7 @@ use App\Models\Reward;
 
 class AvailableRewardService
 {
-    public function getRewards(?string $search)
+    public function getRewards(?string $search, ?int $per_page)
     {
         $query = Reward::where('admin_approved', '!=', 'Canceled');
 
@@ -20,7 +20,7 @@ class AvailableRewardService
             });
         }
 
-        return $query->latest()->paginate(10);
+        return $query->latest()->paginate($per_page ?? 10);
     }
     public function viewReward(?int $id)
     {

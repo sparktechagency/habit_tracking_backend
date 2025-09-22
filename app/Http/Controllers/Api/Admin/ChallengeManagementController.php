@@ -19,7 +19,7 @@ class ChallengeManagementController extends Controller
     public function getActiveChallenges(Request $request)
     {
         try {
-            $types = $this->challengeManagementService->getActiveChallenges($request->search);
+            $types = $this->challengeManagementService->getActiveChallenges($request->search,$request->per_page);
             return $this->sendResponse($types, 'Get active challenges fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
@@ -38,7 +38,7 @@ class ChallengeManagementController extends Controller
     public function getCompletedChallenges(Request $request)
     {
         try {
-            $types = $this->challengeManagementService->getCompletedChallenges($request->search);
+            $types = $this->challengeManagementService->getCompletedChallenges($request->search,$request->per_page);
             return $this->sendResponse($types, 'Get completed challenges fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
