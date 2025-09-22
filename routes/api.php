@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AvailableRewardController;
+use App\Http\Controllers\Api\Admin\ChallengeManagementController;
 use App\Http\Controllers\Api\Admin\ChallengeTypeController;
 use App\Http\Controllers\Api\Admin\PartnerBusinessController;
 use App\Http\Controllers\Api\Admin\SubscriptionControler;
@@ -57,6 +58,14 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('/edit-type/{id?}', [ChallengeTypeController::class, 'editType']);
         Route::delete('/delete-type/{id?}', [ChallengeTypeController::class, 'deleteType']);
 
+        // active challenge
+        Route::get('/get-active-challenges',[ChallengeManagementController::class,'getActiveChallenges']);
+        Route::get('/view-active-challenge/{id?}',[ChallengeManagementController::class,'viewActiveChallenge']);
+        Route::get('/get-completed-challenges',[ChallengeManagementController::class,'getCompletedChallenges']);
+        Route::get('/view-completed-challenge/{id?}',[ChallengeManagementController::class,'viewCompletedChallenge']);
+
+
+
         // user management
         Route::get('/get-users',[UserManagementController::class,'getUsers']);
         Route::get('/view-user',[UserManagementController::class,'viewUser']);
@@ -65,7 +74,6 @@ Route::middleware('auth:api')->group(function () {
 
         // partner business
         Route::get('/get-partners',[PartnerBusinessController::class,'getPartners']);
-
 
         // available reward
         Route::get('/get-rewards',[AvailableRewardController::class,'getRewards']);

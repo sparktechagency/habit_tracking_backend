@@ -278,7 +278,7 @@ class GroupService
             'completed_at' => Carbon::now(),
         ]);
 
-       
+
         $profile = Profile::where('user_id', Auth::id())->first();
         $profile->increment('total_points');
 
