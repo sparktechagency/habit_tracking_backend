@@ -86,7 +86,7 @@ class GroupService
             });
         }
 
-        $groups = $query->paginate($per_page??10);
+        $groups = $query->paginate($per_page ?? 10);
 
         $groups->each(function ($group) use ($authId, $today) {
             $group->max_count = 100;
@@ -245,7 +245,21 @@ class GroupService
             ->where('user_id', '!=', $authId)
             ->get()
             ->groupBy('user_id');
-        $members = GroupMember::where('challenge_group_id', $groupId)->get();
+        $members = GroupMember::with(['user' => function ($q) {
+            $q->select('id', 'full_name'); }])->where('challenge_group_id', $groupId)->get();
+
+        foreach ($members as $member) {
+            $member->is_celebrate = ChallengeLog::where('user_id', $authId)
+                ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->exists();
+
+                $member->completed_count_today = ChallengeLog::where('user_id', $authId)
+                ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->count();
+        }
+
         $members = $members->sortBy(function ($member) use ($authId) {
             return $member->user_id == $authId ? 0 : 1;
         })->values();
