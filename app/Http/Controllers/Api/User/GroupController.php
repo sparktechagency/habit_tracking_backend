@@ -45,7 +45,7 @@ class GroupController extends Controller
     {
         try {
             $search = $request->query('search');
-            $groups = $this->groupService->getGroups($search);
+            $groups = $this->groupService->getGroups($search,$request->per_page);
             return $this->sendResponse($groups, 'Groups fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);

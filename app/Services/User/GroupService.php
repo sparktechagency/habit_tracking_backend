@@ -72,7 +72,7 @@ class GroupService
         }
         return $group;
     }
-    public function getGroups(?string $search = null)
+    public function getGroups(?string $search = null, ?int $per_page)
     {
         $authId = Auth::id();
         $today = now()->toDateString();
@@ -86,7 +86,7 @@ class GroupService
             });
         }
 
-        $groups = $query->get();
+        $groups = $query->paginate($per_page??10);
 
         $groups->each(function ($group) use ($authId, $today) {
             $group->max_count = 100;

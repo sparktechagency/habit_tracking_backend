@@ -49,7 +49,7 @@ class DashboardController extends Controller
     public function topChallengeChart(Request $request)
     {
         try {
-            $challenge = $this->dashboardService->topChallengeChart();
+            $challenge = $this->dashboardService->topChallengeChart($request->filter);
             return $this->sendResponse($challenge, 'Get top challenge chart fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
