@@ -145,6 +145,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/get-overall-progress', [GroupController::class, 'getOverallProgress']);
         Route::get('/get-my-completed-groups', [GroupController::class, 'getMyCompletedGroups']);
         Route::post('/send-celebration', [GroupController::class, 'sendCelebration']);
+        Route::get('/check-group-member', [GroupController::class, 'checkGroupMember']);
+        Route::get('/group-array', [GroupController::class, 'groupArray']);
 
         // payment
         Route::post('/payment-intent',[PaymentController::class,'paymentIntent']);

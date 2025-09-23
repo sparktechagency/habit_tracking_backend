@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CreateChallengeGroupRequest;
 use App\Models\ChallengeLog;
+use App\Models\GroupMember;
 use App\Models\User;
 use App\Notifications\CelebrationNotification;
 use App\Services\User\GroupService;
@@ -45,7 +46,7 @@ class GroupController extends Controller
     {
         try {
             $search = $request->query('search');
-            $groups = $this->groupService->getGroups($search,$request->per_page);
+            $groups = $this->groupService->getGroups($search, $request->per_page);
             return $this->sendResponse($groups, 'Groups fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
@@ -148,5 +149,19 @@ class GroupController extends Controller
         } catch (Exception $e) {
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
         }
+    }
+
+    public function checkGroupMember(Request $request)
+    {
+        $is_member = GroupMember::where('challenge_group_id', $request->challenge_group_id)
+            ->where('user_id', Auth::id())
+            ->exists();
+        return ['is_join' => $is_member];
+    }
+
+    public function groupArray()
+    {
+        $arr = GroupMember::where('user_id', Auth::id())->pluck('challenge_group_id')->toArray();
+        return ['join_group_ids' => $arr];
     }
 }
