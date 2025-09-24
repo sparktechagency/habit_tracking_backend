@@ -15,4 +15,10 @@ class GroupHabit extends Model
     {
         return $this->belongsTo(ChallengeGroup::class);
     }
+
+    public function challengeGroup()
+{
+    return $this->belongsTo(ChallengeGroup::class, 'challenge_group_id');
+}
+
 }

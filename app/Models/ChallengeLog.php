@@ -14,4 +14,10 @@ class ChallengeLog extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function habit()
+{
+    return $this->belongsTo(GroupHabit::class, 'group_habits_id');
+}
+
 }

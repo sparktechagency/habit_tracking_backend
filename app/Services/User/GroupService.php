@@ -7,6 +7,7 @@ use App\Models\ChallengeGroup;
 use App\Models\ChallengeLog;
 use App\Models\GroupHabit;
 use App\Models\GroupMember;
+use App\Models\HabitLog;
 use App\Models\Profile;
 use App\Models\User;
 use Carbon\Carbon;
@@ -232,7 +233,7 @@ class GroupService
         }
         return $create_log;
     }
-    public function getTodayLogs(int $groupId): array
+    public function getTodayLogs1(int $groupId): array
     {
         $authId = Auth::id();
         $today = Carbon::today()->toDateString();
@@ -243,10 +244,13 @@ class GroupService
         $othersLogs = ChallengeLog::where('challenge_group_id', $groupId)
             ->whereDate('date', $today)
             ->where('user_id', '!=', $authId)
-            ->get()
-            ->groupBy('user_id');
-        $members = GroupMember::with(['user' => function ($q) {
-            $q->select('id', 'full_name'); }])->where('challenge_group_id', $groupId)->get();
+            ->get();
+        // ->groupBy('user_id');
+        $members = GroupMember::with([
+            'user' => function ($q) {
+                $q->select('id', 'full_name');
+            }
+        ])->where('challenge_group_id', $groupId)->get();
 
         foreach ($members as $member) {
             $member->is_celebrate = ChallengeLog::where('user_id', $authId)
@@ -254,10 +258,12 @@ class GroupService
                 ->where('status', 'Completed')
                 ->exists();
 
-                $member->completed_count_today = ChallengeLog::where('user_id', $authId)
+            $member->completed_count_today = ChallengeLog::where('user_id', $authId)
                 ->whereDate('date', $today)
                 ->where('status', 'Completed')
                 ->count();
+
+            $member->logs = ChallengeLog::where('challenge_group_id', $groupId)->where('user_id', $member->user_id)->where('date', $today)->get();
         }
 
         $members = $members->sortBy(function ($member) use ($authId) {
@@ -271,6 +277,194 @@ class GroupService
             'my_logs' => $myLogs,
             'habit_count' => $habit_count,
             'others_logs' => $othersLogs
+        ];
+    }
+    public function getTodayLogs2(int $groupId): array
+    {
+        $authId = Auth::id();
+        $today = Carbon::today()->toDateString();
+
+        $myLogs = ChallengeLog::where('challenge_group_id', $groupId)
+            ->whereDate('date', $today)
+            ->where('user_id', $authId)
+            ->get();
+
+        $othersLogs = ChallengeLog::where('challenge_group_id', $groupId)
+            ->whereDate('date', $today)
+            ->where('user_id', '!=', $authId)
+            ->get();
+
+        $habits = GroupHabit::where('challenge_group_id', $groupId)->get();
+        $habit_count = $habits->count();
+
+        $members = GroupMember::with([
+            'user' => function ($q) {
+                $q->select('id', 'full_name');
+            }
+        ])->where('challenge_group_id', $groupId)->get();
+
+        foreach ($members as $member) {
+            $member->is_celebrate = ChallengeLog::where('user_id', $member->user_id)
+                ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->exists();
+
+            $member->completed_count_today = ChallengeLog::where('user_id', $member->user_id)
+                ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->count();
+
+            // ✅ member logs
+            $logs = ChallengeLog::where('challenge_group_id', $groupId)->where('user_id', $member->user_id)
+                ->where('challenge_group_id', $groupId)
+                ->whereDate('date', $today)
+                ->get();
+
+            // যদি logs না থাকে → default generate
+            if ($logs->isEmpty()) {
+                $defaultLogs = $habits->map(function ($habit) use ($groupId, $member, $today) {
+                    return [
+                        'id' => null,
+                        'challenge_group_id' => $groupId,
+                        'user_id' => $member->user_id,
+                        'group_habits_id' => $habit->id,
+                        'day' => $member->day,
+                        'date' => $today,
+                        'status' => 'Incompleted',
+                        'completed_at' => null,
+                        'created_at' => null,
+                        'updated_at' => null,
+                    ];
+                });
+                $member->logs = $defaultLogs;
+            } else {
+                $member->logs = $logs;
+            }
+        }
+
+        $members = $members->sortBy(function ($member) use ($authId) {
+            return $member->user_id == $authId ? 0 : 1;
+        })->values();
+
+        return [
+            'group_members' => $members,
+            'habit_count' => $habit_count,
+            'group_habits' => $habits,
+            // 'my_logs' => $myLogs,
+            // 'others_logs' => $othersLogs
+        ];
+    }
+    public function getTodayLogs3(int $groupId): array
+    {
+        $authId = Auth::id();
+        $today = Carbon::today()->toDateString();
+        $day = Carbon::today()->day;
+
+        // সব habits
+        $habits = GroupHabit::where('challenge_group_id', $groupId)->get();
+        $habit_count = $habits->count();
+
+        // Members + User + আজকের Logs একসাথে eager load
+        $members = GroupMember::with([
+            'user:id,full_name',
+            'logs' => function ($q) use ($today) {
+                $q->whereDate('date', $today);
+            }
+        ])->where('challenge_group_id', $groupId)->get();
+
+        foreach ($members as $member) {
+            $logs = $member->logs;
+
+            // Celebrate check
+            $member->is_celebrate = $logs->where('status', 'Completed')->isNotEmpty();
+
+            // Count completed
+            $member->completed_count_today = $logs->where('status', 'Completed')->count();
+
+            // যদি আজকের log না থাকে → default generate
+            if ($logs->isEmpty()) {
+                $defaultLogs = $habits->map(function ($habit) use ($groupId, $member, $today, $day) {
+                    return [
+                        'id' => null,
+                        'challenge_group_id' => $groupId,
+                        'user_id' => $member->user_id,
+                        'group_habits_id' => $habit->id,
+                        'day' => $day,
+                        'date' => $today,
+                        'status' => 'Incompleted',
+                        'completed_at' => null,
+                        'created_at' => null,
+                        'updated_at' => null,
+                    ];
+                });
+                $member->logs = $defaultLogs;
+            } else {
+                $member->logs = $logs->values();
+            }
+        }
+
+        // নিজের লগ প্রথমে দেখানো
+        $members = $members->sortBy(fn($m) => $m->user_id == $authId ? 0 : 1)->values();
+
+        return [
+            'group_members' => $members,
+            'habit_count' => $habit_count,
+            'group_habits' => $habits,
+        ];
+    }
+    public function getTodayLogs(int $groupId): array
+    {
+        $authId = Auth::id();
+        $today = Carbon::today()->toDateString();
+
+        $habits = GroupHabit::where('challenge_group_id', $groupId)->get();
+        $habitCount = $habits->count();
+
+        $members = GroupMember::with([
+            'user' => function ($q) {
+                $q->select('id', 'full_name');
+            }
+        ])
+            ->where('challenge_group_id', $groupId)
+            ->get();
+
+        foreach ($members as $member) {
+            $logs = ChallengeLog::where('challenge_group_id', $groupId)
+                ->where('user_id', $member->user_id)
+                ->whereDate('date', $today)
+                ->get();
+
+            if ($logs->isEmpty()) {
+                $logs = $habits->map(function ($habit) use ($groupId, $member, $today) {
+                    return [
+                        'id' => null,
+                        'challenge_group_id' => $groupId,
+                        'user_id' => $member->user_id,
+                        'group_habits_id' => $habit->id,
+                        'day' => Carbon::today()->day,
+                        'date' => $today,
+                        'status' => 'Incompleted',
+                        'completed_at' => null,
+                        'created_at' => null,
+                        'updated_at' => null,
+                    ];
+                });
+            }
+
+            $member->challenge_logs = $logs;
+
+            $member->is_celebrate = $logs->where('status', 'Completed')->isNotEmpty();
+            $member->completed_count_today = $logs->where('status', 'Completed')->count();
+        }
+
+        $members = $members->sortBy(function ($member) use ($authId) {
+            return $member->user_id == $authId ? 0 : 1;
+        })->values();
+
+        return [
+            'group_members' => $members,
+            'habit_count' => $habitCount,
+            'group_habits' => $habits,
         ];
     }
     public function taskCompleted(int $logId)
