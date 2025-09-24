@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
@@ -15,6 +17,19 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        return $next($request);
+        try {
+            if (Auth::user()->role !== 'ADMIN') {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+            return $next($request);
+
+        } catch (AuthenticationException $exception) {
+            return response()->json([
+                'message' => 'Unauthorized: ' . $exception->getMessage()
+            ], 401);
+        }
     }
 }

@@ -16,8 +16,8 @@ class ChallengeLog extends Model
     }
 
     public function habit()
-{
-    return $this->belongsTo(GroupHabit::class, 'group_habits_id');
-}
+    {
+        return $this->belongsTo(GroupHabit::class, 'group_habits_id');
+    }
 
 }
