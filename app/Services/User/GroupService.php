@@ -679,7 +679,7 @@ class GroupService
             'summaries' => $summaries
         ];
     }
-    public function getMyCompletedGroups(?string $search = null)
+    public function getMyCompletedGroups(?string $search = null,?int $per_page)
     {
         $authId = Auth::id();
         $today = now()->toDateString();
@@ -696,7 +696,7 @@ class GroupService
                     ->orWhere('challenge_type', 'LIKE', "%{$search}%");
             });
         }
-        $groups = $query->get();
+        $groups = $query->paginate($per_page??10);
 
         $groups->each(function ($group) use ($authId, $today) {
             $group->max_count = 100;
