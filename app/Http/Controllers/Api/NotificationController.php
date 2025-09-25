@@ -8,12 +8,26 @@ use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+use function PHPUnit\Framework\isEmpty;
+
 class NotificationController extends Controller
 {
-    public function getNotifications(Request $request)
+    public function getNotifications1(Request $request)
     {
         $user = Auth::user();
-        $notifications = $user->notifications()->latest()->paginate($request->per_page ?? 10);
+
+        if (!isEmpty($request->filter)) {
+            if ($request->filter == 'unread') {
+                $notifications = $user->notifications()->where('read_at', null)->latest()->paginate($request->per_page ?? 10);
+            } elseif ($request->filter == 'read') {
+                $notifications = $user->notifications()->where('read_at', '!=', null)->latest()->paginate($request->per_page ?? 10);
+            } else {
+                $notifications = $user->notifications()->latest()->paginate($request->per_page ?? 10);
+            }
+        } else {
+            $notifications = $user->notifications()->latest()->paginate($request->per_page ?? 10);
+        }
+
 
         return response()->json([
             'status' => true,
@@ -21,6 +35,37 @@ class NotificationController extends Controller
             'data' => $notifications
         ]);
     }
+
+    public function getNotifications(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = $user->notifications()->latest();
+
+        if ($request->filled('filter')) {
+            switch ($request->filter) {
+                case 'unread':
+                    $query->whereNull('read_at');
+                    break;
+                case 'read':
+                    $query->whereNotNull('read_at');
+                    break;
+                default:
+                    // all → কোন শর্ত না
+                    break;
+            }
+        }
+
+        $notifications = $query->paginate($request->per_page ?? 10);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Notifications fetched successfully',
+            'data' => $notifications,
+        ]);
+    }
+
+
     public function read(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -48,7 +93,7 @@ class NotificationController extends Controller
         $ids = Auth::user()->unreadNotifications()->pluck('id')->toArray();
 
         DatabaseNotification::whereIn('id', $ids)->update(['read_at' => now()]);
-        
+
         return response()->json([
             'status' => true,
             'message' => 'All Notifications are readed'

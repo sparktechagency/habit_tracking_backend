@@ -50,16 +50,18 @@ Route::middleware('auth:api')->group(function () {
     Route::patch('/read', [NotificationController::class, 'read']);
     Route::patch('/read-all', [NotificationController::class, 'readAll']);
     Route::get('/notification-status', [NotificationController::class, 'status']);
+    // get all challeng from admin
+    Route::get('/get-challenge-type-lists', [GroupController::class, 'getChallengeTypeLists']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
-        
+
         // dashboard
-        Route::get('/dashboard-info',[DashboardController::class,'dashboardInfo']);
-        Route::get('/user-chart',[DashboardController::class,'userChart']);
-        Route::get('/group-chart',[DashboardController::class,'groupChart']);
-        Route::get('/top-challenge-chart',[DashboardController::class,'topChallengeChart']);
-        Route::get('/revenue-chart',[DashboardController::class,'revenueChart']);
-        
+        Route::get('/dashboard-info', [DashboardController::class, 'dashboardInfo']);
+        Route::get('/user-chart', [DashboardController::class, 'userChart']);
+        Route::get('/group-chart', [DashboardController::class, 'groupChart']);
+        Route::get('/top-challenge-chart', [DashboardController::class, 'topChallengeChart']);
+        Route::get('/revenue-chart', [DashboardController::class, 'revenueChart']);
+
         // challenge type
         Route::post('/add-type', [ChallengeTypeController::class, 'addType']);
         Route::get('/get-types', [ChallengeTypeController::class, 'getTypes']);
@@ -68,32 +70,32 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/delete-type/{id?}', [ChallengeTypeController::class, 'deleteType']);
 
         // active challenge
-        Route::get('/get-active-challenges',[ChallengeManagementController::class,'getActiveChallenges']);
-        Route::get('/view-active-challenge/{id?}',[ChallengeManagementController::class,'viewActiveChallenge']);
-        Route::get('/get-completed-challenges',[ChallengeManagementController::class,'getCompletedChallenges']);
-        Route::get('/view-completed-challenge/{id?}',[ChallengeManagementController::class,'viewCompletedChallenge']);
+        Route::get('/get-active-challenges', [ChallengeManagementController::class, 'getActiveChallenges']);
+        Route::get('/view-active-challenge/{id?}', [ChallengeManagementController::class, 'viewActiveChallenge']);
+        Route::get('/get-completed-challenges', [ChallengeManagementController::class, 'getCompletedChallenges']);
+        Route::get('/view-completed-challenge/{id?}', [ChallengeManagementController::class, 'viewCompletedChallenge']);
 
         // user management
-        Route::get('/get-users',[UserManagementController::class,'getUsers']);
-        Route::get('/view-user',[UserManagementController::class,'viewUser']);
-        Route::patch('/block-unblock-user',[UserManagementController::class,'blockUnblockUser']);
-        Route::get('/basic-info',[AdvanceFeatureController::class,'basicInfo']);
+        Route::get('/get-users', [UserManagementController::class, 'getUsers']);
+        Route::get('/view-user', [UserManagementController::class, 'viewUser']);
+        Route::patch('/block-unblock-user', [UserManagementController::class, 'blockUnblockUser']);
+        Route::get('/basic-info', [AdvanceFeatureController::class, 'basicInfo']);
 
         // partner business
-        Route::get('/get-partners',[PartnerBusinessController::class,'getPartners']);
+        Route::get('/get-partners', [PartnerBusinessController::class, 'getPartners']);
 
         // available reward
-        Route::get('/get-rewards',[AvailableRewardController::class,'getRewards']);
-        Route::get('/view-reward/{id?}',[AvailableRewardController::class,'viewReward']);
-        Route::patch('/approved-reward',[AvailableRewardController::class,'approvedReward']);
-        Route::patch('/canceled-reward',[AvailableRewardController::class,'canceledReward']);
+        Route::get('/get-rewards', [AvailableRewardController::class, 'getRewards']);
+        Route::get('/view-reward/{id?}', [AvailableRewardController::class, 'viewReward']);
+        Route::patch('/approved-reward', [AvailableRewardController::class, 'approvedReward']);
+        Route::patch('/canceled-reward', [AvailableRewardController::class, 'canceledReward']);
 
         // subscriptions
-        Route::get('/get-subscriptions',[SubscriptionControler::class,'getSubscriptions']);
-        Route::post('/edit-premium-price/{id?}',[SubscriptionControler::class,'editPremiumPrice']);
+        Route::get('/get-subscriptions', [SubscriptionControler::class, 'getSubscriptions']);
+        Route::post('/edit-premium-price/{id?}', [SubscriptionControler::class, 'editPremiumPrice']);
 
         // transation
-        Route::get('/get-transations',[TransationController::class,'getTransations']);
+        Route::get('/get-transations', [TransationController::class, 'getTransations']);
     });
 
     Route::middleware('partner')->prefix('partner')->group(function () {
@@ -133,7 +135,6 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('/mark-as-completed/{id?}', [UserRewardController::class, 'markAsCompleted']);
 
         // groups
-        Route::get('/get-challenge-type-lists', [GroupController::class, 'getChallengeTypeLists']);
         Route::post('/create-group', [GroupController::class, 'createGroup']);
         Route::get('/get-groups', [GroupController::class, 'getGroups']);
         Route::get('/view-group/{id?}', [GroupController::class, 'viewGroup']);
@@ -149,15 +150,15 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/group-array', [GroupController::class, 'groupArray']);
 
         // payment
-        Route::post('/payment-intent',[PaymentController::class,'paymentIntent']);
-        Route::post('/payment-success',[PaymentController::class,'paymentSuccess']);
+        Route::post('/payment-intent', [PaymentController::class, 'paymentIntent']);
+        Route::post('/payment-success', [PaymentController::class, 'paymentSuccess']);
 
         //advance feature
-        Route::get('/basic-info',[AdvanceFeatureController::class,'basicInfo']);
-        Route::get('/get-subscriptions',[AdvanceFeatureController::class,'getSubscriptions']);
-        Route::get('/premium-user-check',[AdvanceFeatureController::class,'premiumUserCheck']);
-        Route::get('/habit-calendar',[AdvanceFeatureController::class,'habitCalendar']);
-        Route::get('/mode-track-line-graph',[AdvanceFeatureController::class,'modeTrackLineGraph']);
-        Route::get('/say-no-bar-chart',[AdvanceFeatureController::class,'sayOnBarChart']);
+        Route::get('/basic-info', [AdvanceFeatureController::class, 'basicInfo']);
+        Route::get('/get-subscriptions', [AdvanceFeatureController::class, 'getSubscriptions']);
+        Route::get('/premium-user-check', [AdvanceFeatureController::class, 'premiumUserCheck']);
+        Route::get('/habit-calendar', [AdvanceFeatureController::class, 'habitCalendar']);
+        Route::get('/mode-track-line-graph', [AdvanceFeatureController::class, 'modeTrackLineGraph']);
+        Route::get('/say-no-bar-chart', [AdvanceFeatureController::class, 'sayOnBarChart']);
     });
 });

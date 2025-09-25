@@ -78,6 +78,7 @@ class GroupService
         $authId = Auth::id();
         $today = now()->toDateString();
         $query = ChallengeGroup::withCount('members')
+            ->where('status','Active')
             ->with('group_habits')
             ->orderBy('created_at', 'desc');
         if (!empty($search)) {

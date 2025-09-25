@@ -51,14 +51,14 @@ class RewardService
         }
         return $reward;
     }
-    public function getRewards()
+    public function getRewards(?int $per_page)
     {
         $currentDate = Carbon::now()->toDateString();
 
         $rewards = Reward::where('partner_id', Auth::id())
             ->whereDate('expiration_date', '>=', $currentDate)
             ->latest()
-            ->get();
+            ->paginate($per_page??10);
 
         return  $rewards;
          

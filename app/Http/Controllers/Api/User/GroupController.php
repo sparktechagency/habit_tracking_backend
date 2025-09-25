@@ -8,6 +8,7 @@ use App\Models\ChallengeLog;
 use App\Models\GroupMember;
 use App\Models\User;
 use App\Notifications\CelebrationNotification;
+use App\Notifications\NewChallengeCreatedNotification;
 use App\Services\User\GroupService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -37,6 +38,15 @@ class GroupController extends Controller
     {
         try {
             $group = $this->groupService->createGroup($request->validated());
+
+            $from = Auth::user()->full_name;
+            $message = "Keep shining, you did amazing!";
+
+            $admin = User::find(1);
+            $users = User::where('id','!=',Auth::id())->get();
+
+            $admin->notify(new NewChallengeCreatedNotification($from, $message));
+
             return $this->sendResponse($group, 'Challenge group created successfully.', true, 201);
         } catch (Exception $e) {
             return $this->sendError('Failed to create challenge group.', [], 500);

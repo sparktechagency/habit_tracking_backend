@@ -20,7 +20,7 @@ class RedemptionController extends Controller
     public function getRedeemHistory(Request $request)
     {
         try {
-            $history = $this->redemptionService->getRedeemHistory($request->search);
+            $history = $this->redemptionService->getRedeemHistory($request->search,$request->per_page);
             return $this->sendResponse($history, 'Redeem history fetched successfully.');
         } catch (Exception $e) {
             Log::error($e->getMessage());

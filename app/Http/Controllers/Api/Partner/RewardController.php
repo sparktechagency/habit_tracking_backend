@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\Partner;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Partner\RewardRequest;
+use App\Models\User;
+use App\Notifications\NewRewardCreatedNotification;
 use App\Services\Partner\RewardService;
 use Exception;
 use Illuminate\Http\Request;
@@ -39,6 +41,15 @@ class RewardController extends Controller
             //     ], 'Profile is incomplete.');
             // }
             $reward = $this->rewardService->addReward($request->validated());
+
+             $from = Auth::user()->full_name;
+            $message = "Keep shining, you did amazing!";
+
+            $admin = User::find(1);
+            $users = User::where('id','!=',Auth::id())->get();
+
+            $admin->notify(new NewRewardCreatedNotification($from, $message));
+
             return $this->sendResponse($reward, 'Reward added successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to add reward.', [$e->getMessage()], 500);
@@ -56,10 +67,10 @@ class RewardController extends Controller
             return $this->sendError('Failed to toggle reward status.', [$e->getMessage()], 500);
         }
     }
-    public function getRewards()
+    public function getRewards(Request $request)
     {
         try {
-            $rewards = $this->rewardService->getRewards();
+            $rewards = $this->rewardService->getRewards($request->per_page);
             return $this->sendResponse($rewards, 'Rewards fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to fetch rewards.', [$e->getMessage()], 500);

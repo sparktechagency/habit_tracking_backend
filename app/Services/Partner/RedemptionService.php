@@ -12,7 +12,7 @@ use Nette\Utils\Random;
 
 class RedemptionService
 {
-    public function getRedeemHistory($searchCode)
+    public function getRedeemHistory($searchCode, ?int $per_page)
     {
         $redeem_histories = Redemption::where('partner_id', Auth::id())
             ->when($searchCode, function ($query) use ($searchCode) {
@@ -27,7 +27,7 @@ class RedemptionService
                     $q->select('id', 'partner_id', 'title');
                 }
             ])
-            ->get();
+            ->paginate($per_page ?? 10);
         foreach ($redeem_histories as $history) {
             $history->user->avatar = $history->user->avatar
                 ? asset($history->user->avatar)
