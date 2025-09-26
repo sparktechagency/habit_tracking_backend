@@ -64,6 +64,18 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
         }
     }
+
+    public function getActiveGroups(Request $request)
+    {
+        try {
+            $search = $request->query('search');
+            $groups = $this->groupService->getActiveGroups($search, $request->per_page);
+            return $this->sendResponse($groups, 'Groups fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
+        }
+    }
+
     public function viewGroup(Request $request, $id)
     {
         try {
@@ -188,6 +200,41 @@ class GroupController extends Controller
                 ->first()
                 ->completed_at,
             'challenge_group_name' => ChallengeGroup::where('id', $request->challenge_group_id)->first()->group_name,
+        ];
+    }
+
+    public function getUsers(Request $request)
+    {
+
+        $query = User::where('id', '!=', Auth::id())
+            ->where('id', '!=', 1)
+            ->select('id', 'full_name', 'role', 'avatar');
+
+
+        if (!empty($request->search)) {
+            $query->where(function ($q) use ($request) {
+                $q->where('full_name', 'LIKE', "%{$request->search}%");
+            });
+        }
+
+        $users = $query->paginate($per_page ?? 10);
+
+        return [
+            'status' => true,
+            'message' => 'Get users.',
+            'data' => $users,
+        ];
+    }
+
+    public function myGroupLists(Request $request)
+    {
+        $arr = GroupMember::where('user_id', Auth::id())->pluck('challenge_group_id')->toArray();
+
+        $groups = ChallengeGroup::whereIn('id', $arr)->paginate($request->per_page ?? 10);
+        return [
+            'status' => true,
+            'message' => 'Get my groups.',
+            'data' => $groups,
         ];
     }
 }

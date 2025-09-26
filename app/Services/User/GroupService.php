@@ -118,6 +118,58 @@ class GroupService
         });
         return $groups;
     }
+
+     public function getActiveGroups(?string $search = null, ?int $per_page)
+    {
+
+        $arr = GroupMember::where('user_id', Auth::id())->pluck('challenge_group_id')->toArray();
+
+        $authId = Auth::id();
+        $today = now()->toDateString();
+        $query = ChallengeGroup::withCount('members')
+            ->whereIn('id',$arr)
+            ->where('status', 'Active')
+            ->with('group_habits')
+            ->orderBy('created_at', 'desc');
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('group_name', 'LIKE', "%{$search}%")
+                    ->orWhere('challenge_type', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $groups = $query->paginate($per_page ?? 10);
+
+        $groups->each(function ($group) use ($authId, $today) {
+            $group->max_count = 100;
+            $totalTasks = $group->group_habits->count();
+            $totalMembers = $group->members_count;
+            $completedCount = ChallengeLog::where('challenge_group_id', $group->id)
+                ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->count();
+            $expectedGroupTasks = $totalTasks * $totalMembers;
+            $group->group_daily_progress = $expectedGroupTasks > 0
+                ? round(($completedCount / $expectedGroupTasks) * 100)
+                : 0;
+            $myCompleted = ChallengeLog::where('challenge_group_id', $group->id)
+                ->where('user_id', $authId)
+                ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->count();
+            $group->my_daily_progress = $totalTasks > 0
+                ? round(($myCompleted / $totalTasks) * 100)
+                : 0;
+
+            $group->member_lists = GroupMember::with(['user' => function($q){$q->select('id','full_name','avatar');}])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
+
+            $group->makeHidden('members');
+            $group->makeHidden('group_habits');
+        });
+        return $groups;
+    }
+
     public function viewGroup(int $id)
     {
         $authId = Auth::id();

@@ -137,6 +137,7 @@ Route::middleware('auth:api')->group(function () {
         // groups
         Route::post('/create-group', [GroupController::class, 'createGroup']);
         Route::get('/get-groups', [GroupController::class, 'getGroups']);
+        Route::get('/get-active-groups', [GroupController::class, 'getActiveGroups']);
         Route::get('/view-group/{id?}', [GroupController::class, 'viewGroup']);
         Route::post('/join-group', [GroupController::class, 'joinGroup']);
         Route::post('/log-progress', [GroupController::class, 'logProgress']);
@@ -149,6 +150,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/check-group-member', [GroupController::class, 'checkGroupMember']);
         Route::get('/group-array', [GroupController::class, 'groupArray']);
         Route::get('/view-celebration-member', [GroupController::class, 'viewCelebrationMember']);
+        Route::get('/get-users', [GroupController::class, 'getUsers']);
+        Route::get('/my-group-lists', [GroupController::class, 'myGroupLists']);
 
         // payment
         Route::post('/payment-intent', [PaymentController::class, 'paymentIntent']);
