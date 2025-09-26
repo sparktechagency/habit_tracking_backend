@@ -148,6 +148,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/send-celebration', [GroupController::class, 'sendCelebration']);
         Route::get('/check-group-member', [GroupController::class, 'checkGroupMember']);
         Route::get('/group-array', [GroupController::class, 'groupArray']);
+        Route::get('/view-celebration-member', [GroupController::class, 'viewCelebrationMember']);
 
         // payment
         Route::post('/payment-intent', [PaymentController::class, 'paymentIntent']);

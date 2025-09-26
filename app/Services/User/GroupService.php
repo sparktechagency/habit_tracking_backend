@@ -111,7 +111,7 @@ class GroupService
                 ? round(($myCompleted / $totalTasks) * 100)
                 : 0;
 
-            $group->member_lists = GroupMember::where('challenge_group_id', $group->id)->latest()->take(5)->get();
+            $group->member_lists = GroupMember::with(['user' => function($q){$q->select('id','full_name','avatar');}])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
 
             $group->makeHidden('members');
             $group->makeHidden('group_habits');

@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CreateChallengeGroupRequest;
+use App\Models\ChallengeGroup;
 use App\Models\ChallengeLog;
 use App\Models\GroupMember;
 use App\Models\User;
 use App\Notifications\CelebrationNotification;
 use App\Notifications\NewChallengeCreatedNotification;
 use App\Services\User\GroupService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,7 +45,7 @@ class GroupController extends Controller
             $message = "Keep shining, you did amazing!";
 
             $admin = User::find(1);
-            $users = User::where('id','!=',Auth::id())->get();
+            $users = User::where('id', '!=', Auth::id())->get();
 
             $admin->notify(new NewChallengeCreatedNotification($from, $message));
 
@@ -154,7 +156,7 @@ class GroupController extends Controller
     {
         try {
             $search = $request->query('search');
-            $groups = $this->groupService->getMyCompletedGroups($search,$request->per_page);
+            $groups = $this->groupService->getMyCompletedGroups($search, $request->per_page);
             return $this->sendResponse($groups, 'My completed groups fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
@@ -173,5 +175,19 @@ class GroupController extends Controller
     {
         $arr = GroupMember::where('user_id', Auth::id())->pluck('challenge_group_id')->toArray();
         return ['join_group_ids' => $arr];
+    }
+
+    public function viewCelebrationMember(Request $request)
+    {
+        return [
+            'user' => User::where('id', $request->user_id)->select('id', 'full_name', 'role', 'avatar')->first(),
+            'last_completed_time' => ChallengeLog::where('challenge_group_id', $request->challenge_group_id)
+                ->where('user_id', $request->user_id)
+                ->whereDate('date', Carbon::now())
+                ->latest()
+                ->first()
+                ->completed_at,
+            'challenge_group_name' => ChallengeGroup::where('id', $request->challenge_group_id)->first()->group_name,
+        ];
     }
 }
