@@ -75,7 +75,7 @@ class AdvanceFeatureService
             : 0; // ✅ safe default
 
         $user = User::where('id', $authId)
-            ->select('id', 'full_name', 'role')
+            ->select('id', 'full_name', 'role','avatar')
             ->first();
 
         $completed_group_challenge = ChallengeGroup::where('status', 'Completed')
