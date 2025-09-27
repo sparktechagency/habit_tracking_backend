@@ -10,6 +10,7 @@ use App\Models\GroupMember;
 use App\Models\User;
 use App\Notifications\CelebrationNotification;
 use App\Notifications\NewChallengeCreatedNotification;
+use App\Notifications\SendInviteNotification;
 use App\Services\User\GroupService;
 use Carbon\Carbon;
 use Exception;
@@ -236,5 +237,27 @@ class GroupController extends Controller
             'message' => 'Get my groups.',
             'data' => $groups,
         ];
+    }
+
+    public function sendInvite(Request $request)
+    {
+        try {
+            $user = User::find($request->user_id);
+
+            if (!$user) {
+                throw new Exception('User not found.');
+            }
+
+            $group = ChallengeGroup::where('id',$request->challenge_group_id)->first();
+
+            $from = Auth::user()->full_name;
+            $message = "Invited you to the ".$group->group_name." group.";
+
+            $user->notify(new SendInviteNotification($from, $message, $group));
+
+            return $this->sendResponse([], 'Notification send successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
+        }
     }
 }
