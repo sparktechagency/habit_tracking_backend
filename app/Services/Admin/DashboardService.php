@@ -169,7 +169,7 @@ class DashboardService
         ];
     }
 
-    public function topChallengeChart(?int $filter)
+    public function topHabitChart(?int $filter)
     {
 
         $days = $filter;
@@ -191,6 +191,29 @@ class DashboardService
             'data' => $topHabits,
         ];
     }
+
+    public function topChallengeChart(?int $filter)
+{
+    $days = $filter;
+
+    $startDate = Carbon::now()->subDays($days ?? 30)->startOfDay();
+    $endDate   = Carbon::now()->endOfDay();
+
+    // challenge_logs থেকে habit-wise completed count আনা
+    $topHabits = ChallengeLog::join('group_habits', 'challenge_logs.group_habits_id', '=', 'group_habits.id')
+        ->where('challenge_logs.status', 'Completed')
+        ->whereBetween('challenge_logs.completed_at', [$startDate, $endDate])
+        ->select('group_habits.habit_name', DB::raw('COUNT(challenge_logs.id) as completed_count'))
+        ->groupBy('group_habits.habit_name')
+        ->orderByDesc('completed_count')
+        ->take(5) // top 5 habits
+        ->get();
+
+    return [
+        'data' => $topHabits,
+    ];
+}
+
 
     public function revenueChart()
     {
