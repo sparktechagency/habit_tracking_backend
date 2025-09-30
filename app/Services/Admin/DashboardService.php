@@ -30,7 +30,7 @@ class DashboardService
             ? round(($form_last_week_revenues / $total_revenues) * 100, 2)
             : 0;
 
-        $total_completed_challenges = ChallengeGroup::where('status', 'Completed')->count();
+        $total_completed_challenges = ChallengeGroup::where('status', 'Completed')->count() ?? 0;
 
         $query = ChallengeGroup::where('status', 'Completed')->orderBy('created_at', 'desc');
         $groups = $query->get();
@@ -60,7 +60,7 @@ class DashboardService
             'from_last_week' => $form_last_week_challenges,
             'total_revenues' => $total_revenues,
             'form_last_week_revenues' => '+' . $form_last_week_revenues_percentage . '%',
-            'challenge_completion_rate' => $total_completed_challenges_average_rate . '%',
+            'challenge_completion_rate' => $total_completed_challenges_average_rate ?? 0 . '%',
             'total_challenge_completed' => $total_completed_challenges,
 
         ];
