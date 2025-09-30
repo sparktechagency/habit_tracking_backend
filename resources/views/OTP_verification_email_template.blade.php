@@ -32,8 +32,8 @@
         padding: 15px;
         text-align: center;
         border-radius: 8px;
-        border: 1px dashed #ED6237;
-        color: #ED6237;
+        border: 1px dashed #D6DF22;
+        color: #D6DF22;
       }
       .btn-verify {
         display: inline-block;
@@ -51,15 +51,15 @@
         margin-top: 20px;
       }
       .footer-text a {
-        color: #ED6237;
+        color: #D6DF22;
         text-decoration: none;
       }
       .otp-lock {
-        color: #333;
+        color: #D6DF22;
         font-size: 80px;
       }
       .welcome-section {
-        background: #ED6237;
+        background: #D6DF22;
         padding: 30px;
         border-radius: 4px;
         color: #fff;

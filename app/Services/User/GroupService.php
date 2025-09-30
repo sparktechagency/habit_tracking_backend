@@ -27,7 +27,7 @@ class GroupService
     public function createGroup(array $data): ChallengeGroup
     {
         $startDate = Carbon::now();
-        $endDate = Carbon::now()->addDays(((int) $data['duration']) - 1);
+        $endDate = Carbon::now()->addDays(((int) $data['duration']));
         $group = ChallengeGroup::create([
             'user_id' => Auth::id(),
             'group_name' => $data['group_name'],
