@@ -163,4 +163,15 @@ class AuthController extends Controller
             return $this->sendError($e->getMessage(), 500);
         }
     }
+
+    public function deleteAccount(Request $request)
+    {
+        Auth::user()->delete();
+        JWTAuth::invalidate(JWTAuth::getToken());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Account deleted successfully'
+        ]);
+    }
 }

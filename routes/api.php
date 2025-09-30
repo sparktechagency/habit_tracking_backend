@@ -43,6 +43,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/get-profile', [AuthController::class, 'getProfile']);
     Route::post('/edit-profile', [SettingsController::class, 'editProfile']);
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
+    Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
+
+
     // static page update
     Route::post('pages/{slug}', [StaticPageController::class, 'update']);
     // notification

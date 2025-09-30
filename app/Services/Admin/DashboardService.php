@@ -59,7 +59,7 @@ class DashboardService
             'from_last_week' => $form_last_week_challenges,
             'total_revenues' => $total_revenues,
             'form_last_week_revenues' => '+' . $form_last_week_revenues_percentage . '%',
-            'challenge_completion_rate' => round($total_completed_challenges_average_rate,2) . '%',
+            'challenge_completion_rate' => round($total_completed_challenges_average_rate, 2) . '%',
             'total_challenge_completed' => $total_completed_challenges,
 
         ];
@@ -193,26 +193,26 @@ class DashboardService
     }
 
     public function topChallengeChart(?int $filter)
-{
-    $days = $filter;
+    {
+        $days = $filter;
 
-    $startDate = Carbon::now()->subDays($days ?? 30)->startOfDay();
-    $endDate   = Carbon::now()->endOfDay();
+        $startDate = Carbon::now()->subDays($days ?? 30)->startOfDay();
+        $endDate = Carbon::now()->endOfDay();
 
-    // challenge_logs থেকে habit-wise completed count আনা
-    $topHabits = ChallengeLog::join('group_habits', 'challenge_logs.group_habits_id', '=', 'group_habits.id')
-        ->where('challenge_logs.status', 'Completed')
-        ->whereBetween('challenge_logs.completed_at', [$startDate, $endDate])
-        ->select('group_habits.habit_name', DB::raw('COUNT(challenge_logs.id) as completed_count'))
-        ->groupBy('group_habits.habit_name')
-        ->orderByDesc('completed_count')
-        ->take(5) // top 5 habits
-        ->get();
+        // challenge_logs থেকে habit-wise completed count আনা
+        $topHabits = ChallengeLog::join('group_habits', 'challenge_logs.group_habits_id', '=', 'group_habits.id')
+            ->where('challenge_logs.status', 'Completed')
+            ->whereBetween('challenge_logs.completed_at', [$startDate, $endDate])
+            ->select('group_habits.habit_name', DB::raw('COUNT(challenge_logs.id) as completed_count'))
+            ->groupBy('group_habits.habit_name')
+            ->orderByDesc('completed_count')
+            ->take(5) // top 5 habits
+            ->get();
 
-    return [
-        'data' => $topHabits,
-    ];
-}
+        return [
+            'data' => $topHabits,
+        ];
+    }
 
 
     public function revenueChart()
