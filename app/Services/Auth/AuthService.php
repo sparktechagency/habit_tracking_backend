@@ -29,6 +29,7 @@ class AuthService
             'role' => $data['role'],
             'full_name' => $data['full_name'],
             'email' => $data['email'],
+            'phone_number' => $data['phone_number'],
             'password' => Hash::make($data['password']),
             'otp' => $otp,
             'otp_expires_at' => $otp_expires_at,
