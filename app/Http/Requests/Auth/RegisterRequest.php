@@ -25,6 +25,7 @@ class RegisterRequest extends FormRequest
             'role' => 'required|string|in:USER,PARTNER',
             'full_name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users,email|max:255',
+            'phone_number' => 'required|string|max:15',
             'password' => 'required|string|min:8|confirmed',
         ];
     }
