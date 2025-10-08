@@ -43,6 +43,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/get-profile', [AuthController::class, 'getProfile']);
     Route::post('/edit-profile', [SettingsController::class, 'editProfile']);
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
+    Route::get('/syn-contacts', [AuthController::class, 'synContacts']);
     Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
 
 
