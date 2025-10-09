@@ -29,6 +29,9 @@ class SettingsRequest extends FormRequest
             'full_name' => 'nullable|string|max:255',
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
+             'location' => 'nullable|string|max:255',
+            'latitude' => 'nullable|string|max:255',
+            'longitude' => 'nullable|string|max:255',
 
             'business_name' => 'nullable|string|max:255',
             'user_name' => "nullable|string|max:255|unique:profiles,user_name,{$profileId}",

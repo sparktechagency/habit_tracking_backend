@@ -21,7 +21,7 @@ class RewardController extends Controller
     public function getAvailableRewards(Request $request)
     {
         try {
-            $rewards = $this->rewardService->getAvailableRewards($request->search, $request->per_page);
+            $rewards = $this->rewardService->getAvailableRewards($request->search, $request->per_page, $request->radius);
             return response()->json([
                 'status' => true,
                 'message' => 'Available rewards fetched successfully.',

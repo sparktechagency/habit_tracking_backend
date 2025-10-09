@@ -27,6 +27,9 @@ class RewardRequest extends FormRequest
             'description' => 'nullable|string',
             'expiration_date' => 'required',
             'purchase_point' => 'required|integer',
+            'location' => 'required|string|max:255',
+            'latitude' => 'required|string|max:255',
+            'longitude' => 'required|string|max:255',
             'status' => 'in:Enable,Disable',
         ];
     }

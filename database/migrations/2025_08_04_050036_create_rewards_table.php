@@ -18,6 +18,9 @@ return new class extends Migration {
             $table->longText('description')->nullable();
             $table->date('expiration_date');
             $table->unsignedBigInteger('purchase_point')->default(0);
+            $table->string('location')->nullable();
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->enum('status', ['Enable', 'Disable'])->default('Enable');
             $table->enum('admin_approved',['Accepted','Pending','Canceled'])->default('Pending');
             $table->timestamps();

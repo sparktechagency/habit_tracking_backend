@@ -35,7 +35,7 @@ class RewardService
     {
         $data['partner_id'] = Auth::id();
         $data['admin_approved'] = 'Pending';
-        $data['expiration_date'] = Carbon::createFromFormat('m/d/Y', $data['expiration_date'])
+        $data['expiration_date'] = Carbon::createFromFormat('d/m/Y', $data['expiration_date'])
             ->format('Y-m-d');
         
         return Reward::create($data);
