@@ -15,7 +15,6 @@ class SettingsService
             'full_name',
             'phone_number',
             'address',
-            'location',
             'latitude',
             'longitude'
         ])->toArray();

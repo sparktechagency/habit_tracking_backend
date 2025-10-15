@@ -37,6 +37,10 @@ class RewardService
         $data['admin_approved'] = 'Pending';
         $data['expiration_date'] = Carbon::createFromFormat('d/m/Y', $data['expiration_date'])
             ->format('Y-m-d');
+
+        $data['location'] = Auth::user()->address;
+        $data['latitude'] = Auth::user()->latitude;
+        $data['longitude'] = Auth::user()->longitude;
         
         return Reward::create($data);
     }
