@@ -66,7 +66,7 @@ class RewardService
         $results = $query->latest()->paginate($per_page ?? 10);
 
         return [
-            'message' => "Nearby Restaurants within {$radius}km",
+            'message' => "Nearby reward within {$radius}km",
             'center' => [
                 'latitude' => $lat,
                 'longitude' => $lng,
