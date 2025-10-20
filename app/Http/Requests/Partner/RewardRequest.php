@@ -28,6 +28,8 @@ class RewardRequest extends FormRequest
             'expiration_date' => 'required',
             'purchase_point' => 'required|integer',
             'status' => 'in:Enable,Disable',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:20480', // 20 mb
         ];
+
     }
 }

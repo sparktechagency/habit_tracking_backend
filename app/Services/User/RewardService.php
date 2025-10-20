@@ -108,7 +108,7 @@ class RewardService
                 ->havingRaw("distance <= ?", [$radius])
                 ->orderBy('distance');
         } else {
-             $query = Reward::where('status', 'Enable')
+            $query = Reward::where('status', 'Enable')
                 ->where('admin_approved', 'Accepted')
                 ->where('expiration_date', '>', Carbon::now());
         }
@@ -131,57 +131,52 @@ class RewardService
             'data' => $results
         ];
     }
-
-
-
     public static function getAvailableRewards(?string $search, ?int $per_page = null, ?int $radius)
-{
-    $radius = $radius ?? 10;
-    $user = Auth::user();
+    {
+        $radius = $radius ?? 10;
+        $user = Auth::user();
 
-    $lat = $user->latitude;
-    $lng = $user->longitude;
+        $lat = $user->latitude;
+        $lng = $user->longitude;
 
-    if ($user->latitude != null && $user->longitude != null) {
-        $query = Reward::select(
-            '*',
-            DB::raw("(6371 * acos(
+        if ($user->latitude != null && $user->longitude != null) {
+            $query = Reward::select(
+                '*',
+                DB::raw("(6371 * acos(
                 cos(radians($lat)) * cos(radians(latitude)) *
                 cos(radians(longitude) - radians($lng)) +
                 sin(radians($lat)) * sin(radians(latitude))
             )) AS distance")
-        )
-        ->where('status', 'Enable')
-        ->where('admin_approved', 'Accepted')
-        ->whereDate('expiration_date', '>', now()) // ✅ শুধু date অংশ check করবে
-        ->havingRaw("distance <= ?", [$radius])
-        ->orderBy('distance');
-    } else {
-        $query = Reward::where('status', 'Enable')
-            ->where('admin_approved', 'Accepted')
-            ->whereDate('expiration_date', '>', now()); // ✅ শুধু date অংশ check করবে
+            )
+                ->where('status', 'Enable')
+                ->where('admin_approved', 'Accepted')
+                ->whereDate('expiration_date', '>', now()) // ✅ শুধু date অংশ check করবে
+                ->havingRaw("distance <= ?", [$radius])
+                ->orderBy('distance');
+        } else {
+            $query = Reward::where('status', 'Enable')
+                ->where('admin_approved', 'Accepted')
+                ->whereDate('expiration_date', '>', now()); // ✅ শুধু date অংশ check করবে
+        }
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('challenge_type', 'like', "%{$search}%");
+            });
+        }
+
+        $results = $query->latest()->paginate($per_page ?? 10);
+
+        return [
+            'message' => "Nearby reward within {$radius}km",
+            'center' => [
+                'latitude' => $lat,
+                'longitude' => $lng,
+            ],
+            'data' => $results
+        ];
     }
-
-    if (!empty($search)) {
-        $query->where(function ($q) use ($search) {
-            $q->where('title', 'like', "%{$search}%")
-              ->orWhere('challenge_type', 'like', "%{$search}%");
-        });
-    }
-
-    $results = $query->latest()->paginate($per_page ?? 10);
-
-    return [
-        'message' => "Nearby reward within {$radius}km",
-        'center' => [
-            'latitude' => $lat,
-            'longitude' => $lng,
-        ],
-        'data' => $results
-    ];
-}
-
-
     public function viewReward(?int $id)
     {
         $reword = Reward::where('status', 'Enable')

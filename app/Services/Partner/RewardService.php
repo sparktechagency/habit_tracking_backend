@@ -6,6 +6,7 @@ use App\Models\Reward;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class RewardService
 {
@@ -41,7 +42,12 @@ class RewardService
         $data['location'] = Auth::user()->address;
         $data['latitude'] = Auth::user()->latitude;
         $data['longitude'] = Auth::user()->longitude;
-        
+
+        if (isset($data['image']) && $data['image']->isValid()) {
+            $path = $data['image']->store('images', 'public');
+            $data['image'] = Storage::url($path);
+        }
+
         return Reward::create($data);
     }
     public function enableDisableReward(int $id): ?Reward
@@ -62,9 +68,9 @@ class RewardService
         $rewards = Reward::where('partner_id', Auth::id())
             ->whereDate('expiration_date', '>=', $currentDate)
             ->latest()
-            ->paginate($per_page??10);
+            ->paginate($per_page ?? 10);
 
-        return  $rewards;
-         
+        return $rewards;
+
     }
 }

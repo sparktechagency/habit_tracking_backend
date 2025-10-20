@@ -11,6 +11,8 @@ class Reward extends Model
 
     protected $guarded = ['id'];
 
+     protected $appends = ['image_url'];
+
     // expiration_date কে Carbon instance বানাতে
     protected $casts = [
         'expiration_date' => 'date',
@@ -19,6 +21,13 @@ class Reward extends Model
     public function partner()
     {
         return $this->belongsTo(User::class, 'partner_id');
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image
+            ? asset($this->image)
+            : 'https://ui-avatars.com/api/?background=random&name=' . urlencode($this->title);
     }
 
 

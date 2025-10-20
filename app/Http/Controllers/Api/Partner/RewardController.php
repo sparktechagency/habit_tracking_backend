@@ -42,11 +42,11 @@ class RewardController extends Controller
             // }
             $reward = $this->rewardService->addReward($request->validated());
 
-             $from = Auth::user()->full_name;
+            $from = Auth::user()->full_name;
             $message = "Keep shining, you did amazing!";
 
             $admin = User::find(1);
-            $users = User::where('id','!=',Auth::id())->get();
+            $users = User::where('id', '!=', Auth::id())->get();
 
             $admin->notify(new NewRewardCreatedNotification($from, $message));
 
