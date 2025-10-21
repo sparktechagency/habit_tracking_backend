@@ -107,9 +107,6 @@ class AdvanceFeatureService
     public function premiumUserCheck()
     {
         $plan = Plan::where('user_id', Auth::id())->latest()->first();
-
-
-
         if ($plan) {
             if ($plan->renewal >= Carbon::now()) {
                 $plan->features = json_decode($plan->features);
@@ -129,7 +126,6 @@ class AdvanceFeatureService
                 'current_plan' => Subscription::where('plan_name', 'Free')->first(),
             ];
         }
-
     }
     public function habitCalendar(int $year, int $month)
     {

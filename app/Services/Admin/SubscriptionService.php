@@ -44,13 +44,12 @@ class SubscriptionService
 
         return $subscription;
     }
-
     public function deleteSubscription(int $id): bool
     {
-        $challenge = Subscription::find($id);
+        $subscription = Subscription::find($id);
 
-        if ($challenge && $challenge->plan_name != 'Free') {
-            return $challenge->delete();
+        if ($subscription && $subscription->plan_name != 'Free') {
+            return $subscription->delete();
         }
         return false;
     }
