@@ -48,7 +48,7 @@ class SubscriptionService
     {
         $subscription = Subscription::find($id);
 
-        if ($subscription && $subscription->plan_name != 'Free') {
+        if ($subscription) {
             return $subscription->delete();
         }
         return false;
