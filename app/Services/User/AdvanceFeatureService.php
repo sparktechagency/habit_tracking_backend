@@ -10,6 +10,7 @@ use App\Models\GroupHabit;
 use App\Models\GroupMember;
 use App\Models\Habit;
 use App\Models\HabitLog;
+use App\Models\Plan;
 use App\Models\Profile;
 use App\Models\Subscription;
 use App\Models\Transaction;
@@ -75,7 +76,7 @@ class AdvanceFeatureService
             : 0; // ✅ safe default
 
         $user = User::where('id', $authId)
-            ->select('id', 'full_name', 'role','avatar')
+            ->select('id', 'full_name', 'role', 'avatar')
             ->first();
 
         $completed_group_challenge = ChallengeGroup::where('status', 'Completed')
@@ -105,21 +106,26 @@ class AdvanceFeatureService
     }
     public function premiumUserCheck()
     {
-        $plan = Transaction::where('user_id', Auth::id())->exists();
+        $plan = Plan::where('user_id', Auth::id())->latest()->first();
+
+        $plan->features = json_decode($plan->features);
 
         if ($plan) {
-            if (Transaction::where('user_id', Auth::id())->latest()->first()->renewal > Carbon::now()) {
+            if ($plan->renewal >= Carbon::now()) {
                 return [
-                    'is_premium_check' => true,
+                    'is_premium_user' => true,
+                    'current_plan' => $plan,
                 ];
             } else {
                 return [
                     'is_premium_check' => false,
+                    'current_plan' => Subscription::where('plan_name', 'Free')->first(),
                 ];
             }
         } else {
             return [
                 'is_premium_check' => false,
+                'current_plan' => Subscription::where('plan_name', 'Free')->first(),
             ];
         }
 

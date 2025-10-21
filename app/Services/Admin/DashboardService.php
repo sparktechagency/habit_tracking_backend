@@ -18,8 +18,8 @@ class DashboardService
 {
     public function dashboardInfo()
     {
-        $total_users = User::all()->count();
-        $form_yesterday_users = User::whereDate('created_at', Carbon::now()->subDay())->count();
+        $total_users = User::where('role','!=','ADMIN')->count();
+        $form_yesterday_users = User::where('role','!=','ADMIN')->whereDate('created_at', Carbon::now()->subDay())->count();
 
         $total_challenges = ChallengeGroup::all()->count();
         $form_last_week_challenges = ChallengeGroup::whereBetween('created_at', [Carbon::now()->subDays(6), Carbon::now()])->count();

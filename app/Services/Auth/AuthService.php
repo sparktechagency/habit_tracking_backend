@@ -4,6 +4,7 @@ namespace App\Services\Auth;
 
 use App\Mail\VerifyOTPMail;
 use App\Models\Profile;
+use App\Models\Subscription;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -89,6 +90,9 @@ class AuthService
             'otp_verified_at' => now(),
             'status' => 'active',
         ]);
+
+        Subscription::where('plan_name','Free')->increment('active_subscribers');
+
         return ['success' => true, 'user' => $user];
     }
     public function resendOtp(string $email): array
@@ -114,6 +118,11 @@ class AuthService
         } catch (Exception $e) {
             Log::error('OTP email failed: ' . $e->getMessage());
         }
+
+        if(Subscription::where('plan_name','Free')->first()->active_subscribers > 0){
+            Subscription::where('plan_name','Free')->decrement('active_subscribers');
+        }
+
         return ['success' => true];
     }
     public function forgotPassword(string $email): array
@@ -139,6 +148,11 @@ class AuthService
         } catch (Exception $e) {
             Log::error('OTP email failed: ' . $e->getMessage());
         }
+
+         if(Subscription::where('plan_name','Free')->first()->active_subscribers > 0){
+            Subscription::where('plan_name','Free')->decrement('active_subscribers');
+        }
+
         return ['success' => true];
     }
     public function changePassword(string $newPassword): array

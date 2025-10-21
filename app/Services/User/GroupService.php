@@ -8,6 +8,7 @@ use App\Models\ChallengeLog;
 use App\Models\GroupHabit;
 use App\Models\GroupMember;
 use App\Models\HabitLog;
+use App\Models\Plan;
 use App\Models\Profile;
 use App\Models\User;
 use Carbon\Carbon;
@@ -111,7 +112,8 @@ class GroupService
                 ? round(($myCompleted / $totalTasks) * 100)
                 : 0;
 
-            $group->member_lists = GroupMember::with(['user' => function($q){$q->select('id','full_name','avatar');}])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
+            $group->member_lists = GroupMember::with(['user' => function ($q) {
+                $q->select('id', 'full_name', 'avatar'); }])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
 
             $group->makeHidden('members');
             $group->makeHidden('group_habits');
@@ -119,7 +121,7 @@ class GroupService
         return $groups;
     }
 
-     public function getActiveGroups(?string $search = null, ?int $per_page)
+    public function getActiveGroups(?string $search = null, ?int $per_page)
     {
 
         $arr = GroupMember::where('user_id', Auth::id())->pluck('challenge_group_id')->toArray();
@@ -127,7 +129,7 @@ class GroupService
         $authId = Auth::id();
         $today = now()->toDateString();
         $query = ChallengeGroup::withCount('members')
-            ->whereIn('id',$arr)
+            ->whereIn('id', $arr)
             ->where('status', 'Active')
             ->with('group_habits')
             ->orderBy('created_at', 'desc');
@@ -162,7 +164,8 @@ class GroupService
                 ? round(($myCompleted / $totalTasks) * 100)
                 : 0;
 
-            $group->member_lists = GroupMember::with(['user' => function($q){$q->select('id','full_name','avatar');}])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
+            $group->member_lists = GroupMember::with(['user' => function ($q) {
+                $q->select('id', 'full_name', 'avatar'); }])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
 
             $group->makeHidden('members');
             $group->makeHidden('group_habits');
@@ -544,7 +547,23 @@ class GroupService
 
 
         $profile = Profile::where('user_id', Auth::id())->first();
-        $profile->increment('total_points');
+
+        $plan = Plan::where('user_id', Auth::id())->latest()->first();
+        if ($plan) {
+            if ($plan->renewal >= Carbon::now()) {
+                $is_premium_check = true;
+            } else {
+                $is_premium_check = false;
+            }
+        } else {
+            $is_premium_check = false;
+        }
+
+        if ($is_premium_check == false) {
+            $profile->increment('total_points', 1);
+        } elseif ($is_premium_check == true) {
+            $profile->increment('total_points', 2);
+        }
 
         $totalPoints = $profile->total_points;
 

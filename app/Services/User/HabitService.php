@@ -4,6 +4,7 @@ namespace App\Services\User;
 
 use App\Models\Habit;
 use App\Models\HabitLog;
+use App\Models\Plan;
 use App\Models\Profile;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -77,7 +78,23 @@ class HabitService
         }
 
         $profile = Profile::where('user_id', Auth::id())->first();
-        $profile->increment('total_points');
+
+        $plan = Plan::where('user_id', Auth::id())->latest()->first();
+        if ($plan) {
+            if ($plan->renewal >= Carbon::now()) {
+                $is_premium_check = true;
+            } else {
+                $is_premium_check = false;
+            }
+        } else {
+            $is_premium_check = false; 
+        }
+
+        if($is_premium_check == false){
+            $profile->increment('total_points',1);
+        }elseif($is_premium_check == true){
+            $profile->increment('total_points',2);
+        }
 
         $totalPoints = $profile->total_points;
 

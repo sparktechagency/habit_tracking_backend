@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Exception;
@@ -57,8 +59,8 @@ class PaymentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'payment_intent_id' => 'required',
-            'amount' => 'required|numeric',
-            'card_number' => 'nullable'
+            'card_number' => 'nullable',
+            'subscription_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -72,23 +74,38 @@ class PaymentController extends Controller
 
         try {
             $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
-            if ($paymentIntent->status === 'succeeded') {  // succeeded or requires_payment_method
-                $plan = Transaction::Create([
+            if ($paymentIntent->status === 'requires_payment_method') {  // succeeded or requires_payment_method
+
+                $subscription = Subscription::where('id', $request->subscription_id)->first();
+
+                $plan = Plan::create([
+                    'user_id' => Auth::id(),
+                    'plan_name' => $subscription->plan_name,
+                    'duration' => $subscription->duration,
+                    'price' => $subscription->price,
+                    'features' => json_encode($subscription->features),
+                    'renewal' => $subscription->duration == 'Monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear(),
+                ]);
+
+                $transaction = Transaction::Create([
                     'payment_intent_id' => $request->payment_intent_id,
                     'card_number' => $request->card_number,
-                    'user_id' => Auth::id(),
-                    // 'subscription_id' => $request->subscription_id,
-                    'plan_name' => 'Premium',
+                    'user_name' => Auth::user()->full_name,
+                    'plan_name' => Subscription::where('id', $request->subscription_id)->first()->plan_name,
                     'date' => Carbon::now(),
-                    'renewal' => Carbon::now()->addMonth(),
-                    'amount' => $request->amount,
+                    'amount' => Subscription::where('id', $request->subscription_id)->first()->price,
                     'status' => 'Completed'
                 ]);
+
+                $plan->features = json_decode($plan->features);
 
                 return response()->json([
                     'status' => true,
                     'message' => 'Payment done and plan created successfully',
-                    'data' => $plan,
+                    'data' => [
+                        'plan' => $plan,
+                        'transaction' => $transaction,
+                    ],
                 ], 200);
 
             } else {

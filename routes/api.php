@@ -94,9 +94,11 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('/approved-reward', [AvailableRewardController::class, 'approvedReward']);
         Route::patch('/canceled-reward', [AvailableRewardController::class, 'canceledReward']);
 
-        // subscriptions
+        // subscriptions        
+        Route::post('/add-subscription', [SubscriptionControler::class, 'addSubscription']);
         Route::get('/get-subscriptions', [SubscriptionControler::class, 'getSubscriptions']);
-        Route::post('/edit-premium-price/{id?}', [SubscriptionControler::class, 'editPremiumPrice']);
+        Route::post('/edit-subscription/{id?}', [SubscriptionControler::class, 'editSubscription']);
+        Route::delete('/delete-subscription/{id?}', [SubscriptionControler::class, 'deleteSubscription']);
 
         // transation
         Route::get('/get-transations', [TransationController::class, 'getTransations']);

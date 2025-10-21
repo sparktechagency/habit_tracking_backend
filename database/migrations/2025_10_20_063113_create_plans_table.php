@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('plans', function (Blueprint $table) {
             $table->id();
-            $table->string('payment_intent_id');
-            $table->string('card_number')->nullable();
-            $table->string('user_name');
+            $table->unsignedInteger('user_id');
             $table->string('plan_name');
-            $table->timestamp('date');
-            $table->decimal('amount',10,2);
-            $table->string('status')->default('Completed');
+            $table->string('duration');
+            $table->decimal('price',10,2);
+            $table->json('features');
+            $table->timestamp('renewal');
+
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('plans');
     }
 };

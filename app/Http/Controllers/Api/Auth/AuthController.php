@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\OtpVerifyRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResendOtpRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Services\Auth\AuthService;
 use App\Traits\ApiResponseTrait;
@@ -79,6 +80,7 @@ class AuthController extends Controller
             $tokenExpiry = now()->addDays(7);
             $customClaims = ['exp' => $tokenExpiry->timestamp];
             $token = JWTAuth::customClaims($customClaims)->fromUser($user);
+
             return $this->sendResponse([
                 'token' => $token,
                 'token_type' => 'bearer',

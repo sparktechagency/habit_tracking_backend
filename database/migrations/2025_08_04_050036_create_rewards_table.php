@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->string('location')->nullable();
             $table->string('latitude')->nullable();
             $table->string('longitude')->nullable();
+            $table->string('image')->nullable();
             $table->enum('status', ['Enable', 'Disable'])->default('Enable');
             $table->enum('admin_approved',['Accepted','Pending','Canceled'])->default('Pending');
             $table->timestamps();

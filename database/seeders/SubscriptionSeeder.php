@@ -15,17 +15,41 @@ class SubscriptionSeeder extends Seeder
     {
         Subscription::create([
             'plan_name' => 'Free',
-            'duration' => '-',
+            'duration' => 'Ongoing',
             'price' => 0.00,
-            'features' => '2 features available',
+            'features' => [
+                'Basic challenges',
+                'Unlimited habits tracking',
+                'Unlimited Say No'
+            ],
             'active_subscribers' => 0,
         ]);
 
         Subscription::create([
             'plan_name' => 'Premium',
-            'duration' => '1 Month',
+            'duration' => 'Monthly',
+            'price' => 5.99,
+            'features' => [
+                'Basic challenges',
+                'Unlimited habits tracking',
+                'Unlimited Say No',
+                'Advanced analytics',
+                'Premium rewards (earn point 2x)'
+            ],
+            'active_subscribers' => 0,
+        ]);
+
+        Subscription::create([
+            'plan_name' => 'Premium',
+            'duration' => 'Yearly',
             'price' => 29.99,
-            'features' => 'All features available',
+            'features' => [
+                'Basic challenges',
+                'Unlimited habits tracking',
+                'Unlimited Say No',
+                'Advanced analytics',
+                'Premium rewards (earn point 2x)'
+            ],
             'active_subscribers' => 0,
         ]);
     }
