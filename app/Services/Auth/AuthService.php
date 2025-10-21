@@ -91,7 +91,7 @@ class AuthService
             'status' => 'active',
         ]);
 
-        Subscription::where('plan_name','Free')->increment('active_subscribers');
+        Subscription::where('plan_name', 'Free')->increment('active_subscribers');
 
         return ['success' => true, 'user' => $user];
     }
@@ -119,8 +119,10 @@ class AuthService
             Log::error('OTP email failed: ' . $e->getMessage());
         }
 
-        if(Subscription::where('plan_name','Free')->first()->active_subscribers > 0){
-            Subscription::where('plan_name','Free')->decrement('active_subscribers');
+        if ($user->otp_verified_at != null) {
+            if (Subscription::where('plan_name', 'Free')->first()->active_subscribers > 0) {
+                Subscription::where('plan_name', 'Free')->decrement('active_subscribers');
+            }
         }
 
         return ['success' => true];
@@ -149,8 +151,10 @@ class AuthService
             Log::error('OTP email failed: ' . $e->getMessage());
         }
 
-         if(Subscription::where('plan_name','Free')->first()->active_subscribers > 0){
-            Subscription::where('plan_name','Free')->decrement('active_subscribers');
+        if ($user->otp_verified_at != null) {
+            if (Subscription::where('plan_name', 'Free')->first()->active_subscribers > 0) {
+                Subscription::where('plan_name', 'Free')->decrement('active_subscribers');
+            }
         }
 
         return ['success' => true];
@@ -192,7 +196,7 @@ class AuthService
             'data' => $user,
         ];
     }
-    
+
     public function logout(): array
     {
         try {

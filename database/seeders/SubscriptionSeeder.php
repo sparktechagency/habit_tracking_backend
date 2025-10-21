@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -22,7 +23,7 @@ class SubscriptionSeeder extends Seeder
                 'Unlimited habits tracking',
                 'Unlimited Say No'
             ],
-            'active_subscribers' => 0,
+            'active_subscribers' => 3,
         ]);
 
         Subscription::create([
