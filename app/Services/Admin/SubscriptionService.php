@@ -49,7 +49,7 @@ class SubscriptionService
     {
         $challenge = Subscription::find($id);
 
-        if ($challenge) {
+        if ($challenge && $challenge->plan_name != 'Free') {
             return $challenge->delete();
         }
         return false;

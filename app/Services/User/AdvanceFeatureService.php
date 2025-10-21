@@ -108,10 +108,11 @@ class AdvanceFeatureService
     {
         $plan = Plan::where('user_id', Auth::id())->latest()->first();
 
-        $plan->features = json_decode($plan->features);
+
 
         if ($plan) {
             if ($plan->renewal >= Carbon::now()) {
+                $plan->features = json_decode($plan->features);
                 return [
                     'is_premium_user' => true,
                     'current_plan' => $plan,
