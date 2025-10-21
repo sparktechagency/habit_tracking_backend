@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 
 class AddSubscriptionRequest extends FormRequest
 {
@@ -23,11 +24,25 @@ class AddSubscriptionRequest extends FormRequest
     {
 
         return [
-            'plan_name' => 'required|string|max:255',
+            'plan_name' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $existingPlan = DB::table('subscriptions')
+                        ->where('id', '!=', 1)
+                        ->where('plan_name', $value)
+                        ->first();
+
+                    if ($existingPlan) {
+                        $fail('You cannot create a plan with the name Free ! Please enter a different name.');
+                    }
+                },
+            ],
             'duration' => 'required|string|in:monthly,yearly',
             'price' => 'required|numeric|min:0',
             'features' => 'required|array|min:1',
-            'features.*' => 'string|max:255', // array এর প্রতিটি item string হতে হবে
+            'features.*' => 'string|max:255',
         ];
     }
 }
