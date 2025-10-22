@@ -18,8 +18,8 @@ class DashboardService
 {
     public function dashboardInfo()
     {
-        $total_users = User::where('role','!=','ADMIN')->count();
-        $form_yesterday_users = User::where('role','!=','ADMIN')->whereDate('created_at', Carbon::now()->subDay())->count();
+        $total_users = User::where('role', '!=', 'ADMIN')->count();
+        $form_yesterday_users = User::where('role', '!=', 'ADMIN')->whereDate('created_at', Carbon::now()->subDay())->count();
 
         $total_challenges = ChallengeGroup::all()->count();
         $form_last_week_challenges = ChallengeGroup::whereBetween('created_at', [Carbon::now()->subDays(6), Carbon::now()])->count();
@@ -57,7 +57,7 @@ class DashboardService
             'from_yesterday' => $form_yesterday_users,
             'total_challenges' => $total_challenges,
             'from_last_week' => $form_last_week_challenges,
-            'total_revenues' => $total_revenues,
+            'total_revenues' => '$' . $total_revenues,
             'form_last_week_revenues' => '+' . $form_last_week_revenues_percentage . '%',
             'challenge_completion_rate' => round($total_completed_challenges_average_rate, 2) . '%',
             'total_challenge_completed' => $total_completed_challenges,
