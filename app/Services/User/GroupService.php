@@ -677,6 +677,8 @@ class GroupService
             ];
         }
 
+         $summaries = array_reverse($summaries);
+
         $achieved_point = ChallengeLog::where('challenge_group_id', $groupId)
             ->where('user_id', Auth::id())
             ->where('status', 'Completed')
