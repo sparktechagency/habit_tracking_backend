@@ -28,6 +28,7 @@ class SettingsRequest extends FormRequest
             'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:20480',
             'full_name' => 'nullable|string|max:255',
             'phone_number' => 'nullable|string|max:20',
+            'country_code' => 'nullable|string|max:10',
             'address' => 'nullable|string|max:500',
              'location' => 'nullable|string|max:255',
             'latitude' => 'nullable|string|max:255',

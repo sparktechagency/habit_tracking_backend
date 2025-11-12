@@ -16,7 +16,8 @@ class SettingsService
             'phone_number',
             'address',
             'latitude',
-            'longitude'
+            'longitude',
+            'country_code'
         ])->toArray();
 
         if (isset($data['avatar'])) {
