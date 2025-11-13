@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\OtpVerifyRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResendOtpRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
+use App\Models\Profile;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Services\Auth\AuthService;
@@ -17,8 +18,10 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 use Symfony\Component\CssSelector\Node\FunctionNode;
@@ -35,6 +38,100 @@ class AuthController extends Controller
     public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
+    }
+
+    public function socialLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'full_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'google_id' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()
+            ], 400);
+        }
+
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser) {
+            $socialMatch = $request->has('google_id') && $existingUser->google_id === $request->google_id;
+
+            if ($socialMatch) {
+
+                Auth::login($existingUser);
+
+                $tokenExpiry = Carbon::now()->addDays(7);
+                $customClaims = ['exp' => $tokenExpiry->timestamp];
+                $token = JWTAuth::customClaims($customClaims)->fromUser($existingUser);
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Login successful',
+                    'token' => $token
+                ], 200);
+            } elseif (is_null($existingUser->google_id)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User already exists. Please sign in manually.'
+                ], 422);
+            } else {
+                $existingUser->update([
+                    'google_id' => $request->google_id ?? $existingUser->google_id,
+                ]);
+
+                Auth::login($existingUser);
+
+                $tokenExpiry = Carbon::now()->addDays(7);
+                $customClaims = ['exp' => $tokenExpiry->timestamp];
+                $token = JWTAuth::customClaims($customClaims)->fromUser($existingUser);
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Login successful',
+                    'token' => $token
+                ], 200);
+            }
+        }
+
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $filepath = $file->storeAs('avatars', $filename, 'public');
+            $avatarPath = '/storage/' . $filepath;
+        }
+
+        $user = User::create([
+            'full_name' => $request->full_name,
+            'email' => $request->email,
+            'password' => Hash::make(Str::random(16)),
+            'avatar' => $avatarPath ?? null,
+            'role' => 'USER',
+            'google_id' => $request->google_id ?? null,
+            'status' => 'active',
+        ]);
+
+        Profile::create([
+            'user_id' => $user->id,
+        ]);
+
+        Auth::login($user);
+
+        $tokenExpiry = Carbon::now()->addDays(7);
+        $customClaims = ['exp' => $tokenExpiry->timestamp];
+        $token = JWTAuth::customClaims($customClaims)->fromUser($user);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User registered and logged in successfully.',
+            'token' => $token,
+            'data' => $user
+        ], 200);
     }
     public function register(RegisterRequest $request)
     {
