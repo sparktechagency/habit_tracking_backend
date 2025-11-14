@@ -31,6 +31,8 @@ class AdvanceFeatureService
             ->select('id', 'habit_name')
             ->get();
 
+        $habit_logs = HabitLog::where('user_id', $authId)->count();
+
         $arr = [];
         foreach ($habit_lists as $habit) {
             $completedDays = HabitLog::where('user_id', $authId)
@@ -92,7 +94,7 @@ class AdvanceFeatureService
             'total_points' => $profile->total_points ?? 0,
             'used_points' => $profile->used_points ?? 0,
             'remaining_points' => ($profile->total_points ?? 0) - ($profile->used_points ?? 0),
-            'completed_habit' => $habit_lists->count(),
+            'completed_habit' => $habit_logs,
             'longest_streaks_avg' => round($avg),
             'longest_streaks_max' => $max,
             'longest_streak_month' => $now->format('F Y'),
