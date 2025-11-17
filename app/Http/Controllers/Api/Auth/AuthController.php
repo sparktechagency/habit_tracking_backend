@@ -45,6 +45,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
+            'role' => 'required',
             'google_id' => 'nullable|string',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
@@ -72,7 +73,8 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => true,
                     'message' => 'Login successful',
-                    'token' => $token
+                    'token' => $token,
+                    'data' => $existingUser
                 ], 200);
             } elseif (is_null($existingUser->google_id)) {
                 return response()->json([
@@ -93,7 +95,8 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => true,
                     'message' => 'Login successful',
-                    'token' => $token
+                    'token' => $token,
+                    'data' => $existingUser
                 ], 200);
             }
         }
@@ -111,7 +114,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make(Str::random(16)),
             'avatar' => $avatarPath ?? null,
-            'role' => 'USER',
+            'role' => $request->role,
             'google_id' => $request->google_id ?? null,
             'status' => 'active',
         ]);
@@ -414,7 +417,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-         $contactNumbers = $request->contact_lists;
+        $contactNumbers = $request->contact_lists;
 
         $matchedUsers = User::where(function ($q) use ($contactNumbers) {
             $q->whereIn('phone_number', $contactNumbers)

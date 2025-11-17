@@ -212,10 +212,10 @@ class AdvanceFeatureService
             'data' => $graphData,
         ];
     }
-    public function modeTrackLineGraphOld(?string $filter)
+    public function modeTrackLineGraph(?string $filter)
     {
         $userId = Auth::id();
-        $months = 12;
+        $months = 8;
 
         // current or last 6 month / 12 month
         // $months = $filter == 'current' ? 1 : 12;
@@ -238,7 +238,12 @@ class AdvanceFeatureService
         // }
 
         $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
+
+        // $startDate->addMonth();
+
         $endDate = Carbon::now()->endOfMonth();
+
+        // $endDate->addMonth();
 
         $completedLogs = HabitLog::where('user_id', $userId)
             ->where('status', 'Completed')
@@ -274,7 +279,7 @@ class AdvanceFeatureService
         ];
     }
 
-    public function modeTrackLineGraph(?string $filter)
+    public function modeTrackLineGraphUp(?string $filter)
     {
         $userId = Auth::id();
         $monthsToShow = 12; // সবসময় 12 মাস দেখাবে
@@ -316,7 +321,7 @@ class AdvanceFeatureService
         ];
     }
 
-    public function sayOnBarChartOld()
+    public function sayOnBarChartmain()
     {
         $userId = Auth::id();
         $currentYear = Carbon::now()->year;
@@ -343,7 +348,53 @@ class AdvanceFeatureService
         ];
 
     }
+
     public function sayOnBarChart()
+{
+    $userId = Auth::id();
+    $currentMonth = Carbon::now()->month;
+    $currentYear = Carbon::now()->year;
+
+    $monthsToShow = 8; // last 8 months
+
+    // fetch entries for last 8 months
+    $startDate = Carbon::now()->subMonths($monthsToShow - 1)->startOfMonth();
+    $endDate = Carbon::now()->endOfMonth();
+
+    $entries = Entry::where('user_id', $userId)
+        ->whereBetween('date', [$startDate, $endDate])
+        ->selectRaw('YEAR(date) as year, MONTH(date) as month, COUNT(*) as total_say_no')
+        ->groupBy('year', 'month')
+        ->orderBy('year')
+        ->orderBy('month')
+        ->get();
+
+    $months = [];
+
+    // loop last 8 months starting from oldest
+    for ($i = $monthsToShow - 1; $i >= 0; $i--) {
+        $date = Carbon::now()->subMonths($i);
+        $monthNumber = $date->month;
+        $yearNumber = $date->year;
+
+        $found = $entries->firstWhere(function ($entry) use ($monthNumber, $yearNumber) {
+            return $entry->month == $monthNumber && $entry->year == $yearNumber;
+        });
+
+        $months[] = [
+            'month' => $date->format('M Y'), // e.g., "Apr 2025"
+            'total_say_no' => $found->total_say_no ?? 0,
+        ];
+    }
+
+    return [
+        'data' => $months
+    ];
+}
+
+
+
+    public function sayOnBarChart2()
     {
         $userId = Auth::id();
         $currentMonth = Carbon::now()->month;
@@ -361,9 +412,9 @@ class AdvanceFeatureService
 
         $months = [];
 
-        for ($i = 0; $i < 12; $i++) {
-            $monthNumber = ($currentMonth + $i - 1) % 12 + 1;
-            $yearNumber = $currentYear + floor(($currentMonth + $i - 1) / 12);
+        for ($i = 0; $i < 8; $i++) {
+            $monthNumber = ($currentMonth + $i - 1) % 8 + 1;
+            $yearNumber = $currentYear + floor(($currentMonth + $i - 1) / 8);
 
             $found = $entries->firstWhere(function ($entry) use ($monthNumber, $yearNumber) {
                 return $entry->month == $monthNumber && $entry->year == $yearNumber;
