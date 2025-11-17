@@ -35,6 +35,7 @@ class AuthService
             'email' => $data['email'],
             'phone_number' => $data['phone_number'],
             'country_code' => $data['country_code'],
+            'phone_number_with_code' => $data['country_code'] . $data['phone_number'],
             'password' => Hash::make($data['password']),
             'otp' => $otp,
             'otp_expires_at' => $otp_expires_at,

@@ -366,22 +366,25 @@ class AuthController extends Controller
     // }
 
 
-    public function synContacts(Request $request)
+    public function synContactsf(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'contact_lists' => 'required'
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'contact_lists' => 'required'
+        // ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
 
-        $contactNumbers = $request->contact_lists;
+
+        // if ($validator->fails()) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'errors' => $validator->errors()
+        //     ], 422);
+        // }
+
+        $contactNumbers = ["1797004550", "+8801797004550"];
 
         $matchedUsers = User::whereIn('phone_number', $contactNumbers)
+            // ->whereIn('phone_number_with_code',$contactNumbers)
             ->where('id', '!=', Auth::id())
             ->where('role', 'USER')
             ->get();
@@ -392,6 +395,45 @@ class AuthController extends Controller
             'data' => $matchedUsers
         ]);
     }
+
+
+    public function synContacts(Request $request)
+    {
+        // $contactNumbers = ["1797004550", "+8801797004550"];
+
+        $validator = Validator::make($request->all(), [
+            'contact_lists' => 'required'
+        ]);
+
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+         $contactNumbers = $request->contact_lists;
+
+        $matchedUsers = User::where(function ($q) use ($contactNumbers) {
+            $q->whereIn('phone_number', $contactNumbers)
+                ->orWhereIn('phone_number_with_code', $contactNumbers);
+        })
+            ->where('id', '!=', Auth::id())
+            ->where('role', 'USER')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Matched registered users from contact list',
+            'data' => $matchedUsers
+        ]);
+    }
+
+
+
+
     public function deleteAccount(Request $request)
     {
         Auth::user()->delete();

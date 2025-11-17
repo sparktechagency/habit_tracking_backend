@@ -175,6 +175,7 @@ class AdvanceFeatureService
             'result' => $result,
         ];
     }
+
     public function modeTrackLineGraph1(?string $filter)
     {
         $userId = Auth::id();
@@ -211,7 +212,7 @@ class AdvanceFeatureService
             'data' => $graphData,
         ];
     }
-    public function modeTrackLineGraph(?string $filter)
+    public function modeTrackLineGraphOld(?string $filter)
     {
         $userId = Auth::id();
         $months = 12;
@@ -272,7 +273,50 @@ class AdvanceFeatureService
             'data' => $graphData,
         ];
     }
-    public function sayOnBarChart()
+
+    public function modeTrackLineGraph(?string $filter)
+    {
+        $userId = Auth::id();
+        $monthsToShow = 12; // সবসময় 12 মাস দেখাবে
+
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        // fetch all completed logs for last 12 months
+        $startDate = Carbon::now()->subMonths($monthsToShow - 1)->startOfMonth();
+        $endDate = Carbon::now()->endOfMonth();
+
+        $completedLogs = HabitLog::where('user_id', $userId)
+            ->where('status', 'Completed')
+            ->whereBetween('done_at', [$startDate, $endDate])
+            ->selectRaw('YEAR(done_at) as year, MONTH(done_at) as month, COUNT(*) as completed_count')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        $graphData = [];
+
+        for ($i = 0; $i < $monthsToShow; $i++) {
+            $monthNumber = ($currentMonth + $i - 1) % 12 + 1;
+            $yearNumber = $currentYear + floor(($currentMonth + $i - 1) / 12);
+
+            $record = $completedLogs->firstWhere(function ($log) use ($monthNumber, $yearNumber) {
+                return $log->month == $monthNumber && $log->year == $yearNumber;
+            });
+
+            $graphData[] = [
+                'month' => Carbon::create()->year($yearNumber)->month($monthNumber)->format('M Y'),
+                'completed_count' => $record->completed_count ?? 0,
+            ];
+        }
+
+        return [
+            'data' => $graphData,
+        ];
+    }
+
+    public function sayOnBarChartOld()
     {
         $userId = Auth::id();
         $currentYear = Carbon::now()->year;
@@ -299,4 +343,44 @@ class AdvanceFeatureService
         ];
 
     }
+    public function sayOnBarChart()
+    {
+        $userId = Auth::id();
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        // সব এন্ট্রি নিয়ে আসা দুই বছরের জন্য (কারণ ডিসেম্বর পার হলে পরের বছরের জন্যও লাগবে)
+        $entries = Entry::where('user_id', $userId)
+            ->whereYear('date', '>=', $currentYear)
+            ->whereYear('date', '<=', $currentYear + 1)
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, COUNT(*) as total_say_no')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        $months = [];
+
+        for ($i = 0; $i < 12; $i++) {
+            $monthNumber = ($currentMonth + $i - 1) % 12 + 1;
+            $yearNumber = $currentYear + floor(($currentMonth + $i - 1) / 12);
+
+            $found = $entries->firstWhere(function ($entry) use ($monthNumber, $yearNumber) {
+                return $entry->month == $monthNumber && $entry->year == $yearNumber;
+            });
+
+            $months[] = [
+                'month' => Carbon::create()->year($yearNumber)->month($monthNumber)->format('M-Y'),
+                'total_say_no' => $found->total_say_no ?? 0,
+            ];
+        }
+
+        return [
+            'data' => $months
+        ];
+    }
+
+
+
+
 }
