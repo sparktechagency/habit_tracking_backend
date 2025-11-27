@@ -131,7 +131,7 @@ class GroupController extends Controller
     public function getDailySummaries(Request $request)
     {
         try {
-            $group = $this->groupService->getDailySummaries($request->challenge_group_id);
+            $group = $this->groupService->getDailySummaries($request->challenge_group_id,$request->day);
             return $this->sendResponse($group, 'Get logs fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [$e->getMessage()], 500);

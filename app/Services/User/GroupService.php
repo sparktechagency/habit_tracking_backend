@@ -112,8 +112,11 @@ class GroupService
                 ? round(($myCompleted / $totalTasks) * 100)
                 : 0;
 
-            $group->member_lists = GroupMember::with(['user' => function ($q) {
-                $q->select('id', 'full_name', 'avatar'); }])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
+            $group->member_lists = GroupMember::with([
+                'user' => function ($q) {
+                    $q->select('id', 'full_name', 'avatar');
+                }
+            ])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
 
             $group->makeHidden('members');
             $group->makeHidden('group_habits');
@@ -164,8 +167,11 @@ class GroupService
                 ? round(($myCompleted / $totalTasks) * 100)
                 : 0;
 
-            $group->member_lists = GroupMember::with(['user' => function ($q) {
-                $q->select('id', 'full_name', 'avatar'); }])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
+            $group->member_lists = GroupMember::with([
+                'user' => function ($q) {
+                    $q->select('id', 'full_name', 'avatar');
+                }
+            ])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
 
             $group->makeHidden('members');
             $group->makeHidden('group_habits');
@@ -580,7 +586,7 @@ class GroupService
 
         return $userLog;
     }
-    public function getDailySummaries(int $groupId)
+    public function getDailySummaries1(int $groupId)
     {
         $group = ChallengeGroup::find($groupId);
         if (!$group) {
@@ -677,7 +683,7 @@ class GroupService
             ];
         }
 
-         $summaries = array_reverse($summaries);
+        $summaries = array_reverse($summaries);
 
         $achieved_point = ChallengeLog::where('challenge_group_id', $groupId)
             ->where('user_id', Auth::id())
@@ -689,6 +695,142 @@ class GroupService
             'summaries' => $summaries
         ];
     }
+
+    public function getDailySummaries(int $groupId, ?int $day)
+    {
+        $filterDay = $day; // optional day filter
+
+        $group = ChallengeGroup::find($groupId);
+        if (!$group) {
+            throw new Exception("Group with ID {$groupId} not found.");
+        }
+
+        $start_date = Carbon::parse($group->start_date)->toDateString();
+        $end_date = Carbon::parse($group->end_date)->toDateString();
+
+        $daysArray = $this->getChallengeDaysWithDates($start_date, $end_date);
+
+        $logs = ChallengeLog::with('user')
+            ->where('challenge_group_id', $groupId)
+            ->whereBetween('date', [
+                Carbon::parse($start_date)->startOfDay(),
+                Carbon::parse($end_date)->endOfDay()
+            ])
+            ->get()
+            ->groupBy(function ($log) {
+                return Carbon::parse($log->date)->toDateString();
+            });
+
+        $today = Carbon::now()->toDateString();
+
+        // remove future dates
+        $daysArray = collect($daysArray)
+            ->filter(fn($date) => $date <= $today)
+            ->values()
+            ->toArray();
+
+        $groupUserIds = ChallengeLog::where('challenge_group_id', $groupId)
+            ->pluck('user_id')
+            ->unique()
+            ->toArray();
+
+        $summaries = [];
+
+        foreach ($daysArray as $index => $dayDate) {
+            $formattedDate = Carbon::parse($dayDate)->toDateString();
+            $dayNumber = $index + 1;
+
+            $dayLogs = $logs->get($formattedDate, collect());
+            $usersByLog = $dayLogs->groupBy('user_id');
+
+            $userProgress = [];
+            $totalPercent = 0;
+
+            foreach ($groupUserIds as $userId) {
+                $userLogs = $usersByLog->get($userId, collect());
+
+                if ($userLogs->isNotEmpty()) {
+                    $totalTasks = $userLogs->count();
+                    $completedTasks = $userLogs->where('status', 'Completed')->count();
+                } else {
+                    $totalTasks = GroupHabit::where('challenge_group_id', $groupId)->count();
+                    $completedTasks = 0;
+                }
+
+                $progressPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+
+                $userModel = $userLogs->first()?->user ?? User::find($userId);
+
+                $statusList = $userLogs->pluck('status')->toArray();
+                if (empty($statusList)) {
+                    $statusList = array_fill(0, $totalTasks, 'Incompleted');
+                }
+
+                $userProgress[] = [
+                    'user_id' => $userId,
+                    'user_name' => $userModel->full_name ?? 'Unknown',
+                    'progress' => $progressPercent,
+                    'status' => $statusList,
+                    'is_all_completed' => !in_array('Incompleted', $statusList),
+                ];
+
+                $totalPercent += $progressPercent;
+            }
+
+            // sort auth user first
+            $authId = Auth::id();
+            usort($userProgress, function ($a, $b) use ($authId) {
+                if ($a['user_id'] == $authId)
+                    return -1;
+                if ($b['user_id'] == $authId)
+                    return 1;
+                return 0;
+            });
+
+            $groupCompletion = count($groupUserIds) > 0 ? round($totalPercent / count($groupUserIds)) : 0;
+
+            $summaries[] = [
+                'date' => $formattedDate,
+                'day' => $dayNumber,
+                'group_completion' => $groupCompletion,
+                'members' => $userProgress,
+            ];
+        }
+
+        // reverse for latest first
+        $summaries = array_reverse($summaries);
+
+        // =========== 🔥 APPLY DAY FILTER =========== //
+        // if ($filterDay) {
+        //     $summaries = collect($summaries)
+        //         ->where('day', intval($filterDay))
+        //         ->values()
+        //         ->toArray();
+        // }
+
+        if (!is_null($filterDay) && $filterDay !== '') {
+            $filterDay = (int) $filterDay;
+
+            $summaries = collect($summaries)
+                ->where('day', $filterDay)
+                ->values()
+                ->toArray();
+        }
+        // =========================================== //
+
+        // count achieved point
+        $achieved_point = ChallengeLog::where('challenge_group_id', $groupId)
+            ->where('user_id', Auth::id())
+            ->where('status', 'Completed')
+            ->count();
+
+        return [
+            'my_achieved_point' => $achieved_point,
+            'summaries' => $summaries
+        ];
+    }
+
+
     public function getOverallProgress(int $groupId)
     {
         $group = ChallengeGroup::find($groupId);
