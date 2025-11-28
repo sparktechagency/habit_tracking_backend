@@ -175,153 +175,102 @@ class AdvanceFeatureService
             'result' => $result,
         ];
     }
-
-    public function modeTrackLineGraph1(?string $filter)
+    public function modeTrackLineGraph(?int $cycle = null)
     {
         $userId = Auth::id();
-        $month = $filter == 'current' ? Carbon::now() : Carbon::now()->subMonth();
 
-        $startOfMonth = $month->copy()->startOfMonth();
-        $endOfMonth = $month->copy()->endOfMonth();
-
-        $completedLogs = HabitLog::where('user_id', $userId)
-            // ->where('habit_id', $habitId)
+        // 1. First Completed Habit Date
+        $firstLog = HabitLog::where('user_id', $userId)
             ->where('status', 'Completed')
-            ->whereBetween('done_at', [$startOfMonth, $endOfMonth])
-            ->selectRaw('DATE(done_at) as day, COUNT(*) as completed_count')
-            ->groupBy('day')
-            ->orderBy('day')
-            ->get();
+            ->orderBy('done_at', 'asc')
+            ->first();
 
-        $daysInMonth = $startOfMonth->daysInMonth;
-        $graphData = [];
-        for ($day = 1; $day <= $daysInMonth; $day++) {
-            $date = Carbon::createFromDate($month->year, $month->month, $day)->toDateString();
-
-            $count = $completedLogs->firstWhere('day', $date)->completed_count ?? 0;
-
-            $graphData[] = [
-                'day' => $day,
-                'date' => $date,
-                'completed_count' => $count,
+        if (!$firstLog) {
+            return [
+                'data' => [],
+                'message' => 'No habit completed yet.'
             ];
         }
 
-        return [
-            'month' => $month->format('F Y'),
-            'data' => $graphData,
-        ];
-    }
-    public function modeTrackLineGraph(?string $filter)
-    {
-        $userId = Auth::id();
-        $months = 8;
+        $firstDoneAt = Carbon::parse($firstLog->done_at)->startOfMonth();
 
-        // current or last 6 month / 12 month
-        // $months = $filter == 'current' ? 1 : 12;
 
-        // // Filter range
-        // switch ($filter) {
-        //     case 'last_3_months':
-        //         $months = 3;
-        //         break;
-        //     case 'last_6_months':
-        //         $months = 6;
-        //         break;
-        //     case 'last_year':
-        //         $months = 12;
-        //         break;
-        //     case 'current':
-        //     default:
-        //         $months = 1;
-        //         break;
-        // }
+        // 2. Total months passed from first month → now
+        $monthsPassed = $firstDoneAt->diffInMonths(Carbon::now());
 
-        $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
+        // Total cycle count
+        $totalCycles = floor($monthsPassed / 12) + 1;
 
-        // $startDate->addMonth();
+        // 3. Requested cycle, default = latest cycle
+        $requestedCycle = $cycle ?? $totalCycles;
 
-        $endDate = Carbon::now()->endOfMonth();
+        if ($requestedCycle < 1 || $requestedCycle > $totalCycles) {
+            return [
+                'message' => "Invalid cycle number. Available cycles: 1 - {$totalCycles}"
+            ];
+        }
 
-        // $endDate->addMonth();
+        // 4. Determine cycle start & end
+        $cycleStart = $firstDoneAt->copy()->addMonths(($requestedCycle - 1) * 12);
+        $cycleEnd = $cycleStart->copy()->addMonths(11)->endOfMonth();
 
+
+        // 5. Fetch logs inside that cycle
         $completedLogs = HabitLog::where('user_id', $userId)
             ->where('status', 'Completed')
-            ->whereBetween('done_at', [$startDate, $endDate])
+            ->whereBetween('done_at', [$cycleStart, $cycleEnd])
             ->selectRaw('YEAR(done_at) as year, MONTH(done_at) as month, COUNT(*) as completed_count')
             ->groupBy('year', 'month')
             ->orderBy('year')
             ->orderBy('month')
             ->get();
 
+        // 6. Build static 12-month graph
         $graphData = [];
-        $period = Carbon::parse($startDate)->monthsUntil($endDate);
+        $cursor = $cycleStart->copy();
 
-        foreach ($period as $date) {
-            $year = $date->year;
-            $month = $date->month;
+        for ($i = 0; $i < 12; $i++) {
 
-            $record = $completedLogs->firstWhere(
-                fn($log) =>
-                $log->year == $year && $log->month == $month
-            );
-
-            $graphData[] = [
-                'month' => $date->format('F Y'),
-                'completed_count' => $record->completed_count ?? 0,
-            ];
-        }
-
-        return [
-            'start' => $startDate->format('F Y'),
-            'end' => $endDate->format('F Y'),
-            'data' => $graphData,
-        ];
-    }
-
-    public function modeTrackLineGraphUp(?string $filter)
-    {
-        $userId = Auth::id();
-        $monthsToShow = 12; // সবসময় 12 মাস দেখাবে
-
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-
-        // fetch all completed logs for last 12 months
-        $startDate = Carbon::now()->subMonths($monthsToShow - 1)->startOfMonth();
-        $endDate = Carbon::now()->endOfMonth();
-
-        $completedLogs = HabitLog::where('user_id', $userId)
-            ->where('status', 'Completed')
-            ->whereBetween('done_at', [$startDate, $endDate])
-            ->selectRaw('YEAR(done_at) as year, MONTH(done_at) as month, COUNT(*) as completed_count')
-            ->groupBy('year', 'month')
-            ->orderBy('year')
-            ->orderBy('month')
-            ->get();
-
-        $graphData = [];
-
-        for ($i = 0; $i < $monthsToShow; $i++) {
-            $monthNumber = ($currentMonth + $i - 1) % 12 + 1;
-            $yearNumber = $currentYear + floor(($currentMonth + $i - 1) / 12);
-
-            $record = $completedLogs->firstWhere(function ($log) use ($monthNumber, $yearNumber) {
-                return $log->month == $monthNumber && $log->year == $yearNumber;
+            $record = $completedLogs->firstWhere(function ($log) use ($cursor) {
+                return ($log->year == $cursor->year) && ($log->month == $cursor->month);
             });
 
             $graphData[] = [
-                'month' => Carbon::create()->year($yearNumber)->month($monthNumber)->format('M Y'),
+                'month' => $cursor->format('M'),
+                'month_year' => $cursor->format('M-y'),
                 'completed_count' => $record->completed_count ?? 0,
             ];
+
+            $cursor->addMonth();
         }
 
+        // 7. Calculate max completed count
+        $maxCompletedCount = collect($graphData)->max('completed_count');
+
+        // Build cycle dropdown array
+        $cycle_arr = [];
+
+        for ($i = 1; $i <= $totalCycles; $i++) {
+
+            $start = $firstDoneAt->copy()->addMonths(($i - 1) * 12);
+            $end = $start->copy()->addMonths(11);
+
+            $cycle_arr[$i] = $start->format('My') . '-' . $end->format('My');
+        }
+
+        // 8. Response
         return [
-            'data' => $graphData,
+            'cycle_list' => $cycle_arr,  // 👈 dropdown text list
+            'max_completed_count' => $maxCompletedCount < 10 ? 10 : $maxCompletedCount,
+            'current_cycle' => $requestedCycle,
+            'total_cycles' => $totalCycles,
+            'cycle_start' => $cycleStart->format('F Y'),
+            'cycle_end' => $cycleEnd->format('F Y'),
+            'data' => $graphData
         ];
     }
 
-    public function sayOnBarChartmain()
+    public function sayOnBarChartMain()
     {
         $userId = Auth::id();
         $currentYear = Carbon::now()->year;
@@ -349,52 +298,52 @@ class AdvanceFeatureService
 
     }
 
-    public function sayOnBarChart()
-{
-    $userId = Auth::id();
-    $currentMonth = Carbon::now()->month;
-    $currentYear = Carbon::now()->year;
-
-    $monthsToShow = 8; // last 8 months
-
-    // fetch entries for last 8 months
-    $startDate = Carbon::now()->subMonths($monthsToShow - 1)->startOfMonth();
-    $endDate = Carbon::now()->endOfMonth();
-
-    $entries = Entry::where('user_id', $userId)
-        ->whereBetween('date', [$startDate, $endDate])
-        ->selectRaw('YEAR(date) as year, MONTH(date) as month, COUNT(*) as total_say_no')
-        ->groupBy('year', 'month')
-        ->orderBy('year')
-        ->orderBy('month')
-        ->get();
-
-    $months = [];
-
-    // loop last 8 months starting from oldest
-    for ($i = $monthsToShow - 1; $i >= 0; $i--) {
-        $date = Carbon::now()->subMonths($i);
-        $monthNumber = $date->month;
-        $yearNumber = $date->year;
-
-        $found = $entries->firstWhere(function ($entry) use ($monthNumber, $yearNumber) {
-            return $entry->month == $monthNumber && $entry->year == $yearNumber;
-        });
-
-        $months[] = [
-            'month' => $date->format('M Y'), // e.g., "Apr 2025"
-            'total_say_no' => $found->total_say_no ?? 0,
-        ];
-    }
-
-    return [
-        'data' => $months
-    ];
-}
-
 
 
     public function sayOnBarChart2()
+    {
+        $userId = Auth::id();
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        $monthsToShow = 8; // last 8 months
+
+        // fetch entries for last 8 months
+        $startDate = Carbon::now()->subMonths($monthsToShow - 1)->startOfMonth();
+        $endDate = Carbon::now()->endOfMonth();
+
+        $entries = Entry::where('user_id', $userId)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, COUNT(*) as total_say_no')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        $months = [];
+
+        // loop last 8 months starting from oldest
+        for ($i = $monthsToShow - 1; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $monthNumber = $date->month;
+            $yearNumber = $date->year;
+
+            $found = $entries->firstWhere(function ($entry) use ($monthNumber, $yearNumber) {
+                return $entry->month == $monthNumber && $entry->year == $yearNumber;
+            });
+
+            $months[] = [
+                'month' => $date->format('M Y'), // e.g., "Apr 2025"
+                'total_say_no' => $found->total_say_no ?? 0,
+            ];
+        }
+
+        return [
+            'data' => $months
+        ];
+    }
+
+    public function sayOnBarChart1()
     {
         $userId = Auth::id();
         $currentMonth = Carbon::now()->month;
@@ -430,6 +379,97 @@ class AdvanceFeatureService
             'data' => $months
         ];
     }
+
+    public function sayOnBarChart(?int $cycle = null)
+    {
+        $userId = Auth::id();
+
+        // 1. First Entry Date
+        $firstEntry = Entry::where('user_id', $userId)
+            ->orderBy('date', 'asc')
+            ->first();
+
+        if (!$firstEntry) {
+            return [
+                'data' => [],
+                'message' => 'No entries found.'
+            ];
+        }
+
+        $firstDate = Carbon::parse($firstEntry->date)->startOfMonth();
+
+        // 2. Total months passed from first month till now
+        $monthsPassed = $firstDate->diffInMonths(Carbon::now());
+
+        // Total cycles (12 months per cycle)
+        $totalCycles = floor($monthsPassed / 12) + 1;
+
+        // 3. Requested cycle (default = latest)
+        $requestedCycle = $cycle ?? $totalCycles;
+
+        if ($requestedCycle < 1 || $requestedCycle > $totalCycles) {
+            return [
+                'message' => "Invalid cycle number. Available cycles: 1 - {$totalCycles}"
+            ];
+        }
+
+        // 4. Determine cycle start & end
+        $cycleStart = $firstDate->copy()->addMonths(($requestedCycle - 1) * 12);
+        $cycleEnd = $cycleStart->copy()->addMonths(11)->endOfMonth();
+
+        // 5. Fetch entries in this cycle
+        $entries = Entry::where('user_id', $userId)
+            ->whereBetween('date', [$cycleStart, $cycleEnd])
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, COUNT(*) as total_say_no')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        // 6. Build 12-month graph
+        $graphData = [];
+        $cursor = $cycleStart->copy();
+
+        for ($i = 0; $i < 12; $i++) {
+            $record = $entries->firstWhere(function ($entry) use ($cursor) {
+                return $entry->year == $cursor->year && $entry->month == $cursor->month;
+            });
+
+            $graphData[] = [
+                'month' => $cursor->format('M'),
+                'month_year' => $cursor->format('M-y'),
+                'total_say_no' => $record->total_say_no ?? 0,
+            ];
+
+            $cursor->addMonth();
+        }
+
+        // 7. Max value for chart scaling
+        $maxCount = collect($graphData)->max('total_say_no');
+        if ($maxCount < 10)
+            $maxCount = 10;
+
+        // 8. Build cycle dropdown
+        $cycle_arr = [];
+        for ($i = 1; $i <= $totalCycles; $i++) {
+            $start = $firstDate->copy()->addMonths(($i - 1) * 12);
+            $end = $start->copy()->addMonths(11);
+            $cycle_arr[$i] = $start->format('My') . '-' . $end->format('My');
+        }
+
+        // 9. Response
+        return [
+            'cycle_list' => $cycle_arr,
+            'max_total_say_no' => $maxCount,
+            'current_cycle' => $requestedCycle,
+            'total_cycles' => $totalCycles,
+            'cycle_start' => $cycleStart->format('F Y'),
+            'cycle_end' => $cycleEnd->format('F Y'),
+            'data' => $graphData
+        ];
+    }
+
+
 
 
 
