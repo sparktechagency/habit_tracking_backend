@@ -29,6 +29,9 @@ class RewardRequest extends FormRequest
             'purchase_point' => 'required|integer',
             'status' => 'in:Enable,Disable',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:20480', // 20 mb
+            'location' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
         ];
 
     }

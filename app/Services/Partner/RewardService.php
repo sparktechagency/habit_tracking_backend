@@ -39,9 +39,9 @@ class RewardService
         $data['expiration_date'] = Carbon::createFromFormat('d/m/Y', $data['expiration_date'])
             ->format('Y-m-d');
 
-        $data['location'] = Auth::user()->address;
-        $data['latitude'] = Auth::user()->latitude;
-        $data['longitude'] = Auth::user()->longitude;
+        // $data['location'] = Auth::user()->address;
+        // $data['latitude'] = Auth::user()->latitude;
+        // $data['longitude'] = Auth::user()->longitude;
 
         if (isset($data['image']) && $data['image']->isValid()) {
             $path = $data['image']->store('images', 'public');
