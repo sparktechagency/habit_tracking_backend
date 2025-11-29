@@ -40,7 +40,7 @@ class AvailableRewardController extends Controller
     {
         try {
             $types = $this->availableRewardService->approvedReward($request->reward_id);
-            return $this->sendResponse($types, 'Get Rewards fetched successfully.');
+            return $this->sendResponse($types, 'Reward approved successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [], 500);
         }
