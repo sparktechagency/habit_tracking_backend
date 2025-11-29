@@ -89,6 +89,20 @@ class ChallengeManagementService
         $groups->each(function ($group) {
             $group->max_count = 100;
 
+            $totalTasks = $group->group_habits->count();
+            $totalMembers = $group->members_count;
+            $completedCount = ChallengeLog::where('challenge_group_id', $group->id)
+                // ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->count();
+            $expectedGroupTasks = $totalTasks * $totalMembers;
+            $group->completetion_rate = $expectedGroupTasks > 0
+                ? round(($completedCount / $expectedGroupTasks) * 100)
+                : 0;
+
+            $group->tasks = $group->group_habits()->pluck('habit_name')->toArray();
+
+
             $group->makeHidden('members');
             $group->makeHidden('group_habits');
         });
