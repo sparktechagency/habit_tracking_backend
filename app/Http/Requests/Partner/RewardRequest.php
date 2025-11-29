@@ -23,7 +23,7 @@ class RewardRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:255',
-            'challenge_type' => 'required|string|max:255',
+            'challenge_type' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'expiration_date' => 'required',
             'purchase_point' => 'required|integer',
