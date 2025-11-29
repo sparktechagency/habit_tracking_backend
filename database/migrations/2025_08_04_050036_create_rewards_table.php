@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('partner_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
-            $table->string('challenge_type')->nullable();
+            $table->string('challenge_type');
             $table->longText('description')->nullable();
             $table->date('expiration_date');
             $table->unsignedBigInteger('purchase_point')->default(0);
