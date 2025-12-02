@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Auth;
 
 class GroupController extends Controller
 {
-
     protected $groupService;
 
     public function __construct(GroupService $groupService)
@@ -65,7 +64,6 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
         }
     }
-
     public function getActiveGroups(Request $request)
     {
         try {
@@ -76,7 +74,6 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch groups.', [$e->getMessage()], 500);
         }
     }
-
     public function viewGroup(Request $request, $id)
     {
         try {
@@ -183,13 +180,11 @@ class GroupController extends Controller
             ->exists();
         return ['is_join' => $is_member];
     }
-
     public function groupArray()
     {
         $arr = GroupMember::where('user_id', Auth::id())->pluck('challenge_group_id')->toArray();
         return ['join_group_ids' => $arr];
     }
-
     public function viewCelebrationMember(Request $request)
     {
         return [
@@ -203,7 +198,6 @@ class GroupController extends Controller
             'challenge_group_name' => ChallengeGroup::where('id', $request->challenge_group_id)->first()->group_name,
         ];
     }
-
     public function getUsers(Request $request)
     {
 
@@ -226,7 +220,6 @@ class GroupController extends Controller
             'data' => $users,
         ];
     }
-
     public function myGroupLists(Request $request)
     {
         $arr = GroupMember::where('user_id', Auth::id())->pluck('challenge_group_id')->toArray();
@@ -238,7 +231,6 @@ class GroupController extends Controller
             'data' => $groups,
         ];
     }
-
     public function sendInvite(Request $request)
     {
         try {

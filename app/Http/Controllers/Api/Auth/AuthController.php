@@ -398,8 +398,6 @@ class AuthController extends Controller
             'data' => $matchedUsers
         ]);
     }
-
-
     public function synContacts(Request $request)
     {
         // $contactNumbers = ["1797004550", "+8801797004550"];
@@ -433,10 +431,6 @@ class AuthController extends Controller
             'data' => $matchedUsers
         ]);
     }
-
-
-
-
     public function deleteAccount(Request $request)
     {
         Auth::user()->delete();

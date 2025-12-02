@@ -25,7 +25,6 @@ class UserManagementController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function viewUser(Request $request)
     {
         try {
@@ -35,7 +34,6 @@ class UserManagementController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function blockUnblockUser(Request $request)
     {
         try {

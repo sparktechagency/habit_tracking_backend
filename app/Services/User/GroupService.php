@@ -10,6 +10,7 @@ use App\Models\GroupMember;
 use App\Models\HabitLog;
 use App\Models\Plan;
 use App\Models\Profile;
+use App\Models\Subscription;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -123,7 +124,6 @@ class GroupService
         });
         return $groups;
     }
-
     public function getActiveGroups(?string $search = null, ?int $per_page)
     {
 
@@ -178,7 +178,6 @@ class GroupService
         });
         return $groups;
     }
-
     public function viewGroup(int $id)
     {
         $authId = Auth::id();
@@ -298,185 +297,6 @@ class GroupService
         }
         return $create_log;
     }
-    public function getTodayLogs1(int $groupId): array
-    {
-        $authId = Auth::id();
-        $today = Carbon::today()->toDateString();
-        $myLogs = ChallengeLog::where('challenge_group_id', $groupId)
-            ->whereDate('date', $today)
-            ->where('user_id', $authId)
-            ->get();
-        $othersLogs = ChallengeLog::where('challenge_group_id', $groupId)
-            ->whereDate('date', $today)
-            ->where('user_id', '!=', $authId)
-            ->get();
-        // ->groupBy('user_id');
-        $members = GroupMember::with([
-            'user' => function ($q) {
-                $q->select('id', 'full_name');
-            }
-        ])->where('challenge_group_id', $groupId)->get();
-
-        foreach ($members as $member) {
-            $member->is_celebrate = ChallengeLog::where('user_id', $authId)
-                ->whereDate('date', $today)
-                ->where('status', 'Completed')
-                ->exists();
-
-            $member->completed_count_today = ChallengeLog::where('user_id', $authId)
-                ->whereDate('date', $today)
-                ->where('status', 'Completed')
-                ->count();
-
-            $member->logs = ChallengeLog::where('challenge_group_id', $groupId)->where('user_id', $member->user_id)->where('date', $today)->get();
-        }
-
-        $members = $members->sortBy(function ($member) use ($authId) {
-            return $member->user_id == $authId ? 0 : 1;
-        })->values();
-        $habits = GroupHabit::where('challenge_group_id', $groupId)->get();
-        $habit_count = GroupHabit::where('challenge_group_id', $groupId)->count();
-        return [
-            'group_members' => $members,
-            'group_habits' => $habits,
-            'my_logs' => $myLogs,
-            'habit_count' => $habit_count,
-            'others_logs' => $othersLogs
-        ];
-    }
-    public function getTodayLogs2(int $groupId): array
-    {
-        $authId = Auth::id();
-        $today = Carbon::today()->toDateString();
-
-        $myLogs = ChallengeLog::where('challenge_group_id', $groupId)
-            ->whereDate('date', $today)
-            ->where('user_id', $authId)
-            ->get();
-
-        $othersLogs = ChallengeLog::where('challenge_group_id', $groupId)
-            ->whereDate('date', $today)
-            ->where('user_id', '!=', $authId)
-            ->get();
-
-        $habits = GroupHabit::where('challenge_group_id', $groupId)->get();
-        $habit_count = $habits->count();
-
-        $members = GroupMember::with([
-            'user' => function ($q) {
-                $q->select('id', 'full_name');
-            }
-        ])->where('challenge_group_id', $groupId)->get();
-
-        foreach ($members as $member) {
-            $member->is_celebrate = ChallengeLog::where('user_id', $member->user_id)
-                ->whereDate('date', $today)
-                ->where('status', 'Completed')
-                ->exists();
-
-            $member->completed_count_today = ChallengeLog::where('user_id', $member->user_id)
-                ->whereDate('date', $today)
-                ->where('status', 'Completed')
-                ->count();
-
-            // ✅ member logs
-            $logs = ChallengeLog::where('challenge_group_id', $groupId)->where('user_id', $member->user_id)
-                ->where('challenge_group_id', $groupId)
-                ->whereDate('date', $today)
-                ->get();
-
-            // যদি logs না থাকে → default generate
-            if ($logs->isEmpty()) {
-                $defaultLogs = $habits->map(function ($habit) use ($groupId, $member, $today) {
-                    return [
-                        'id' => null,
-                        'challenge_group_id' => $groupId,
-                        'user_id' => $member->user_id,
-                        'group_habits_id' => $habit->id,
-                        'day' => $member->day,
-                        'date' => $today,
-                        'status' => 'Incompleted',
-                        'completed_at' => null,
-                        'created_at' => null,
-                        'updated_at' => null,
-                    ];
-                });
-                $member->logs = $defaultLogs;
-            } else {
-                $member->logs = $logs;
-            }
-        }
-
-        $members = $members->sortBy(function ($member) use ($authId) {
-            return $member->user_id == $authId ? 0 : 1;
-        })->values();
-
-        return [
-            'group_members' => $members,
-            'habit_count' => $habit_count,
-            'group_habits' => $habits,
-            // 'my_logs' => $myLogs,
-            // 'others_logs' => $othersLogs
-        ];
-    }
-    public function getTodayLogs3(int $groupId): array
-    {
-        $authId = Auth::id();
-        $today = Carbon::today()->toDateString();
-        $day = Carbon::today()->day;
-
-        // সব habits
-        $habits = GroupHabit::where('challenge_group_id', $groupId)->get();
-        $habit_count = $habits->count();
-
-        // Members + User + আজকের Logs একসাথে eager load
-        $members = GroupMember::with([
-            'user:id,full_name',
-            'logs' => function ($q) use ($today) {
-                $q->whereDate('date', $today);
-            }
-        ])->where('challenge_group_id', $groupId)->get();
-
-        foreach ($members as $member) {
-            $logs = $member->logs;
-
-            // Celebrate check
-            $member->is_celebrate = $logs->where('status', 'Completed')->isNotEmpty();
-
-            // Count completed
-            $member->completed_count_today = $logs->where('status', 'Completed')->count();
-
-            // যদি আজকের log না থাকে → default generate
-            if ($logs->isEmpty()) {
-                $defaultLogs = $habits->map(function ($habit) use ($groupId, $member, $today, $day) {
-                    return [
-                        'id' => null,
-                        'challenge_group_id' => $groupId,
-                        'user_id' => $member->user_id,
-                        'group_habits_id' => $habit->id,
-                        'day' => $day,
-                        'date' => $today,
-                        'status' => 'Incompleted',
-                        'completed_at' => null,
-                        'created_at' => null,
-                        'updated_at' => null,
-                    ];
-                });
-                $member->logs = $defaultLogs;
-            } else {
-                $member->logs = $logs->values();
-            }
-        }
-
-        // নিজের লগ প্রথমে দেখানো
-        $members = $members->sortBy(fn($m) => $m->user_id == $authId ? 0 : 1)->values();
-
-        return [
-            'group_members' => $members,
-            'habit_count' => $habit_count,
-            'group_habits' => $habits,
-        ];
-    }
     public function getTodayLogs(int $groupId): array
     {
         $authId = Auth::id();
@@ -566,9 +386,22 @@ class GroupService
         }
 
         if ($is_premium_check == false) {
-            $profile->increment('total_points', 1);
+            $free = Subscription::where('plan_name', 'Free')->first();
+            if (in_array("Premium rewards (earn point 2x)", $free->features)) {
+                // return '2x';
+                $profile->increment('total_points', 2);
+            } else {
+                // return '1x';
+                $profile->increment('total_points', 1);
+            }
         } elseif ($is_premium_check == true) {
-            $profile->increment('total_points', 2);
+            if (in_array("Premium rewards (earn point 2x)", json_decode($plan->features))) {
+                // return 'primium user 2x';
+                $profile->increment('total_points', 2);
+            }else{
+                // return '1x';
+                $profile->increment('total_points', 1);
+            }
         }
 
         $totalPoints = $profile->total_points;
@@ -586,116 +419,6 @@ class GroupService
 
         return $userLog;
     }
-    public function getDailySummaries1(int $groupId)
-    {
-        $group = ChallengeGroup::find($groupId);
-        if (!$group) {
-            throw new Exception("Group with ID {$groupId} not found.");
-        }
-
-        $start_date = Carbon::parse($group->start_date)->toDateString();
-        $end_date = Carbon::parse($group->end_date)->toDateString();
-
-        $daysArray = $this->getChallengeDaysWithDates($start_date, $end_date);
-
-        $logs = ChallengeLog::with('user')
-            ->where('challenge_group_id', $groupId)
-            ->whereBetween('date', [
-                Carbon::parse($start_date)->startOfDay(),
-                Carbon::parse($end_date)->endOfDay()
-            ])
-            ->get()
-            ->groupBy(function ($log) {
-                return Carbon::parse($log->date)->toDateString();
-            });
-
-        $today = Carbon::now()->toDateString();
-
-        $daysArray = collect($daysArray)
-            ->filter(fn($date) => $date <= $today)
-            ->values()
-            ->toArray();
-
-        $groupUserIds = ChallengeLog::where('challenge_group_id', $groupId)
-            ->pluck('user_id')
-            ->unique()
-            ->toArray();
-
-        $summaries = [];
-
-        foreach ($daysArray as $index => $dayDate) {
-            $formattedDate = Carbon::parse($dayDate)->toDateString();
-            $dayNumber = $index + 1;
-
-            $dayLogs = $logs->get($formattedDate, collect());
-            $usersByLog = $dayLogs->groupBy('user_id');
-
-            $userProgress = [];
-            $totalPercent = 0;
-
-            foreach ($groupUserIds as $userId) {
-                $userLogs = $usersByLog->get($userId, collect());
-
-                if ($userLogs->isNotEmpty()) {
-                    $totalTasks = $userLogs->count();
-                    $completedTasks = $userLogs->where('status', 'Completed')->count();
-                } else {
-                    $totalTasks = GroupHabit::where('challenge_group_id', $groupId)->count();
-                    $completedTasks = 0;
-                }
-
-                $progressPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
-
-                $userModel = $userLogs->first()?->user ?? User::find($userId);
-
-                $statusList = $userLogs->pluck('status')->toArray();
-                if (empty($statusList)) {
-                    $statusList = array_fill(0, $totalTasks, 'Incompleted');
-                }
-
-                $userProgress[] = [
-                    'user_id' => $userId,
-                    'user_name' => $userModel->full_name ?? 'Unknown',
-                    'progress' => $progressPercent,
-                    'status' => $statusList,
-                    'is_all_completed' => !in_array('Incompleted', $statusList),
-                ];
-
-                $totalPercent += $progressPercent;
-            }
-
-            $authId = Auth::id();
-            usort($userProgress, function ($a, $b) use ($authId) {
-                if ($a['user_id'] == $authId)
-                    return -1;
-                if ($b['user_id'] == $authId)
-                    return 1;
-                return 0;
-            });
-
-            $groupCompletion = count($groupUserIds) > 0 ? round($totalPercent / count($groupUserIds)) : 0;
-
-            $summaries[] = [
-                'date' => $formattedDate,
-                'day' => $dayNumber,
-                'group_completion' => $groupCompletion,
-                'members' => $userProgress,
-            ];
-        }
-
-        $summaries = array_reverse($summaries);
-
-        $achieved_point = ChallengeLog::where('challenge_group_id', $groupId)
-            ->where('user_id', Auth::id())
-            ->where('status', 'Completed')
-            ->count();
-
-        return [
-            'my_achieved_point' => $achieved_point,
-            'summaries' => $summaries
-        ];
-    }
-
     public function getDailySummaries(int $groupId, ?int $day)
     {
         $filterDay = $day; // optional day filter
@@ -829,8 +552,6 @@ class GroupService
             'summaries' => $summaries
         ];
     }
-
-
     public function getOverallProgress(int $groupId)
     {
         $group = ChallengeGroup::find($groupId);

@@ -18,7 +18,6 @@ class SubscriptionControler extends Controller
         $this->subscriptionService = $subscriptionService;
     }
 
-
     public function addSubscription(AddSubscriptionRequest $request)
     {
         try {
@@ -47,7 +46,6 @@ class SubscriptionControler extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
      public function deleteSubscription($id)
     {
         try {

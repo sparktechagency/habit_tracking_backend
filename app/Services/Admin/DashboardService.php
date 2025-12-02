@@ -64,7 +64,6 @@ class DashboardService
 
         ];
     }
-
     public function userChart()
     {
         $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
@@ -116,7 +115,6 @@ class DashboardService
             'new_partners' => $monthlySignupPartners,
         ];
     }
-
     public function groupChart()
     {
         $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
@@ -168,7 +166,6 @@ class DashboardService
             'challenge_completion' => $monthlyChallengeCompletion,
         ];
     }
-
     public function topHabitChart(?int $filter)
     {
 
@@ -191,7 +188,6 @@ class DashboardService
             'data' => $topHabits,
         ];
     }
-
     public function topChallengeChart(?int $filter)
     {
         $days = $filter;
@@ -213,8 +209,6 @@ class DashboardService
             'data' => $topHabits,
         ];
     }
-
-
     public function revenueChart()
     {
         $startDate = Carbon::now()->subMonths(5)->startOfMonth(); // last 6 months (including current)

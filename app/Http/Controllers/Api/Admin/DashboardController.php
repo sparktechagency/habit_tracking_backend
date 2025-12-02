@@ -25,7 +25,6 @@ class DashboardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function userChart(Request $request)
     {
         try {
@@ -35,7 +34,6 @@ class DashboardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function groupChart(Request $request)
     {
         try {
@@ -45,7 +43,6 @@ class DashboardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function topChallengeChart(Request $request)
     {
         try {
@@ -55,7 +52,6 @@ class DashboardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function revenueChart(Request $request)
     {
         try {

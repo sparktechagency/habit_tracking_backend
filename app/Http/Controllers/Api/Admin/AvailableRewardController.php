@@ -25,7 +25,6 @@ class AvailableRewardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function viewReward(Request $request,$id)
     {
         try {
@@ -35,7 +34,6 @@ class AvailableRewardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function approvedReward(Request $request)
     {
         try {
@@ -45,7 +43,6 @@ class AvailableRewardController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function canceledReward(Request $request)
     {
         try {

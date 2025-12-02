@@ -35,7 +35,6 @@ class RewardController extends Controller
             ], 500);
         }
     }
-
     public function viewReward(Request $request, ?int $id)
     {
         try {
@@ -53,7 +52,6 @@ class RewardController extends Controller
             ], 500);
         }
     }
-
     public function redeem(RedeemRequest $request)
     {
         try {

@@ -12,30 +12,6 @@ use function PHPUnit\Framework\isEmpty;
 
 class NotificationController extends Controller
 {
-    public function getNotifications1(Request $request)
-    {
-        $user = Auth::user();
-
-        if (!isEmpty($request->filter)) {
-            if ($request->filter == 'unread') {
-                $notifications = $user->notifications()->where('read_at', null)->latest()->paginate($request->per_page ?? 10);
-            } elseif ($request->filter == 'read') {
-                $notifications = $user->notifications()->where('read_at', '!=', null)->latest()->paginate($request->per_page ?? 10);
-            } else {
-                $notifications = $user->notifications()->latest()->paginate($request->per_page ?? 10);
-            }
-        } else {
-            $notifications = $user->notifications()->latest()->paginate($request->per_page ?? 10);
-        }
-
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Latest notifications',
-            'data' => $notifications
-        ]);
-    }
-
     public function getNotifications(Request $request)
     {
         $user = Auth::user();

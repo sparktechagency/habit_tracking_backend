@@ -6,8 +6,11 @@ use App\Models\Habit;
 use App\Models\HabitLog;
 use App\Models\Plan;
 use App\Models\Profile;
+use App\Models\Subscription;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+
+use function PHPUnit\Framework\isArray;
 
 class HabitService
 {
@@ -18,13 +21,15 @@ class HabitService
             'habit_name' => $data['habit_name']
         ]);
     }
-    public function getHabits($isArchived = null,?string $search = null)
+    public function getHabits($isArchived = null, ?string $search = null)
     {
         $today = Carbon::now();
 
-        $query = Habit::with(['logs' => function ($q) use ($today) {
-            $q->whereDate('done_at', $today);
-        }])->where('user_id', Auth::id())
+        $query = Habit::with([
+            'logs' => function ($q) use ($today) {
+                $q->whereDate('done_at', $today);
+            }
+        ])->where('user_id', Auth::id())
             ->orderByDesc('created_at');
 
         if ($isArchived == 1) {
@@ -80,6 +85,7 @@ class HabitService
         $profile = Profile::where('user_id', Auth::id())->first();
 
         $plan = Plan::where('user_id', Auth::id())->latest()->first();
+
         if ($plan) {
             if ($plan->renewal >= Carbon::now()) {
                 $is_premium_check = true;
@@ -87,13 +93,26 @@ class HabitService
                 $is_premium_check = false;
             }
         } else {
-            $is_premium_check = false; 
+            $is_premium_check = false;
         }
 
-        if($is_premium_check == false){
-            $profile->increment('total_points',1);
-        }elseif($is_premium_check == true){
-            $profile->increment('total_points',2);
+        if ($is_premium_check == false) {
+            $free = Subscription::where('plan_name', 'Free')->first();
+            if (in_array("Premium rewards (earn point 2x)", $free->features)) {
+                // return '2x';
+                $profile->increment('total_points', 2);
+            } else {
+                // return '1x';
+                $profile->increment('total_points', 1);
+            }
+        } elseif ($is_premium_check == true) {
+            if (in_array("Premium rewards (earn point 2x)", json_decode($plan->features))) {
+                // return 'primium user 2x';
+                $profile->increment('total_points', 2);
+            }else{
+                // return '1x';
+                $profile->increment('total_points', 1);
+            }
         }
 
         $totalPoints = $profile->total_points;

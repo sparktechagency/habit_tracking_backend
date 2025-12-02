@@ -13,38 +13,6 @@ use Ramsey\Uuid\Type\Decimal;
 
 class UserManagementService
 {
-    public function getUsers1(?string $search, ?int $per_page)
-    {
-        $query = User::query();
-
-        $query->with('profile')->where('role', 'USER');
-
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('full_name', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $users = $query->latest()->paginate($per_page ?? 10);
-
-        foreach ($users as $user) {
-            $plan = Plan::where('user_id', $user->id)->latest()->first();
-
-            if ($plan) {
-                if ($plan->renewal >= Carbon::now()) {
-                    $is_premium_user = true;
-                    $current_plan_name = $plan->plan_name;
-                }
-            }
-
-            $user->subscription_plan_name = [
-                $is_premium_user,
-                $current_plan_name
-            ] ?? 'Free';
-        }
-
-        return $users;
-    }
     public function getUsers(?string $search, ?int $per_page)
     {
         $query = User::query();

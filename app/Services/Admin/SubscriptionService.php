@@ -32,13 +32,13 @@ class SubscriptionService
         $subscription = Subscription::where('id', $id)->first();
 
         if ($subscription->plan_name == 'Free') {
-            $subscription->features = $data['features'];
+            $subscription->features = $data['features'] ?? $subscription->features;
             $subscription->save();
         } else {
-            $subscription->plan_name = $data['plan_name'];
-            $subscription->duration = $data['duration'];
-            $subscription->price = $data['price'];
-            $subscription->features = $data['features'];
+            $subscription->plan_name = $data['plan_name'] ?? $subscription->plan_name;
+            $subscription->duration = $data['duration'] ?? $subscription->duration;
+            $subscription->price = $data['price'] ?? $subscription->price;
+            $subscription->features = $data['features'] ?? $subscription->features;
             $subscription->save();
         }
 

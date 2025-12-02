@@ -34,7 +34,6 @@ class ChallengeManagementController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
     public function getCompletedChallenges(Request $request)
     {
         try {
@@ -53,5 +52,4 @@ class ChallengeManagementController extends Controller
             return $this->sendError('Something went wrong.', [], 500);
         }
     }
-
 }

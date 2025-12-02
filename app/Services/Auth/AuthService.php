@@ -201,7 +201,6 @@ class AuthService
             'data' => $user,
         ];
     }
-
     public function logout(): array
     {
         try {
