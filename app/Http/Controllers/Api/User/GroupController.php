@@ -202,6 +202,7 @@ class GroupController extends Controller
     {
 
         $query = User::where('id', '!=', Auth::id())
+            ->where('role', 'USER')
             ->where('id', '!=', 1)
             ->select('id', 'full_name', 'role', 'avatar');
 
