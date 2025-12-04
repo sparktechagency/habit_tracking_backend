@@ -113,7 +113,7 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('/enable-disable-reward/{id?}', [RewardController::class, 'enableDisableReward']);
         Route::get('/get-rewards', [RewardController::class, 'getRewards']);
         Route::get('/view-reward/{id?}', [RewardController::class, 'viewReward']);
-        Route::patch('/edit-reward/{id?}', [RewardController::class, 'editReward']);
+        Route::post('/edit-reward/{id?}', [RewardController::class, 'editReward']);
         Route::delete('/delete-reward/{id?}', [RewardController::class, 'deleteReward']);
 
 

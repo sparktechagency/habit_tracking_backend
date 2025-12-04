@@ -94,6 +94,14 @@ class RewardService
             throw new \Exception("Reward not found.");
         }
 
+         if (isset($data['image'])) {
+            if ($reward->image && Storage::disk('public')->exists(str_replace('/storage/', '', $reward->image))) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $reward->image));
+            }
+            $path = $data['image']->store('images', 'public');
+            $data['image'] = '/storage/' . $path;
+        }
+
         $reward->update($data);
 
         return $reward;
