@@ -73,7 +73,6 @@ class RewardService
         return $rewards;
 
     }
-
     public function viewReward($id)
     {
         $reward = Reward::find($id);
@@ -84,8 +83,6 @@ class RewardService
 
         return $reward;
     }
-
-
     public function editReward(array $data, $id)
     {
         $reward = Reward::find($id);
@@ -106,8 +103,6 @@ class RewardService
 
         return $reward;
     }
-
-
     public function deleteReward($id)
     {
         $reward = Reward::find($id);
