@@ -35,7 +35,8 @@ class HabitService
         if ($is_premium_user == false) {
             if (Habit::where('user_id', Auth::id())->count() == $max) {
                 throw ValidationException::withMessages([
-                    'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
+                    // 'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
+                    'message' => 'Free users can add up to '.$max.' habits only. Upgrade to premium to add unlimited habits.',
                 ]);
             }
         }

@@ -30,7 +30,8 @@ class SayNoService
         if ($is_premium_user == false) {
             if (Entry::where('user_id', Auth::id())->count() == $max) {
                 throw ValidationException::withMessages([
-                    'message' => 'You already have ' . $max . ' entries created. You cannot create more than ' . $max . ' entries.',
+                    // 'message' => 'You already have ' . $max . ' entries created. You cannot create more than ' . $max . ' entries.',
+                    'message' => 'Free users can add up to '.$max.' say no only. Upgrade to premium to add unlimited say no.',
                 ]);
             }
         }
