@@ -122,7 +122,7 @@ class HabitService
 
         if ($is_premium_check == false) {
             $free = Subscription::where('plan_name', 'Free')->first();
-            if (in_array("Premium rewards (earn point 2x)", $free->features)) {
+            if (in_array("Earn point 2x per work done", $free->features)) {
                 // return '2x';
                 $profile->increment('total_points', 2);
             } else {
@@ -130,7 +130,7 @@ class HabitService
                 $profile->increment('total_points', 1);
             }
         } elseif ($is_premium_check == true) {
-            if (in_array("Premium rewards (earn point 2x)", json_decode($plan->features))) {
+            if (in_array("Earn point 2x per work done", json_decode($plan->features))) {
                 // return 'primium user 2x';
                 $profile->increment('total_points', 2);
             } else {
