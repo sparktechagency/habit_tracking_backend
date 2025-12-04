@@ -43,7 +43,8 @@ class AddSubscriptionRequest extends FormRequest
             ],
             'duration' => 'required|string|in:monthly,yearly',
             'price' => 'required|numeric|min:0',
-            'features' => 'required|array|min:1',
+            'discount' => 'nullable|numeric|min:0',
+            'features' => 'required|array|min:0',
             'features.*' => 'string|max:255',
         ];
 

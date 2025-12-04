@@ -26,7 +26,8 @@ class EditSubscriptionRequest extends FormRequest
             'plan_name' => 'nullable|string|max:255',
             'duration' => 'nullable|string|in:monthly,yearly',
             'price' => 'nullable|numeric|min:0',
-            'features' => 'required|array|min:1',
+            'discount' => 'nullable|numeric|min:0',
+            'features' => 'required|array|min:0',
             'features.*' => 'string|max:255', // array এর প্রতিটি item string হতে হবে
         ];
 

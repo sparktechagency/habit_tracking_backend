@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('plan_name');
             $table->string('duration');
             $table->decimal('price',10,2)->default(0);
+            $table->unsignedInteger('discount')->nullable();
             $table->json('features');
             $table->unsignedBigInteger('active_subscribers')->default(0);
             $table->timestamps();

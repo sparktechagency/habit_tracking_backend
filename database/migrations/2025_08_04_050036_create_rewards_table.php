@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('partner_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
-            $table->string('challenge_type');
+            $table->string('challenge_type')->nullable();
             $table->longText('description')->nullable();
             $table->date('expiration_date');
             $table->unsignedBigInteger('purchase_point')->default(0);
@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->string('longitude')->nullable();
             $table->string('image')->nullable();
             $table->enum('status', ['Enable', 'Disable'])->default('Enable');
-            $table->enum('admin_approved',['Accepted','Pending','Canceled'])->default('Pending');
+            $table->enum('admin_approved', ['Accepted', 'Pending', 'Canceled'])->default('Pending');
             $table->timestamps();
         });
     }

@@ -38,6 +38,7 @@ class SubscriptionService
             $subscription->plan_name = $data['plan_name'] ?? $subscription->plan_name;
             $subscription->duration = $data['duration'] ?? $subscription->duration;
             $subscription->price = $data['price'] ?? $subscription->price;
+            $subscription->discount = $data['discount'] ?? $subscription->discount;
             $subscription->features = $data['features'] ?? $subscription->features;
             $subscription->save();
         }
