@@ -159,5 +159,4 @@ class HabitService
             'done_at' => Carbon::now()
         ]);
     }
-
 }

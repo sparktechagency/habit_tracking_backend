@@ -77,7 +77,6 @@ class RewardController extends Controller
             return $this->sendError('Failed to fetch reward.', [$e->getMessage()], 500);
         }
     }
-
     public function viewReward($id)
     {
         try {
@@ -87,7 +86,6 @@ class RewardController extends Controller
             return $this->sendError('Failed to fetch rewards.', [$e->getMessage()], 500);
         }
     }
-
     public function editReward(EditRewardRequest $request, $id)
     {
         try {
@@ -97,7 +95,6 @@ class RewardController extends Controller
             return $this->sendError('Failed to updated reward.', [$e->getMessage()], 500);
         }
     }
-
     public function deleteReward($id)
     {
         try {

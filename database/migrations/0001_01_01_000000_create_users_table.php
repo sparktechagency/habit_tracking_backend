@@ -17,13 +17,13 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('status', ['Active', 'Inactive','Blocked'])->default('Inactive');
+            $table->enum('status', ['Active', 'Inactive', 'Blocked'])->default('Inactive');
             $table->timestamp('otp_verified_at')->nullable();
             $table->string('otp')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
             $table->longText('phone_number')->nullable();
             $table->string('country_code')->nullable();
-             $table->string('phone_number_with_code')->nullable();
+            $table->string('phone_number_with_code')->nullable();
             $table->string('address')->nullable();
             $table->string('location')->nullable();
             $table->string('latitude')->nullable();
