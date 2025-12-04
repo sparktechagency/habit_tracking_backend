@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Partner;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Partner\EditRewardRequest;
 use App\Http\Requests\Partner\RewardRequest;
 use App\Models\User;
 use App\Notifications\NewRewardCreatedNotification;
@@ -73,7 +74,37 @@ class RewardController extends Controller
             $rewards = $this->rewardService->getRewards($request->per_page);
             return $this->sendResponse($rewards, 'Rewards fetched successfully.');
         } catch (Exception $e) {
+            return $this->sendError('Failed to fetch reward.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function viewReward($id)
+    {
+        try {
+            $reward = $this->rewardService->viewReward($id);
+            return $this->sendResponse($reward, 'Reward details fetched successfully.');
+        } catch (Exception $e) {
             return $this->sendError('Failed to fetch rewards.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function editReward(EditRewardRequest $request, $id)
+    {
+        try {
+            $reward = $this->rewardService->editReward($request->validated(), $id);
+            return $this->sendResponse($reward, 'Reward updated successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to updated reward.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function deleteReward($id)
+    {
+        try {
+            $this->rewardService->deleteReward($id);
+            return $this->sendResponse([], 'Reward deleted successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to deleted reward.', [$e->getMessage()], 500);
         }
     }
 }

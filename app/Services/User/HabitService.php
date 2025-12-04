@@ -8,14 +8,38 @@ use App\Models\Plan;
 use App\Models\Profile;
 use App\Models\Subscription;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 use function PHPUnit\Framework\isArray;
 
 class HabitService
 {
-    public function addNewHabit(array $data): Habit
+    public function addNewHabit(array $data)
     {
+        $max = 5;
+
+        $plan = Plan::where('user_id', Auth::id())->latest()->first();
+        if ($plan) {
+            if ($plan->renewal >= Carbon::now()) {
+                $plan->features = json_decode($plan->features);
+                $is_premium_user = true;
+            } else {
+                $is_premium_user = false;
+            }
+        } else {
+            $is_premium_user = false;
+        }
+
+        if ($is_premium_user == false) {
+            if (Habit::where('user_id', Auth::id())->count() == $max) {
+                throw ValidationException::withMessages([
+                    'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
+                ]);
+            }
+        }
+
         return Habit::create([
             'user_id' => Auth::id(),
             'habit_name' => $data['habit_name']
@@ -109,7 +133,7 @@ class HabitService
             if (in_array("Premium rewards (earn point 2x)", json_decode($plan->features))) {
                 // return 'primium user 2x';
                 $profile->increment('total_points', 2);
-            }else{
+            } else {
                 // return '1x';
                 $profile->increment('total_points', 1);
             }

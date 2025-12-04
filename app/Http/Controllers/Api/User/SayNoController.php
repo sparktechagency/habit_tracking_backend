@@ -23,7 +23,7 @@ class SayNoController extends Controller
             $entry = $this->sayNoService->addEntry($request->validated());
             return $this->sendResponse($entry, 'Entry added successfully.');
         } catch (Exception $e) {
-            return $this->sendError('Something went wrong.', [], 500);
+            return $this->sendError('Something went wrong.', ['error' => $e->getMessage()], 500);
         }
     }
     public function getEntries(Request $request)

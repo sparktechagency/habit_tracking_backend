@@ -19,9 +19,10 @@ class SubscriptionSeeder extends Seeder
             'duration' => 'Ongoing',
             'price' => 0.00,
             'features' => [
-                'Basic challenges',
-                'Unlimited habits tracking',
-                'Unlimited Say No'
+                'Join challenge group & activity',
+                'Only 5 habits added',
+                'Only 5 Say No added',
+                'Earn point 1 per work done',
             ],
             'active_subscribers' => 3,
         ]);
@@ -31,11 +32,12 @@ class SubscriptionSeeder extends Seeder
             'duration' => 'Monthly',
             'price' => 5.99,
             'features' => [
-                'Basic challenges',
-                'Unlimited habits tracking',
-                'Unlimited Say No',
-                'Advanced analytics',
-                'Premium rewards (earn point 2x)'
+                'Creating a challenge group',
+                'Unlimited habits added',
+                'Unlimited Say No added',
+                'Advanced graphical analytics',
+                'Earn point 2x per work done',
+                'Reward redemption by point'
             ],
             'active_subscribers' => 0,
         ]);
@@ -45,11 +47,12 @@ class SubscriptionSeeder extends Seeder
             'duration' => 'Yearly',
             'price' => 29.99,
             'features' => [
-                'Basic challenges',
-                'Unlimited habits tracking',
-                'Unlimited Say No',
-                'Advanced analytics',
-                'Premium rewards (earn point 2x)'
+                'Creating a challenge group',
+                'Unlimited habits added',
+                'Unlimited Say No added',
+                'Advanced graphical analytics',
+                'Earn point 2x per work done',
+                'Reward redemption by point'
             ],
             'active_subscribers' => 0,
         ]);

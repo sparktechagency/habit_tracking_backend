@@ -23,7 +23,7 @@ class HabitController extends Controller
             $habit = $this->habitService->addNewHabit($request->validated());
             return $this->sendResponse($habit, 'Habit created successfully.');
         } catch (Exception $e) {
-            return $this->sendError('Failed to create habit.', [], 500);
+            return $this->sendError('Failed to create habit.', ['error' => $e->getMessage()], 500);
         }
     }
     public function getHabits(Request $request)

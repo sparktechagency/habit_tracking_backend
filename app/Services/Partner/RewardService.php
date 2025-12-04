@@ -73,4 +73,43 @@ class RewardService
         return $rewards;
 
     }
+
+    public function viewReward($id)
+    {
+        $reward = Reward::find($id);
+
+        if (!$reward) {
+            throw new \Exception("Reward not found.");
+        }
+
+        return $reward;
+    }
+
+
+    public function editReward(array $data, $id)
+    {
+        $reward = Reward::find($id);
+
+        if (!$reward) {
+            throw new \Exception("Reward not found.");
+        }
+
+        $reward->update($data);
+
+        return $reward;
+    }
+
+
+    public function deleteReward($id)
+    {
+        $reward = Reward::find($id);
+
+        if (!$reward) {
+            throw new \Exception("Reward not found.");
+        }
+
+        $reward->delete();
+
+        return true;
+    }
 }

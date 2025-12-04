@@ -4,13 +4,37 @@ namespace App\Services\User;
 
 use App\Models\Entry;
 use App\Models\Habit;
+use App\Models\Plan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class SayNoService
 {
     public function addEntry(array $data): Entry
     {
+        $max = 5;
+
+        $plan = Plan::where('user_id', Auth::id())->latest()->first();
+        if ($plan) {
+            if ($plan->renewal >= Carbon::now()) {
+                $plan->features = json_decode($plan->features);
+                $is_premium_user = true;
+            } else {
+                $is_premium_user = false;
+            }
+        } else {
+            $is_premium_user = false;
+        }
+
+        if ($is_premium_user == false) {
+            if (Entry::where('user_id', Auth::id())->count() == $max) {
+                throw ValidationException::withMessages([
+                    'message' => 'You already have ' . $max . ' entries created. You cannot create more than ' . $max . ' entries.',
+                ]);
+            }
+        }
+
         return Entry::create([
             'user_id' => Auth::id(),
             'date' => Carbon::now(),
