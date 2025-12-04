@@ -128,7 +128,7 @@ class GroupController extends Controller
     public function getDailySummaries(Request $request)
     {
         try {
-            $group = $this->groupService->getDailySummaries($request->challenge_group_id,$request->day);
+            $group = $this->groupService->getDailySummaries($request->challenge_group_id, $request->day);
             return $this->sendResponse($group, 'Get logs fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
@@ -241,10 +241,10 @@ class GroupController extends Controller
                 throw new Exception('User not found.');
             }
 
-            $group = ChallengeGroup::where('id',$request->challenge_group_id)->first();
+            $group = ChallengeGroup::where('id', $request->challenge_group_id)->first();
 
             $from = Auth::user()->full_name;
-            $message = "Invited you to the ".$group->group_name." group.";
+            $message = "Invited you to the " . $group->group_name . " group.";
 
             $user->notify(new SendInviteNotification($from, $message, $group));
 
