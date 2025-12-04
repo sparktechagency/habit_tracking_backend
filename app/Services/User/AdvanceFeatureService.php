@@ -179,21 +179,18 @@ class AdvanceFeatureService
     {
         $userId = Auth::id();
 
-        // 1. First Completed Habit Date
+        // 1. First Completed Habit Date OR default = current month
         $firstLog = HabitLog::where('user_id', $userId)
             ->where('status', 'Completed')
             ->orderBy('done_at', 'asc')
             ->first();
 
-        if (!$firstLog) {
-            return [
-                'data' => [],
-                'message' => 'No habit completed yet.'
-            ];
+        if ($firstLog) {
+            $firstDoneAt = Carbon::parse($firstLog->done_at)->startOfMonth();
+        } else {
+            // No habit_log exists → start from current month
+            $firstDoneAt = Carbon::now()->startOfMonth();
         }
-
-        $firstDoneAt = Carbon::parse($firstLog->done_at)->startOfMonth();
-
 
         // 2. Total months passed from first month → now
         $monthsPassed = $firstDoneAt->diffInMonths(Carbon::now());
@@ -213,7 +210,6 @@ class AdvanceFeatureService
         // 4. Determine cycle start & end
         $cycleStart = $firstDoneAt->copy()->addMonths(($requestedCycle - 1) * 12);
         $cycleEnd = $cycleStart->copy()->addMonths(11)->endOfMonth();
-
 
         // 5. Fetch logs inside that cycle
         $completedLogs = HabitLog::where('user_id', $userId)
@@ -260,13 +256,17 @@ class AdvanceFeatureService
 
         // 8. Response
         return [
-            'cycle_list' => $cycle_arr,  // 👈 dropdown text list
-            'max_completed_count' => $maxCompletedCount < 10 ? 10 : $maxCompletedCount,
-            'current_cycle' => $requestedCycle,
-            'total_cycles' => $totalCycles,
-            'cycle_start' => $cycleStart->format('F Y'),
-            'cycle_end' => $cycleEnd->format('F Y'),
-            'data' => $graphData
+            'status' => true,
+            'message' => 'Your 12 month habit track.',
+            'data' => [
+                'cycle_list' => $cycle_arr,
+                'max_completed_count' => $maxCompletedCount < 10 ? 10 : $maxCompletedCount,
+                'current_cycle' => $requestedCycle,
+                'total_cycles' => $totalCycles,
+                'cycle_start' => $cycleStart->format('F Y'),
+                'cycle_end' => $cycleEnd->format('F Y'),
+                'data' => $graphData
+            ]
         ];
     }
     public function sayOnBarChart(?int $cycle = null)
@@ -278,17 +278,24 @@ class AdvanceFeatureService
             ->orderBy('date', 'asc')
             ->first();
 
-        if (!$firstEntry) {
-            return [
-                'data' => [],
-                'message' => 'No entries found.'
-            ];
+        // if (!$firstEntry) {
+        //     return [
+        //         'data' => [],
+        //         'message' => 'No entries found.'
+        //     ];
+        // }
+
+        if ($firstEntry) {
+            $firstDoneAt = Carbon::parse($firstEntry->date)->startOfMonth();
+        } else {
+            // No habit_log exists → start from current month
+            $firstDoneAt = Carbon::now()->startOfMonth();
         }
 
-        $firstDate = Carbon::parse($firstEntry->date)->startOfMonth();
+        // $firstDate = Carbon::parse($firstEntry->date)->startOfMonth();
 
         // 2. Total months passed from first month till now
-        $monthsPassed = $firstDate->diffInMonths(Carbon::now());
+        $monthsPassed = $firstDoneAt->diffInMonths(Carbon::now());
 
         // Total cycles (12 months per cycle)
         $totalCycles = floor($monthsPassed / 12) + 1;
@@ -303,7 +310,7 @@ class AdvanceFeatureService
         }
 
         // 4. Determine cycle start & end
-        $cycleStart = $firstDate->copy()->addMonths(($requestedCycle - 1) * 12);
+        $cycleStart = $firstDoneAt->copy()->addMonths(($requestedCycle - 1) * 12);
         $cycleEnd = $cycleStart->copy()->addMonths(11)->endOfMonth();
 
         // 5. Fetch entries in this cycle
@@ -341,7 +348,7 @@ class AdvanceFeatureService
         // 8. Build cycle dropdown
         $cycle_arr = [];
         for ($i = 1; $i <= $totalCycles; $i++) {
-            $start = $firstDate->copy()->addMonths(($i - 1) * 12);
+            $start = $firstDoneAt->copy()->addMonths(($i - 1) * 12);
             $end = $start->copy()->addMonths(11);
             $cycle_arr[$i] = $start->format('My') . '-' . $end->format('My');
         }
