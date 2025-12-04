@@ -256,17 +256,13 @@ class AdvanceFeatureService
 
         // 8. Response
         return [
-            'status' => true,
-            'message' => 'Your 12 month habit track.',
-            'data' => [
-                'cycle_list' => $cycle_arr,
-                'max_completed_count' => $maxCompletedCount < 10 ? 10 : $maxCompletedCount,
-                'current_cycle' => $requestedCycle,
-                'total_cycles' => $totalCycles,
-                'cycle_start' => $cycleStart->format('F Y'),
-                'cycle_end' => $cycleEnd->format('F Y'),
-                'data' => $graphData
-            ]
+            'cycle_list' => $cycle_arr,
+            'max_completed_count' => $maxCompletedCount < 10 ? 10 : $maxCompletedCount,
+            'current_cycle' => $requestedCycle,
+            'total_cycles' => $totalCycles,
+            'cycle_start' => $cycleStart->format('F Y'),
+            'cycle_end' => $cycleEnd->format('F Y'),
+            'data' => $graphData
         ];
     }
     public function sayOnBarChart(?int $cycle = null)

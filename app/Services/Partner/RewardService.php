@@ -91,13 +91,16 @@ class RewardService
             throw new \Exception("Reward not found.");
         }
 
-         if (isset($data['image'])) {
+        if (isset($data['image'])) {
             if ($reward->image && Storage::disk('public')->exists(str_replace('/storage/', '', $reward->image))) {
                 Storage::disk('public')->delete(str_replace('/storage/', '', $reward->image));
             }
             $path = $data['image']->store('images', 'public');
             $data['image'] = '/storage/' . $path;
         }
+
+        $data['expiration_date'] = Carbon::createFromFormat('d/m/Y', $data['expiration_date'])
+            ->format('Y-m-d');
 
         $reward->update($data);
 
