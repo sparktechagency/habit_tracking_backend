@@ -99,7 +99,7 @@ Route::middleware('auth:api')->group(function () {
         // subscriptions        
         Route::post('/add-subscription', [SubscriptionControler::class, 'addSubscription']);
         Route::get('/get-subscriptions', [SubscriptionControler::class, 'getSubscriptions']);
-        Route::post('/edit-subscription/{id?}', [SubscriptionControler::class, 'editSubscription']);
+        Route::patch('/edit-subscription/{id?}', [SubscriptionControler::class, 'editSubscription']);
         Route::delete('/delete-subscription/{id?}', [SubscriptionControler::class, 'deleteSubscription']);
 
         // transation

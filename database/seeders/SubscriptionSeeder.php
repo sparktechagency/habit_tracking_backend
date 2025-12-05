@@ -18,6 +18,7 @@ class SubscriptionSeeder extends Seeder
             'plan_name' => 'Free',
             'duration' => 'Ongoing',
             'price' => 0.00,
+            'discount' => 0,
             'features' => [
                 'Join challenge group & activity',
                 'Only 5 habits added',
@@ -31,6 +32,7 @@ class SubscriptionSeeder extends Seeder
             'plan_name' => 'Premium',
             'duration' => 'Monthly',
             'price' => 5.99,
+            'discount' => 0,
             'features' => [
                 'Creating a challenge group',
                 'Unlimited habits added',
@@ -46,6 +48,7 @@ class SubscriptionSeeder extends Seeder
             'plan_name' => 'Premium',
             'duration' => 'Yearly',
             'price' => 29.99,
+            'discount' => 0,
             'features' => [
                 'Creating a challenge group',
                 'Unlimited habits added',

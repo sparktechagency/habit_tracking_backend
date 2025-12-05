@@ -35,16 +35,16 @@ class AddSubscriptionRequest extends FormRequest
                     // $existingPlan = DB::table('subscriptions')
                     //     ->where('plan_name', $value)
                     //     ->first();
-
+        
                     // if ($existingPlan) {
                     //     $fail('A plan with this name already exists. Please enter a different name.');
                     // }
                 },
             ],
             'duration' => 'required|string|in:monthly,yearly',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
-            'features' => 'required|array|min:0',
+            'price' => 'required|numeric|min:1',
+            'discount' => 'required|numeric|min:0',
+            'features' => 'required|array',
             'features.*' => 'string|max:255',
         ];
 

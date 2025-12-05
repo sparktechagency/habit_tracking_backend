@@ -104,10 +104,12 @@ class AdvanceFeatureService
     }
     public function getSubscriptions()
     {
-        $subscriptions = Subscription::latest()->get();
+        $subscriptions = Subscription::orderBy('id')->get();
         foreach ($subscriptions as $subscription) {
-            $calculated = $subscription->price * ($subscription->discount / 100);
-            $subscription->discount_amount = round($calculated, 2);
+            if ($subscription->discount > 0) {
+                $calculated = $subscription->price - ($subscription->price * ($subscription->discount / 100));
+                $subscription->discount_price = round($calculated, 2);
+            }
         }
         return $subscriptions;
     }
