@@ -6,6 +6,7 @@ use App\Models\Challenge;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Ramsey\Uuid\Type\Decimal;
 
 class SubscriptionService
@@ -31,6 +32,12 @@ class SubscriptionService
     {
         $subscription = Subscription::where('id', $id)->first();
 
+        if (!$subscription) {
+            throw ValidationException::withMessages([
+                'message' => 'Subscription id not found.',
+            ]);
+        }
+
         if ($subscription->plan_name == 'Free') {
             $subscription->features = $data['features'] ?? $subscription->features;
             $subscription->save();
@@ -48,6 +55,12 @@ class SubscriptionService
     public function deleteSubscription(int $id): bool
     {
         $subscription = Subscription::find($id);
+
+        if (!$subscription) {
+            throw ValidationException::withMessages([
+                'message' => 'Subscription id not found.',
+            ]);
+        }
 
         if ($subscription && $subscription->plan_name != 'Free') {
             return $subscription->delete();

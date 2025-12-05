@@ -43,19 +43,16 @@ class SubscriptionControler extends Controller
             $challenge = $this->subscriptionService->editSubscription($id, $request->validated());
             return $this->sendResponse($challenge, 'Subscription updated successfully.');
         } catch (Exception $e) {
-            return $this->sendError('Something went wrong.', [], 500);
+            return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
      public function deleteSubscription($id)
     {
         try {
             $deleted = $this->subscriptionService->deleteSubscription($id);
-            if (!$deleted) {
-                return $this->sendError('Subscription not found.', [], 404);
-            }
             return $this->sendResponse([], 'Subscription deleted successfully.');
         } catch (Exception $e) {
-            return $this->sendError('Failed to delete subscription.', [], 500);
+            return $this->sendError('Failed to delete subscription.', [$e->getMessage()], 500);
         }
     }
 
