@@ -26,7 +26,6 @@ class SubscriptionService
         }
 
         return $query->get();
-
     }
     public function editSubscription(?int $id, array $data)
     {
@@ -67,5 +66,4 @@ class SubscriptionService
         }
         return false;
     }
-
 }

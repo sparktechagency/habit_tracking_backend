@@ -83,20 +83,24 @@ class AuthService
     public function verifyOtp(string $otp): array
     {
         $user = User::where('otp', $otp)->first();
+
         if (!$user) {
             return ['success' => false, 'message' => 'Invalid OTP.', 'code' => 401];
         }
         if (now()->greaterThan($user->otp_expires_at)) {
             return ['success' => false, 'message' => 'OTP expired.', 'code' => 410];
         }
+
+        if ($user->status == 'Inactive') {
+            Subscription::where('plan_name', 'Free')->first()->increment('active_subscribers');
+        }
+
         $user->update([
             'otp' => null,
             'otp_expires_at' => null,
             'otp_verified_at' => now(),
-            'status' => 'active',
+            'status' => 'Active'
         ]);
-
-        Subscription::where('plan_name', 'Free')->increment('active_subscribers');
 
         return ['success' => true, 'user' => $user];
     }
