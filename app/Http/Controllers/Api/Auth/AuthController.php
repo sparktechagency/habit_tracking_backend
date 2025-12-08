@@ -433,8 +433,7 @@ class AuthController extends Controller
     }
     public function deleteAccount(Request $request)
     {
-        // Auth::user()->delete();
-        User::find($request->user_id)->delete();
+        Auth::user()->delete();
         JWTAuth::invalidate(JWTAuth::getToken());
 
         return response()->json([
