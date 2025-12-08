@@ -20,14 +20,18 @@ class TransationService
 
         if ($userId) {
 
-            if (!Transaction::where('user_id', $userId)->latest()->first()) {
-                throw ValidationException::withMessages([
-                    'message' => 'No transaction here.',
-                ]);
-            }
+            throw ValidationException::withMessages([
+                'message' => 'No transaction here.',
+            ]);
 
-            $query->where('user_id', $userId);
-            return $query->latest()->first();
+            // if (!Transaction::where('user_id', $userId)->latest()->first()) {
+            //     throw ValidationException::withMessages([
+            //         'message' => 'No transaction here.',
+            //     ]);
+            // }
+
+            // $query->where('user_id', $userId);
+            // return $query->latest()->first();
         }
 
         return $query->latest()->paginate($per_page ?? 10);
