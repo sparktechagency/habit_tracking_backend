@@ -32,14 +32,40 @@ class HabitService
             $is_premium_user = false;
         }
 
+        // if ($is_premium_user == false) {
+        //     if (Habit::where('user_id', Auth::id())->count() == $max) {
+        //         throw ValidationException::withMessages([
+        //             // 'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
+        //             'message' => 'Free users can add up to ' . $max . ' habits only. Upgrade to premium to add unlimited habits.',
+        //         ]);
+        //     }
+        // }
+
+
         if ($is_premium_user == false) {
-            if (Habit::where('user_id', Auth::id())->count() == $max) {
-                throw ValidationException::withMessages([
-                    // 'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
-                    'message' => 'Free users can add up to '.$max.' habits only. Upgrade to premium to add unlimited habits.',
-                ]);
+
+            $free = Subscription::where('plan_name', 'Free')->first();
+
+            if (!in_array("Unlimited habits added", $free->features)) {
+                if (Habit::where('user_id', Auth::id())->count() == $max) {
+                    throw ValidationException::withMessages([
+                        // 'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
+                        'message' => 'Free users can add up to ' . $max . ' habits only. Upgrade to premium to add unlimited habits.',
+                    ]);
+                }
+            }
+
+        } else {
+            if (!in_array("Unlimited habits added", $plan->features)) {
+                if (Habit::where('user_id', Auth::id())->count() == $max) {
+                    throw ValidationException::withMessages([
+                        // 'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
+                        'message' => 'You can add up to ' . $max . ' habits only. "Unlimited habits added" feature not available for you.',
+                    ]);
+                }
             }
         }
+
 
         return Habit::create([
             'user_id' => Auth::id(),

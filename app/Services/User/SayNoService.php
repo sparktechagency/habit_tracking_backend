@@ -5,6 +5,7 @@ namespace App\Services\User;
 use App\Models\Entry;
 use App\Models\Habit;
 use App\Models\Plan;
+use App\Models\Subscription;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -27,12 +28,36 @@ class SayNoService
             $is_premium_user = false;
         }
 
+        // if ($is_premium_user == false) {
+        //     if (Entry::where('user_id', Auth::id())->count() == $max) {
+        //         throw ValidationException::withMessages([
+        //             // 'message' => 'You already have ' . $max . ' entries created. You cannot create more than ' . $max . ' entries.',
+        //             'message' => 'Free users can add up to '.$max.' say no only. Upgrade to premium to add unlimited say no.',
+        //         ]);
+        //     }
+        // }
+
         if ($is_premium_user == false) {
-            if (Entry::where('user_id', Auth::id())->count() == $max) {
-                throw ValidationException::withMessages([
-                    // 'message' => 'You already have ' . $max . ' entries created. You cannot create more than ' . $max . ' entries.',
-                    'message' => 'Free users can add up to '.$max.' say no only. Upgrade to premium to add unlimited say no.',
-                ]);
+
+            $free = Subscription::where('plan_name', 'Free')->first();
+
+            if (!in_array("Unlimited Say No added", $free->features)) {
+                if (Entry::where('user_id', Auth::id())->count() == $max) {
+                    throw ValidationException::withMessages([
+                        // 'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
+                        'message' => 'Free users can add up to ' . $max . ' say no only. Upgrade to premium to add unlimited say no.',
+                    ]);
+                }
+            }
+
+        } else {
+            if (!in_array("Unlimited Say No added", $plan->features)) {
+                if (Entry::where('user_id', Auth::id())->count() == $max) {
+                    throw ValidationException::withMessages([
+                        // 'message' => 'You already have ' . $max . ' habits created. You cannot create more than ' . $max . ' habits.',
+                        'message' => 'You can add up to ' . $max . ' say no only. "Unlimited Say No added" feature not available for you.',
+                    ]);
+                }
             }
         }
 
