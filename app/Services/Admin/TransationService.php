@@ -17,6 +17,11 @@ class TransationService
         $query = Transaction::query();
 
         if ($userId) {
+
+            if (!Transaction::where('user_id', $userId)->latest()->first()) {
+                return 'Transaction not found.';
+            }
+
             $query->where('user_id', $userId);
             return $query->latest()->first();
         }
