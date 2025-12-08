@@ -21,7 +21,7 @@ class TransationController extends Controller
             $types = $this->transationService->getTransations($request->user_id,$request->per_page);
             return $this->sendResponse($types, 'Get all transations fetched successfully.');
         } catch (Exception $e) {
-            return $this->sendError('Something went wrong.', [], 500);
+            return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     } 
 

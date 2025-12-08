@@ -6,6 +6,8 @@ use App\Models\Challenge;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Ramsey\Uuid\Type\Decimal;
 
 use function PHPUnit\Framework\isEmpty;
@@ -19,7 +21,9 @@ class TransationService
         if ($userId) {
 
             if (!Transaction::where('user_id', $userId)->latest()->first()) {
-                return 'Transaction not found.';
+                throw ValidationException::withMessages([
+                    'message' => 'No transaction here.',
+                ]);
             }
 
             $query->where('user_id', $userId);
