@@ -213,6 +213,13 @@ class GroupService
             $group->my_daily_progress = $totalTasks > 0
                 ? round(($myCompleted / $totalTasks) * 100)
                 : 0;
+
+            $group->member_lists = GroupMember::with([
+                'user' => function ($q) {
+                    $q->select('id', 'full_name', 'avatar');
+                }
+            ])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
+            
             $group->makeHidden('members');
             $group->makeHidden('group_habits');
         });
@@ -398,7 +405,7 @@ class GroupService
             if (in_array("Earn point 2x per work done", json_decode($plan->features))) {
                 // return 'primium user 2x';
                 $profile->increment('total_points', 2);
-            }else{
+            } else {
                 // return '1x';
                 $profile->increment('total_points', 1);
             }
