@@ -38,6 +38,8 @@ Route::post('/social-login', [AuthController::class, 'socialLogin']);
 // static page show
 Route::get('pages/{slug}', [StaticPageController::class, 'show']);
 
+ Route::get('/view-group-web/{id?}', [GroupController::class, 'viewGroup']);
+
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
