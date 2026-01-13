@@ -103,7 +103,7 @@ class AdvanceFeatureService
         ];
     }
 
-    public function basicInfo(?int $userId)
+    public function basicInfo11(?int $userId)
     {
         $authId = $userId ?? Auth::id();
         $now = Carbon::now();
@@ -190,6 +190,97 @@ class AdvanceFeatureService
             'say_no' => Entry::where('user_id', $authId)->count()
         ];
     }
+
+    public function basicInfo(?int $userId)
+    {
+        $authId = $userId ?? Auth::id();
+        $now = Carbon::now();
+
+        // All habits
+        $habitLists = Habit::where('user_id', $authId)
+            ->select('id', 'habit_name')
+            ->get();
+
+        // Total habit logs
+        $habitLogsCount = HabitLog::where('user_id', $authId)->count();
+
+        $habitStreaks = [];
+
+        foreach ($habitLists as $habit) {
+
+            // All completed dates (DESC for current streak calculation)
+            $completedDays = HabitLog::where('user_id', $authId)
+                ->where('habit_id', $habit->id)
+                ->where('status', 'Completed')
+                ->orderByDesc('done_at')
+                ->pluck('done_at')
+                ->map(fn($date) => Carbon::parse($date)->toDateString())
+                ->unique()
+                ->values();
+
+            /**
+             * ✅ CURRENT CONTINUOUS STREAK
+             * - Today must be completed
+             * - Any gap breaks streak
+             */
+            $currentStreak = 0;
+            $expectedDate = Carbon::today();
+
+            foreach ($completedDays as $day) {
+                if ($day === $expectedDate->toDateString()) {
+                    $currentStreak++;
+                    $expectedDate->subDay();
+                } else {
+                    break; // ❌ gap found → reset
+                }
+            }
+
+            $habitStreaks[] = [
+                'habit_id'        => $habit->id,
+                'habit_name'      => $habit->habit_name,
+                'current_streak'  => $currentStreak,
+            ];
+        }
+
+        // Extract streak values
+        $streakValues = collect($habitStreaks)->pluck('current_streak')->toArray();
+
+        // Max current streak among all habits
+        $longestStreakMax = count($streakValues) > 0
+            ? max($streakValues)
+            : 0;
+
+        // User basic info
+        $user = User::where('id', $authId)
+            ->select('id', 'full_name', 'role', 'avatar')
+            ->first();
+
+        // Completed group challenges
+        $completedGroupChallenges = ChallengeGroup::where('status', 'Completed')
+            ->whereHas('members', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->count();
+
+        $profile = Profile::where('user_id', $authId)->first();
+
+        return [
+            'user' => $user,
+            'level' => $profile->level ?? 0,
+            'total_points' => $profile->total_points ?? 0,
+            'used_points' => $profile->used_points ?? 0,
+            'remaining_points' => ($profile->total_points ?? 0) - ($profile->used_points ?? 0),
+            'completed_habit' => $habitLogsCount,
+
+            // ✅ Issue–1 FIXED
+            'longest_streaks_max' => $longestStreakMax,
+            'longest_streak_month' => $now->format('F Y'),
+
+            'completed_group_challenge' => $completedGroupChallenges,
+            'say_no' => Entry::where('user_id', $authId)->count(),
+        ];
+    }
+
 
 
     public function getSubscriptions()
