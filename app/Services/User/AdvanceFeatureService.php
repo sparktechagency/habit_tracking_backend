@@ -191,7 +191,7 @@ class AdvanceFeatureService
         ];
     }
 
-    public function basicInfo(?int $userId)
+    public function basicInfo12(?int $userId)
     {
         $authId = $userId ?? Auth::id();
         $now = Carbon::now();
@@ -281,7 +281,169 @@ class AdvanceFeatureService
         ];
     }
 
+    public function basicInfoOLD(?int $userId)
+    {
+        $authId = $userId ?? Auth::id();
+        $now = Carbon::now();
 
+        // ================= Habits =================
+        $habitLists = Habit::where('user_id', $authId)
+            ->select('id', 'habit_name')
+            ->get();
+
+        $habitLogsCount = HabitLog::where('user_id', $authId)->count();
+
+        $longestStreak = 0;
+
+        foreach ($habitLists as $habit) {
+
+            // All completed dates (date only)
+            $completedDays = HabitLog::where('user_id', $authId)
+                ->where('habit_id', $habit->id)
+                ->where('status', 'Completed')
+                ->pluck('done_at')
+                ->map(fn($date) => Carbon::parse($date)->toDateString())
+                ->unique()
+                ->values();
+
+            $today = Carbon::today()->toDateString();
+            $yesterday = Carbon::yesterday()->toDateString();
+
+            $currentStreak = 0;
+
+            // 🔥 Streak start logic
+            if ($completedDays->contains($today)) {
+                $expectedDate = Carbon::today();
+            } elseif ($completedDays->contains($yesterday)) {
+                $expectedDate = Carbon::yesterday();
+            } else {
+                $expectedDate = null;
+            }
+
+            // 🔁 Count continuous days
+            if ($expectedDate) {
+                foreach ($completedDays as $day) {
+                    if ($day === $expectedDate->toDateString()) {
+                        $currentStreak++;
+                        $expectedDate->subDay();
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            // 👉 Keep highest running streak among habits
+            if ($currentStreak > $longestStreak) {
+                $longestStreak = $currentStreak;
+            }
+        }
+
+        // ================= User Info =================
+        $user = User::where('id', $authId)
+            ->select('id', 'full_name', 'role', 'avatar')
+            ->first();
+
+        $profile = Profile::where('user_id', $authId)->first();
+
+        $completedGroupChallenges = ChallengeGroup::where('status', 'Completed')
+            ->whereHas('members', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->count();
+
+        return [
+            'user' => $user,
+            'level' => $profile->level ?? 0,
+            'total_points' => $profile->total_points ?? 0,
+            'used_points' => $profile->used_points ?? 0,
+            'remaining_points' => ($profile->total_points ?? 0) - ($profile->used_points ?? 0),
+
+            'completed_habit' => $habitLogsCount,
+
+            // ✅ FINAL REQUIRED FIELD
+            'longest_streaks_max' => $longestStreak,
+            'longest_streak_month' => $now->format('F Y'),
+
+            'completed_group_challenge' => $completedGroupChallenges,
+            'say_no' => Entry::where('user_id', $authId)->count(),
+        ];
+    }
+
+    public function basicInfo(?int $userId)
+    {
+        $authId = $userId ?? Auth::id();
+        $now = Carbon::now();
+
+        $habitLogsCount = HabitLog::where('user_id', $authId)->count();
+
+        // All completed days
+        $completedDays = HabitLog::where('user_id', $authId)
+            ->where('status', 'Completed')
+            ->pluck('done_at')
+            ->map(fn($d) => Carbon::parse($d)->toDateString())
+            ->unique()
+            ->toArray();
+
+        $today = Carbon::today()->toDateString();
+        $yesterday = Carbon::yesterday()->toDateString();
+
+        /**
+         * ✅ LONGEST_STREAKS (Final Logic)
+         */
+        $streak = 0;
+
+        // Case 1: today done
+        if (in_array($today, $completedDays)) {
+            $streak = 1;
+            $pointer = Carbon::yesterday();
+
+            while (in_array($pointer->toDateString(), $completedDays)) {
+                $streak++;
+                $pointer->subDay();
+            }
+        }
+        // Case 2: today not done but yesterday done
+        elseif (in_array($yesterday, $completedDays)) {
+            $pointer = Carbon::yesterday();
+            while (in_array($pointer->toDateString(), $completedDays)) {
+                $streak++;
+                $pointer->subDay();
+            }
+        }
+        // Case 3: today & yesterday both not done
+        else {
+            $streak = 0;
+        }
+
+        // user
+        $user = User::select('id', 'full_name', 'role', 'avatar')
+            ->find($authId);
+
+        $profile = Profile::where('user_id', $authId)->first();
+
+        $completedGroupChallenges = ChallengeGroup::where('status', 'Completed')
+            ->whereHas('members', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->count();
+
+        return [
+            'user' => $user,
+            'level' => $profile->level ?? 0,
+            'total_points' => $profile->total_points ?? 0,
+            'used_points' => $profile->used_points ?? 0,
+            'remaining_points' => ($profile->total_points ?? 0) - ($profile->used_points ?? 0),
+
+            'completed_habit' => $habitLogsCount,
+
+            // ✅ EXACT EXPECTED OUTPUT
+            'longest_streaks_max' => $streak,
+            'longest_streak_month' => $now->format('F Y'),
+
+            'completed_group_challenge' => $completedGroupChallenges,
+            'say_no' => Entry::where('user_id', $authId)->count(),
+        ];
+    }
 
     public function getSubscriptions()
     {
