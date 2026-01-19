@@ -93,11 +93,11 @@ class GroupService
         $groups = $query->paginate($per_page ?? 10);
 
         $groups->each(function ($group) use ($authId, $today) {
+
             $group->max_count = 100;
+
             $totalTasks = $group->group_habits->count();
             $totalMembers = $group->members_count;
-
-
 
             $completedCount = ChallengeLog::where('challenge_group_id', $group->id)
                 ->whereDate('date', $today)
@@ -115,19 +115,32 @@ class GroupService
                 ->whereDate('date', $today)
                 ->where('status', 'Completed')
                 ->count();
+
             $group->my_daily_progress = $totalTasks > 0
                 ? round(($myCompleted / $totalTasks) * 100)
                 : 0;
+
+            // ✅ Check if user already joined the group
+            $isJoined = GroupMember::where('challenge_group_id', $group->id)
+                ->where('user_id', $authId)
+                ->exists();
+
+            $group->is_new = !$isJoined;
 
             $group->member_lists = GroupMember::with([
                 'user' => function ($q) {
                     $q->select('id', 'full_name', 'avatar');
                 }
-            ])->where('challenge_group_id', $group->id)->latest()->take(5)->get();
+            ])
+                ->where('challenge_group_id', $group->id)
+                ->latest()
+                ->take(5)
+                ->get();
 
             $group->makeHidden('members');
             $group->makeHidden('group_habits');
         });
+
         return $groups;
     }
     public function getActiveGroups(?string $search = null, ?int $per_page)
