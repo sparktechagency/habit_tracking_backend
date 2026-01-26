@@ -20,10 +20,16 @@ use App\Http\Controllers\Api\User\GroupController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StaticPageController;
 use App\Http\Controllers\Api\User\AdvanceFeatureController;
+use App\Http\Controllers\PushNotificationController;
 use App\Models\Subscription;
 use App\Services\User\AdvanceFeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+
+
+
+Route::post('/push/send', [PushNotificationController::class, 'sendPush']);
 
 
 Route::post('/register', [AuthController::class, 'register']);

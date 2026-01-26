@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+doogoo-app-push-firebase-for-backend.json
+/public/firebase-messaging-sw.js
+/public/fcm.html
