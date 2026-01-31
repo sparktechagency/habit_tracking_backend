@@ -28,7 +28,8 @@ class NewRewardCreatedNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'title' => "{$this->fromUser} new reward created.",
+            'title' => "New reward",
+            'user_name' => $this->fromUser,
             'body'  => $this->message,
         ];
     }

@@ -42,15 +42,6 @@ class RewardController extends Controller
             //     ], 'Profile is incomplete.');
             // }
             $reward = $this->rewardService->addReward($request->validated());
-
-            $from = Auth::user()->full_name;
-            $message = "Keep shining, you did amazing!";
-
-            $admin = User::find(1);
-            $users = User::where('id', '!=', Auth::id())->get();
-
-            $admin->notify(new NewRewardCreatedNotification($from, $message));
-
             return $this->sendResponse($reward, 'Reward added successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to add reward.', [$e->getMessage()], 500);

@@ -20,7 +20,7 @@ use App\Http\Controllers\Api\User\GroupController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StaticPageController;
 use App\Http\Controllers\Api\User\AdvanceFeatureController;
-use App\Http\Controllers\PushNotificationController;
+use App\Http\Controllers\Api\PushNotificationController;
 use App\Models\Subscription;
 use App\Services\User\AdvanceFeatureService;
 use Illuminate\Http\Request;
@@ -55,6 +55,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
     Route::get('/syn-contacts', [AuthController::class, 'synContacts']);
     Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
+     Route::patch('/device-token', [AuthController::class, 'deviceToken']);
 
 
     // static page update

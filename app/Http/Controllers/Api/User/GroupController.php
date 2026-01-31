@@ -17,6 +17,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\PushNotificationService;
 
 class GroupController extends Controller
 {
@@ -36,22 +37,13 @@ class GroupController extends Controller
             return $this->sendError('Failed to fetch challenge types.', [], 500);
         }
     }
-    public function createGroup(CreateChallengeGroupRequest $request): JsonResponse
+    public function createGroup(CreateChallengeGroupRequest $request, PushNotificationService $firebase): JsonResponse
     {
         try {
-            $group = $this->groupService->createGroup($request->validated());
-
-            $from = Auth::user()->full_name;
-            $message = "Keep shining, you did amazing!";
-
-            $admin = User::find(1);
-            $users = User::where('id', '!=', Auth::id())->get();
-
-            $admin->notify(new NewChallengeCreatedNotification($from, $message));
-
+            $group = $this->groupService->createGroup($request->validated(), $firebase);
             return $this->sendResponse($group, 'Challenge group created successfully.', true, 201);
         } catch (Exception $e) {
-            return $this->sendError('Failed to create challenge group.', [], 500);
+            return $this->sendError('Failed to create challenge group.', [$e->getMessage()], 500);
         }
     }
     public function getGroups(Request $request)
@@ -134,7 +126,7 @@ class GroupController extends Controller
             return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
-    public function sendCelebration(Request $request)
+    public function sendCelebration(Request $request, PushNotificationService $firebase)
     {
         try {
             $user = User::find($request->user_id);
@@ -143,10 +135,22 @@ class GroupController extends Controller
                 throw new Exception('User not found.');
             }
 
+            // notification
             $from = Auth::user()->full_name;
-            $message = "Keep shining, you did amazing!";
+            $message = "is celebrating your success 🎉🥳";
 
             $user->notify(new CelebrationNotification($from, $message));
+
+            $device_token = $user->device_token;
+            $firebase->sendNotification(
+                $device_token,
+                'You are congratulated.',
+                Auth::user()->full_name . ' is celebrating your success 🎉🥳',
+                [
+                    'user_id' => (string) Auth::id(),
+                ]
+            );
+
 
             return $this->sendResponse([], 'Notification send successfully.');
         } catch (Exception $e) {

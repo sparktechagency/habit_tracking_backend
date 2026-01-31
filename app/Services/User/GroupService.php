@@ -12,10 +12,12 @@ use App\Models\Plan;
 use App\Models\Profile;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Notifications\NewChallengeCreatedNotification;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Services\PushNotificationService;
 
 class GroupService
 {
@@ -26,7 +28,7 @@ class GroupService
             ->get()
             ->pluck('challenge_type');
     }
-    public function createGroup(array $data): ChallengeGroup
+    public function createGroup(array $data, $firebase): ChallengeGroup
     {
         $startDate = Carbon::now();
         $endDate = Carbon::now()->addDays(((int) $data['duration']) - 1);
@@ -73,6 +75,34 @@ class GroupService
                 'status' => 'Incompleted'
             ]);
         }
+
+
+        // notification
+
+        $from = Auth::user()->full_name;
+        $message = 'a new group challenge created.';
+
+        $admin = User::find(1);
+        $users = User::where('role', 'USER')->where('id', '!=', Auth::id())->get();
+
+        $admin->notify(new NewChallengeCreatedNotification($from, $message));
+
+        foreach ($users as $user) {
+            $user->notify(new NewChallengeCreatedNotification($from, $message));
+
+            $device_token = $user->device_token;
+            $firebase->sendNotification(
+                $device_token,
+                'New group challenge',
+                Auth::user()->full_name . ' a new group challenge created.',
+                [
+                    'user_id' => (string) Auth::id(),
+                    'group_challenge_id' => (string) $group->id,
+                    'redirect' => 'challenge/[id]'
+                ]
+            );
+        }
+
         return $group;
     }
     public function getGroups(?string $search = null, ?int $per_page)

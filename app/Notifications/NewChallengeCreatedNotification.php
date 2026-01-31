@@ -28,7 +28,8 @@ class NewChallengeCreatedNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'title' => "{$this->fromUser} new challenge group created.",
+            'title' => "New group challenge",
+            'user_name' => $this->fromUser,
             'body'  => $this->message,
         ];
     }

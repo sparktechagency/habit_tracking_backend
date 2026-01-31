@@ -28,7 +28,8 @@ class CelebrationNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'title' => "{$this->fromUser} is celebrating your success 🎉🥳",
+            'title' => "You are congratulated.",
+            'user_name' => $this->fromUser,
             'body'  => $this->message,
         ];
     }

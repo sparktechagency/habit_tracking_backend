@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\NewRewardCreatedNotification;
 
 class RewardService
 {
@@ -48,6 +49,12 @@ class RewardService
             $data['image'] = Storage::url($path);
         }
 
+        //notification
+        $from = Auth::user()->full_name;
+        $message = 'a new reward created.';
+        $admin = User::find(1);
+        $admin->notify(new NewRewardCreatedNotification($from, $message));
+
         return Reward::create($data);
     }
     public function enableDisableReward(int $id): ?Reward
@@ -71,7 +78,6 @@ class RewardService
             ->paginate($per_page ?? 10);
 
         return $rewards;
-
     }
     public function viewReward($id)
     {

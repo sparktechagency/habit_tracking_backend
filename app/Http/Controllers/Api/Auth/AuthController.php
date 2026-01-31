@@ -441,4 +441,21 @@ class AuthController extends Controller
             'message' => 'Account deleted successfully'
         ]);
     }
+
+    public function deviceToken(Request $request)
+    {
+        $request->validate([
+            'device_token' => 'required|string'
+        ]);
+
+        $user = Auth::user();
+        $user->device_token = $request->device_token;
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Device token updated successfully',
+            'device_token' => $user->device_token
+        ]);
+    }
 }

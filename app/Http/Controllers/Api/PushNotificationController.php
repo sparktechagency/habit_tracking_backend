@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Services\PushNotificationService;
 use Illuminate\Http\Request;
 
@@ -21,8 +22,8 @@ class PushNotificationController extends Controller
             $request->body,
             [
                 'status' => 'Active',
-                // 'user_id' => '5',
-                // 'product_id' => '1',
+                'user_id' => '5',
+                'product_id' => '1',
             ]
         );
 

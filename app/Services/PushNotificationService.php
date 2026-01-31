@@ -28,9 +28,13 @@ class PushNotificationService
                     "title" => $title,
                     "body"  => $body
                 ],
-                "data" => !empty($metadata) ? $metadata : null
+                // "data" => !empty($metadata) ? $metadata : null
             ]
         ];
+
+        if (!empty($metadata)) {
+            $message['message']['data'] = $metadata;
+        }
 
         // return $message;
 
