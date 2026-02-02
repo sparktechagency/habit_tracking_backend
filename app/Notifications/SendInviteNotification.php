@@ -31,10 +31,11 @@ class SendInviteNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'invited' => true,
-            'title' => "{$this->fromUser} invited you.",
+            'title' => "Invitation letter",
+            'user_name' => $this->fromUser,
             'body'  => $this->message,
             'data' => $this->data,
+            'invited' => true,
         ];
     }
 }
