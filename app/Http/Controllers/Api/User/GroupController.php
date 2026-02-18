@@ -227,8 +227,7 @@ class GroupController extends Controller
     }
     public function myGroupLists(Request $request)
     {
-
-         $request->validate([
+        $request->validate([
             'invitee_id' => 'required|exists:users,id'
         ]);
 

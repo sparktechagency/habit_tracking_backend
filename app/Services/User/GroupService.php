@@ -90,17 +90,17 @@ class GroupService
         foreach ($users as $user) {
             $user->notify(new NewChallengeCreatedNotification($from, $message));
 
-            $device_token = $user->device_token;
-            $firebase->sendNotification(
-                $device_token,
-                'New group challenge',
-                Auth::user()->full_name . ' a new group challenge created.',
-                [
-                    'user_id' => (string) Auth::id(),
-                    'group_challenge_id' => (string) $group->id,
-                    'redirect' => 'challenge/[id]'
-                ]
-            );
+            // $device_token = $user->device_token;
+            // $firebase->sendNotification(
+            //     $device_token,
+            //     'New group challenge',
+            //     Auth::user()->full_name . ' a new group challenge created.',
+            //     [
+            //         'user_id' => (string) Auth::id(),
+            //         'group_challenge_id' => (string) $group->id,
+            //         'redirect' => 'challenge/[id]'
+            //     ]
+            // );
         }
 
         return $group;
