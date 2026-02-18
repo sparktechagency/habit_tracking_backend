@@ -142,15 +142,15 @@ class GroupController extends Controller
 
             $user->notify(new CelebrationNotification($from, $message));
 
-            $device_token = $user->device_token;
-            $firebase->sendNotification(
-                $device_token,
-                'You are congratulated.',
-                Auth::user()->full_name . ' is celebrating your success 🎉🥳',
-                [
-                    'user_id' => (string) Auth::id(),
-                ]
-            );
+            // $device_token = $user->device_token;
+            // $firebase->sendNotification(
+            //     $device_token,
+            //     'You are congratulated.',
+            //     Auth::user()->full_name . ' is celebrating your success 🎉🥳',
+            //     [
+            //         'user_id' => (string) Auth::id(),
+            //     ]
+            // );
 
             return $this->sendResponse([], 'Notification send successfully.');
         } catch (Exception $e) {
@@ -286,17 +286,17 @@ class GroupController extends Controller
 
             $user->notify(new SendInviteNotification($from, $message, $group));
 
-            $device_token = $user->device_token;
-            $firebase->sendNotification(
-                $device_token,
-                'Invitation letter.',
-                Auth::user()->full_name . ' invited you to the ' . $group->group_name . ' group.',
-                [
-                    'user_id' => (string) Auth::id(),
-                    'group_challenge_id' => (string) $group->id,
-                    'redirect' => 'challenge/[id]'
-                ]
-            );
+            // $device_token = $user->device_token;
+            // $firebase->sendNotification(
+            //     $device_token,
+            //     'Invitation letter.',
+            //     Auth::user()->full_name . ' invited you to the ' . $group->group_name . ' group.',
+            //     [
+            //         'user_id' => (string) Auth::id(),
+            //         'group_challenge_id' => (string) $group->id,
+            //         'redirect' => 'challenge/[id]'
+            //     ]
+            // );
 
             return $this->sendResponse([], 'Notification send successfully.');
         } catch (Exception $e) {
