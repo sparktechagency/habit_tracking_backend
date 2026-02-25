@@ -18,6 +18,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Services\PushNotificationService;
+use Illuminate\Support\Facades\Http;
 
 class GroupService
 {
@@ -78,7 +79,6 @@ class GroupService
 
 
         // notification
-
         $from = Auth::user()->full_name;
         $message = 'a new group challenge created.';
 
@@ -101,10 +101,31 @@ class GroupService
             //         'redirect' => 'challenge/[id]'
             //     ]
             // );
-        }
 
+            // push notification
+            $user = $user;
+
+            if ($user && $user->device_token) {
+                $response = Http::post('https://exp.host/--/api/v2/push/send', [
+                    'to'    => $user->device_token,
+                    'title' => "New group challenge",
+                    'user_name' => Auth::user()->full_name . ' a new group challenge created.',
+                    'body'  => $message,
+                    'sound' => 'default',
+                    'data'  => [
+                        'type'     => 'group_created',
+                        'user_id' => (string) Auth::id(),
+                        'group_challenge_id' => (string) $group->id,
+                        'redirect' => 'challenge/[id]',
+                        'is_body_use' => false,
+                    ],
+                ]);
+                Log::info($response->json());
+            }
+        }
         return $group;
     }
+    
     public function getGroups(?string $search = null, ?int $per_page)
     {
         $authId = Auth::id();
