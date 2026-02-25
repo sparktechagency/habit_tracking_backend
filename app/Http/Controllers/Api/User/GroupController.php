@@ -19,6 +19,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\PushNotificationService;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class GroupController extends Controller
 {
@@ -151,6 +153,25 @@ class GroupController extends Controller
             //         'user_id' => (string) Auth::id(),
             //     ]
             // );
+
+            // push notification
+            $user = $user;
+
+            if ($user && $user->device_token) {
+                $response = Http::post('https://exp.host/--/api/v2/push/send', [
+                    'to'    => $user->device_token,
+                    'title' => "You are congratulated",
+                    'user_name' => Auth::user()->full_name,
+                    'body'  => Auth::user()->full_name . ' ' . $message,
+                    'sound' => 'default',
+                    'data'  => [
+                        'type'     => 'send_celebration',
+                        'user_id' => (string) Auth::id(),
+                        'is_body_use' => true,
+                    ],
+                ]);
+                Log::info($response->json());
+            }
 
             return $this->sendResponse([], 'Notification send successfully.');
         } catch (Exception $e) {
@@ -297,6 +318,27 @@ class GroupController extends Controller
             //         'redirect' => 'challenge/[id]'
             //     ]
             // );
+
+            // push notification
+            $user = $user;
+
+            if ($user && $user->device_token) {
+                $response = Http::post('https://exp.host/--/api/v2/push/send', [
+                    'to'    => $user->device_token,
+                    'title' => "Invitation letter",
+                    'user_name' => Auth::user()->full_name,
+                    'body'  => Auth::user()->full_name . ' ' . $message,
+                    'sound' => 'default',
+                    'data'  => [
+                        'type'     => 'send_invitation',
+                        'user_id' => (string) Auth::id(),
+                        'group_challenge_id' => (string) $group->id,
+                        'redirect' => 'challenge/[id]',
+                        'is_body_use' => true,
+                    ],
+                ]);
+                Log::info($response->json());
+            }
 
             return $this->sendResponse([], 'Notification send successfully.');
         } catch (Exception $e) {

@@ -109,15 +109,15 @@ class GroupService
                 $response = Http::post('https://exp.host/--/api/v2/push/send', [
                     'to'    => $user->device_token,
                     'title' => "New group challenge",
-                    'user_name' => Auth::user()->full_name . ' a new group challenge created.',
-                    'body'  => $message,
+                    'user_name' => Auth::user()->full_name,
+                    'body'  => Auth::user()->full_name.' '.$message,
                     'sound' => 'default',
                     'data'  => [
                         'type'     => 'group_created',
                         'user_id' => (string) Auth::id(),
                         'group_challenge_id' => (string) $group->id,
                         'redirect' => 'challenge/[id]',
-                        'is_body_use' => false,
+                        'is_body_use' => true,
                     ],
                 ]);
                 Log::info($response->json());
@@ -125,7 +125,7 @@ class GroupService
         }
         return $group;
     }
-    
+
     public function getGroups(?string $search = null, ?int $per_page)
     {
         $authId = Auth::id();
