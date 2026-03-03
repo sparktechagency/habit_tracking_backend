@@ -178,6 +178,7 @@ Route::middleware('auth:api')->group(function () {
         // payment
         Route::post('/payment-intent', [PaymentController::class, 'paymentIntent']);
         Route::post('/payment-success', [PaymentController::class, 'paymentSuccess']);
+        Route::post('/payment-success-revenue-card', [PaymentController::class, 'paymentSuccessRevenueCard']);
 
         //advance feature
         Route::get('/basic-info', [AdvanceFeatureController::class, 'basicInfo']);

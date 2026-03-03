@@ -55,6 +55,7 @@ class PaymentController extends Controller
             ], 500);
         }
     }
+
     public function paymentSuccess(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -107,14 +108,70 @@ class PaymentController extends Controller
                         'transaction' => $transaction,
                     ],
                 ], 200);
-
             } else {
                 return response()->json([
                     'status' => false,
                     'message' => 'Payment failed. Status: ' . $paymentIntent->status,
                 ], 400);
             }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Payment failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
+    public function paymentSuccessRevenueCard(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'subscription_id' => 'required',
+            'store' => 'required',
+            'storeTransactionId' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $subscription = Subscription::where('id', $request->subscription_id)->first();
+
+            $plan = Plan::create([
+                'user_id' => Auth::id(),
+                'plan_name' => $subscription->plan_name,
+                'duration' => $subscription->duration,
+                'price' => $subscription->price,
+                'features' => json_encode($subscription->features),
+                'renewal' => $subscription->duration == 'Monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear(),
+                'store' => $request->store,
+                'storeTransactionId' => $request->storeTransactionId,
+            ]);
+
+            $transaction = Transaction::Create([
+                'payment_intent_id' => 'paymentSuccessRevenueCard',
+                'card_number' => null,
+                'user_name' => Auth::user()->full_name,
+                'plan_name' => $subscription->plan_name,
+                'date' => Carbon::now(),
+                'amount' => $subscription->price,
+                'status' => 'Completed'
+            ]);
+
+            $plan->features = json_decode($plan->features);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Payment done and plan created successfully',
+                'data' => [
+                    'plan' => $plan,
+                    'transaction' => $transaction,
+                ],
+            ], 200);
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return response()->json([
