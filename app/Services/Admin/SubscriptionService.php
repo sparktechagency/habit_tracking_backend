@@ -74,9 +74,15 @@ class SubscriptionService
     {
         $subscription = Subscription::find($data['subscription_id']);
 
-        $isFreePlan = Plan::where('user_id', $data['user_id'])->where('status', 'Gift')->exists();
+        $isPlan = Plan::where('user_id', $data['user_id'])->first();
 
-        if ($isFreePlan) {
+        if ($isPlan->status == 'Paid' && $isPlan->renewal > Carbon::now()) {
+            throw ValidationException::withMessages([
+                'message' => 'Plan already running.',
+            ]);
+        }
+
+        if ($isPlan->status == 'Gift') {
             throw ValidationException::withMessages([
                 'message' => 'Free plan already exists. You can renew the plan if you want',
             ]);
@@ -97,7 +103,7 @@ class SubscriptionService
         return $plan;
     }
 
-    public function getFreeSubscriptions($search)
+    public function getFreeSubscriptions()
     {
         $giftPlans = Plan::where('status', 'Gift')->get();
 
@@ -107,6 +113,8 @@ class SubscriptionService
             } else {
                 $giftPlan->isRenew = false;
             }
+
+            $giftPlan->features = json_decode($giftPlan->features);
         }
 
         return $giftPlans;
@@ -121,6 +129,8 @@ class SubscriptionService
                 'message' => 'Plan id not found!',
             ]);
         }
+
+        $giftPlan->features = json_decode($giftPlan->features);
 
         return $giftPlan;
     }
@@ -151,7 +161,7 @@ class SubscriptionService
         if ($giftPlan->renewal < Carbon::now()) {
             $giftPlan->renewal = $duration == 'Monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear();
             $giftPlan->save();
-        }else{
+        } else {
             throw ValidationException::withMessages([
                 'message' => 'The plan is already active. You can renew the plan after this period ends.',
             ]);
@@ -162,6 +172,59 @@ class SubscriptionService
 
 
     // =======================refund==============================
-    
+    public function getPlans()
+    {
+        $plans = Plan::whereNotIn('status', ['Gift', 'Refund'])->get();
 
+        foreach ($plans as $plan) {
+            $plan->features = json_decode($plan->features);
+            if ($plan->renewal < Carbon::now()) {
+                $plan->isRefund = false;
+            } else {
+                $plan->isRefund = true;
+            }
+        }
+
+        return $plans;
+    }
+
+    public function viewPlan($id)
+    {
+        $plan = Plan::find($id);
+
+        if (!$plan) {
+            throw ValidationException::withMessages([
+                'message' => 'Plan id not found!',
+            ]);
+        }
+
+        $plan->features = json_decode($plan->features);
+
+        return $plan;
+    }
+
+    public function refund($storeTransactionId)
+    {
+        $plan = Plan::where('storeTransactionId', $storeTransactionId)->first();
+
+        if (!$plan) {
+            throw ValidationException::withMessages([
+                'message' => 'storeTransactionId id not found!',
+            ]);
+        }
+
+        if ($plan->renewal < Carbon::now()) {
+            throw ValidationException::withMessages([
+                'message' => 'The plan is already expired.',
+            ]);
+        } else {
+            if ($plan->status == 'Paid') {
+                $plan->renewal = Carbon::now()->subDay();
+                $plan->status = 'Refund';
+                $plan->save();
+            }
+        }
+
+        return $plan;
+    }
 }

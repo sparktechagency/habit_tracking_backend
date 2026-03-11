@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('plans', function (Blueprint $table) {
-            $table->enum('status', ['Paid', 'Gift'])
+            $table->enum('status', ['Paid', 'Gift','Refund'])
                 ->default('Paid')
                 ->after('renewal');
         });

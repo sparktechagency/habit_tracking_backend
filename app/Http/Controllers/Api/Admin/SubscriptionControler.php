@@ -69,10 +69,10 @@ class SubscriptionControler extends Controller
         }
     }
 
-    public function getFreeSubscriptions(Request $request)
+    public function getFreeSubscriptions()
     {
         try {
-            $types = $this->subscriptionService->getFreeSubscriptions($request->search);
+            $types = $this->subscriptionService->getFreeSubscriptions();
             return $this->sendResponse($types, 'Get free subscriptions fetched successfully.');
         } catch (Exception $e) {
             return $this->sendError('Failed to get free subscriptions.', [$e->getMessage()], 500);
@@ -111,6 +111,36 @@ class SubscriptionControler extends Controller
 
 
     // =======================refund==============================
+    public function getPlans(Request $request)
+    {
+        try {
+            $reward = $this->subscriptionService->getPlans($request->search);
 
+            return $this->sendResponse($reward, 'Get plans fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to get plans fetched.', [$e->getMessage()], 500);
+        }
+    }
 
+    public function viewPlan($id)
+    {
+        try {
+            $reward = $this->subscriptionService->viewPlan($id);
+
+            return $this->sendResponse($reward, 'Get plan fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to get plan fetched.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function refund(Request $request)
+    {
+        try {
+            $reward = $this->subscriptionService->refund($request->storeTransactionId);
+
+            return $this->sendResponse($reward, 'Refund successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to refund.', [$e->getMessage()], 500);
+        }
+    }
 }

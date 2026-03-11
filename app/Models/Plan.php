@@ -11,7 +11,7 @@ class Plan extends Model
 
     protected $guarded = ['id'];
 
-     protected $casts = [
+    protected $casts = [
         'features' => 'array',
     ];
 }

@@ -117,9 +117,9 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/remove-free-subscription/{id?}', [SubscriptionControler::class, 'removeFreeSubscription']);
         Route::patch('/renew-free-subscription/{id?}', [SubscriptionControler::class, 'renewFreeSubscription']);
         // refund
-        Route::get('/get-refunds', [SubscriptionControler::class, 'getRefunds']);
-        Route::patch('/refund', [SubscriptionControler::class, 'refund']);
-        Route::get('/view-refund/{id?}', [SubscriptionControler::class, 'viewRefund']);
+        Route::get('/get-plans', [SubscriptionControler::class, 'getPlans']);
+        Route::get('/view-plan/{id?}', [SubscriptionControler::class, 'viewPlan']);
+        Route::patch('/refund/{id?}', [SubscriptionControler::class, 'refund']);
         
 
         // transation
