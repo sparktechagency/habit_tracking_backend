@@ -4,6 +4,7 @@ namespace App\Services\User;
 
 use App\Models\Challenge;
 use App\Models\ChallengeGroup;
+use App\Models\SendInvite;
 use App\Models\ChallengeLog;
 use App\Models\GroupHabit;
 use App\Models\GroupMember;
@@ -41,6 +42,7 @@ class GroupService
             'start_date' => $startDate,
             'end_date' => $endDate,
             'status' => 'Active',
+            'access' => $data['access'] ?? 'Public',
         ]);
         GroupMember::create([
             'challenge_group_id' => $group->id,
@@ -110,7 +112,7 @@ class GroupService
                     'to'    => $user->device_token,
                     'title' => "New group challenge",
                     'user_name' => Auth::user()->full_name,
-                    'body'  => Auth::user()->full_name.' '.$message,
+                    'body'  => Auth::user()->full_name . ' ' . $message,
                     'sound' => 'default',
                     'data'  => [
                         'type'     => 'group_created',
@@ -126,13 +128,16 @@ class GroupService
         return $group;
     }
 
-    public function getGroups(?string $search = null, ?int $per_page)
+    public function getGroups1(?string $search = null, ?int $per_page)
     {
         $authId = Auth::id();
+
         $today = now()->toDateString();
+
         $query = ChallengeGroup::withCount('members')
             ->where('status', 'Active')
             ->with('group_habits')
+            ->where('access', 'Public')
             ->orderBy('created_at', 'desc');
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
@@ -140,6 +145,14 @@ class GroupService
                     ->orWhere('challenge_type', 'LIKE', "%{$search}%");
             });
         }
+
+        //    return  $inviteUsers = SendInvite::latest()->get();
+
+        // if (Auth::id() == 2) {
+        //     $query->whereIn('access', ['Public', 'Private']);
+        // } else {
+        //     //
+        // }
 
         $groups = $query->paginate($per_page ?? 10);
 
@@ -194,6 +207,100 @@ class GroupService
 
         return $groups;
     }
+    public function getGroups(?string $search = null, ?int $per_page)
+    {
+        $authId = Auth::id();
+        $today = now()->toDateString();
+
+        $query = ChallengeGroup::withCount('members')
+            ->with('group_habits')
+            ->where('status', 'Active')
+            ->where(function ($q) use ($authId) {
+
+                // Public group → সবাই দেখতে পারবে
+                $q->where('access', 'Public')
+
+                    // Private group → invited user
+                    ->orWhere(function ($sub) use ($authId) {
+                        $sub->where('access', 'Private')
+                            ->whereIn('id', function ($invite) use ($authId) {
+                                $invite->select('invitee_challenge_group_id')
+                                    ->from('send_invites')
+                                    ->where('invitee_id', $authId);
+                            });
+                    })
+
+                    // Group creator → নিজের group সবসময় দেখতে পারবে
+                    ->orWhere('user_id', $authId);
+            })
+            ->orderBy('created_at', 'desc');
+
+        // 🔍 Search
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('group_name', 'LIKE', "%{$search}%")
+                    ->orWhere('challenge_type', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $groups = $query->paginate($per_page ?? 10);
+
+        $groups->each(function ($group) use ($authId, $today) {
+
+            $group->max_count = 100;
+
+            $totalTasks = $group->group_habits->count();
+            $totalMembers = $group->members_count;
+
+            // ✅ Group progress
+            $completedCount = ChallengeLog::where('challenge_group_id', $group->id)
+                ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->count();
+
+            $expectedGroupTasks = $totalTasks * $totalMembers;
+
+            $group->group_daily_progress = $expectedGroupTasks > 0
+                ? round(($completedCount / $expectedGroupTasks) * 100)
+                : 0;
+
+            // ✅ My progress
+            $myCompleted = ChallengeLog::where('challenge_group_id', $group->id)
+                ->where('user_id', $authId)
+                ->whereDate('date', $today)
+                ->where('status', 'Completed')
+                ->count();
+
+            $group->my_daily_progress = $totalTasks > 0
+                ? round(($myCompleted / $totalTasks) * 100)
+                : 0;
+
+            // ✅ Check joined
+            $isJoined = GroupMember::where('challenge_group_id', $group->id)
+                ->where('user_id', $authId)
+                ->exists();
+
+            $group->is_new = !$isJoined;
+
+            // ✅ Member list
+            $group->member_lists = GroupMember::with([
+                'user' => function ($q) {
+                    $q->select('id', 'full_name', 'avatar');
+                }
+            ])
+                ->where('challenge_group_id', $group->id)
+                ->latest()
+                ->take(5)
+                ->get();
+
+            // Hide unnecessary data
+            $group->makeHidden('members');
+            $group->makeHidden('group_habits');
+        });
+
+        return $groups;
+    }
+
     public function getActiveGroups(?string $search = null, ?int $per_page)
     {
 

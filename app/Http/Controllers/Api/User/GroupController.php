@@ -293,6 +293,12 @@ class GroupController extends Controller
                 throw new Exception('User not found.');
             }
 
+            $isAlreadyInvited = SendInvite::where('invitee_id', $request->user_id)->where('invitee_challenge_group_id', $request->challenge_group_id)->exists();
+
+            if ($isAlreadyInvited) {
+                throw new Exception('Already invited this user.');
+            }
+
             $group = ChallengeGroup::where('id', $request->challenge_group_id)->first();
 
             SendInvite::create([
