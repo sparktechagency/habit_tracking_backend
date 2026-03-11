@@ -10,4 +10,8 @@ class Plan extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+     protected $casts = [
+        'features' => 'array',
+    ];
 }

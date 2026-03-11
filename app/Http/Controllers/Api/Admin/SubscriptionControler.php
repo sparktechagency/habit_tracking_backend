@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AddSubscriptionRequest;
 use App\Http\Requests\Admin\EditSubscriptionRequest;
+use App\Http\Requests\Admin\FreeSubscriptionBuying\AddFreeSubscriptionRequest;
 use App\Services\Admin\SubscriptionService;
 use Exception;
 use Illuminate\Http\Request;
@@ -46,7 +47,7 @@ class SubscriptionControler extends Controller
             return $this->sendError('Something went wrong.', [$e->getMessage()], 500);
         }
     }
-     public function deleteSubscription($id)
+    public function deleteSubscription($id)
     {
         try {
             $deleted = $this->subscriptionService->deleteSubscription($id);
@@ -55,5 +56,61 @@ class SubscriptionControler extends Controller
             return $this->sendError('Failed to delete subscription.', [$e->getMessage()], 500);
         }
     }
+
+    // =======================free subscription buying==============================
+    public function addFreeSubscription(AddFreeSubscriptionRequest $request)
+    {
+        try {
+            $reward = $this->subscriptionService->addFreeSubscription($request->validated());
+
+            return $this->sendResponse($reward, 'Free subscription added successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to add free subscription.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function getFreeSubscriptions(Request $request)
+    {
+        try {
+            $types = $this->subscriptionService->getFreeSubscriptions($request->search);
+            return $this->sendResponse($types, 'Get free subscriptions fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to get free subscriptions.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function viewFreeSubscription($id)
+    {
+        try {
+            $types = $this->subscriptionService->viewFreeSubscription($id);
+            return $this->sendResponse($types, 'View free subscription fetched successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to view free subscription.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function removeFreeSubscription($id)
+    {
+        try {
+            $types = $this->subscriptionService->removeFreeSubscription($id);
+            return $this->sendResponse($types, 'Free subscription removed successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to removed free subscription.', [$e->getMessage()], 500);
+        }
+    }
+
+    public function renewFreeSubscription(Request $request, $id)
+    {
+        try {
+            $types = $this->subscriptionService->renewFreeSubscription($id, $request->duration);
+            return $this->sendResponse($types, 'Free subscription renew successfully.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to renew free subscription.', [$e->getMessage()], 500);
+        }
+    }
+
+
+    // =======================refund==============================
+
 
 }

@@ -110,6 +110,17 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/get-subscriptions', [SubscriptionControler::class, 'getSubscriptions']);
         Route::patch('/edit-subscription/{id?}', [SubscriptionControler::class, 'editSubscription']);
         Route::delete('/delete-subscription/{id?}', [SubscriptionControler::class, 'deleteSubscription']);
+        // free subsctiption buying
+        Route::get('/get-free-subscriptions', [SubscriptionControler::class, 'getFreeSubscriptions']);
+        Route::post('/add-free-subscription', [SubscriptionControler::class, 'addFreeSubscription']);
+        Route::get('/view-free-subscription/{id?}', [SubscriptionControler::class, 'viewFreeSubscription']);
+        Route::delete('/remove-free-subscription/{id?}', [SubscriptionControler::class, 'removeFreeSubscription']);
+        Route::patch('/renew-free-subscription/{id?}', [SubscriptionControler::class, 'renewFreeSubscription']);
+        // refund
+        Route::get('/get-refunds', [SubscriptionControler::class, 'getRefunds']);
+        Route::patch('/refund', [SubscriptionControler::class, 'refund']);
+        Route::get('/view-refund/{id?}', [SubscriptionControler::class, 'viewRefund']);
+        
 
         // transation
         Route::get('/get-transations', [TransationController::class, 'getTransations']);
